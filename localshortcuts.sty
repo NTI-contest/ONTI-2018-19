@@ -50,6 +50,10 @@
 \subsubsection*{Решение}
 }
 
+\newcommand{\solutionSection}{
+\subsubsection*{Решение}
+}
+
 \newcommand{\paramSection}{
 \subsubsection*{Требования к числовым параметрам}
 }
@@ -86,7 +90,7 @@
 \newcommand{\codeExample}{
 \begin{center}
 \noindent
-\textbf{Вариант верного решения}
+\textbf{Пример программы-решения}
 \end{center}
 }
 
@@ -184,7 +188,11 @@
 
 \newcommand{\inputPythonSource}{
 Ниже представлено решение на языке Python3
+\inputminted[fontsize=\footnotesize, linenos]{python}{\SoutionHomePath/source.py}
+}
 
+\newcommand{\inputPythonSourceAdditional}{
+Ниже представлена вспомогательная программа на языке Python3
 \inputminted[fontsize=\footnotesize, linenos]{python}{\SoutionHomePath/source.py}
 }
 

@@ -37,15 +37,15 @@ def solve_test(n, picture):
     return str(groups) + ' '
     
     
-def solve():
-    dataset = sys.stdin.read()
-    d = dataset.split()
-    tn = int(d[0])
-    idx = 1
-    eprint(tn)
-    ans = ''
-    for _ in range(tn):
-        ans += solve_test(int(d[idx]), [list(x) for x in d[idx + 1:idx + 1 + int(d[idx])]])
-        
-        idx += int(d[idx]) + 1
-    print(ans)
+dataset = sys.stdin.read()
+d = dataset.split()
+tn = int(d[0])
+idx = 1
+eprint(tn)
+ans = ''
+for _ in range(tn):
+    ans += solve_test(int(d[idx]), [list(x) for x in d[idx + 1:idx + 1 + int(d[idx])]])
+    
+    idx += int(d[idx]) + 1
+
+print(ans)
