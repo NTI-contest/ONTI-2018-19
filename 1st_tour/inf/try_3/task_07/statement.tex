@@ -1,0 +1,88 @@
+\assignementTitle{Управление складом}{10}
+
+Анна хочет исследовать динамику использования складского помещения. У нее есть сведения о суточном изменении количества свободных ячеек, и она хочет составлять запросы и узнавать, каким образом изменяется количество свободных ячеек на временных интервалах между любыми двумя указанными датами. Помогите Анне решить эту задачу.
+
+\inputfmtSection
+В первой строке целое число $n\space (1\leq n \leq 10^6)$  количество дней, за которые есть 
+наблюдения.Во второй строке через пробел nn n  целых чисел $c_i\space (-100\leq c_i \leq 100)$  — 
+значения суточных изменений.В третьей строке целое число $m\space (1\leq m \leq 10^6)$  — 
+количество запросов Анны.Далее в $m$  строках по два числа через пробел $b_i$  и $e_i$  
+$(0\leq b_i \leq e_i \leq n-1)$  — первый и последний день отрезка, на котором необходимо 
+произвести расчет.
+
+\outputfmtSection
+Для каждого из $m$  запросов выведите два числа: количество занятых за указанное время ячеек и количество высвобожденных.
+
+\markSection
+
+Баллы за задачу будут начисляться пропорционально количеству успешно пройденных тестов.
+
+\explanationSection
+
+Для считывания в Python вместо input() используйте sys.stdin.readline() во избежании TL.
+
+\sampleTitle{1}
+
+\begin{myverbbox}[\small]{\vinput}
+    1
+-100
+1
+0 0
+\end{myverbbox}
+
+\begin{myverbbox}[\small]{\voutput}
+    0 100
+\end{myverbbox}
+\inputoutputTable
+
+\sampleTitle{2}
+
+\begin{myverbbox}[\small]{\vinput}
+    1
+    100
+    1
+    0 0
+\end{myverbbox}
+
+\begin{myverbbox}[\small]{\voutput}
+    100 0
+\end{myverbbox}
+\inputoutputTable
+
+\sampleTitle{3}
+
+\begin{myverbbox}[\small]{\vinput}
+    4
+    -10 5 -5 10
+    5
+    0 0
+    1 1
+    0 1
+    0 3
+    2 3
+\end{myverbbox}
+
+\begin{myverbbox}[\small]{\voutput}
+    0 10
+    5 0
+    5 10
+    15 15
+    10 5
+\end{myverbbox}
+\inputoutputTable
+
+\sampleTitle{4}
+
+\begin{myverbbox}[\small]{\vinput}
+    5
+    10 20 -30 -10 100
+    1
+    0 4
+\end{myverbbox}
+
+\begin{myverbbox}[\small]{\voutput}
+    130 40
+\end{myverbbox}
+\inputoutputTable
+
+\includeSolutionIfExistsByPath{1st_tour/inf/try_3/task_07}

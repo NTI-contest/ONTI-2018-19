@@ -1,0 +1,29 @@
+\assignementTitle{}{10}
+
+На уроке геометрии нарисовали окружность. 
+На дуге $BC$ этой окружности, описанной около равностороннего треугольника $ABC$, 
+взята произвольная точка $P$. Выразите отрезок $AP$ через отрезки $ВР$ и $СР$. 
+Укажите длину $AP$, если $BP = 3$, $CP = 4$. Ответ введите с точностью до десятитысячных.
+
+\soultionSection
+
+Так как $\triangle ABC$ -- равносторонний, то $\angle BAC = \angle ABC = 
+\angle ACB = 60^{\circ}$ и \linebreak $AB=AC$. $\angle ABC = \angle APC$, так как опираются на $\smile AC$. $\angle ACB = \angle APB$, так как опираются на $\smile{AB}$. Таким образом, $\angle APB = \angle APC = 60^{\circ}$. По теореме косинусов 
+
+\begin{equation*} 
+    \begin{cases}
+    AB^2 = AP^2 + BP^2 - 2 \cdot AP\cdot BP\cdot \cos(\angle APB),\\
+    AC^2 = AP^2 + CP^2 - 2 \cdot AP\cdot CP\cdot \cos(\angle APC).
+    \end{cases}
+\end{equation*}
+
+\putImgWOCaption{5cm}{1}
+
+Так как $AB = AC$ и $\angle APC = \angle APB = 60^{\circ}$, получим:
+
+$$AP^2 + BP^2 - AP\cdot BP\cdot = AP^2 + CP^2 - AP\cdot CP,$$
+$$BP^2 - CP^2 = AP\cdot (BP - CP),$$
+$$AP = BP - CP.$$
+Подставим значения $BP = 3$ и $CP = 4$ и получим $AP = 7$.
+
+\answerMath{7.}

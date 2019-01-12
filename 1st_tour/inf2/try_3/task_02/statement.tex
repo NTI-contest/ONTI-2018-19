@@ -1,0 +1,74 @@
+\assignementTitle{Круглый стол}{20}
+
+Организаторы одного из турниров по одной из самых известных карточных игр заказали круглый стол, 
+за которым будет сидеть несколько (минимум 2) игроков во время каждой из игр.
+
+Профсоюз игроков этой карточной игры выдвинул условие: каждый игрок на время игры 
+должен иметь личное пространство как минимум длины $d$.
+
+Если посчитать стол кругом, то длина пространства игрока определяется как длина хорды, 
+которая отделяет сегмент круга, на котором игрок может положить свои карты и руки, от 
+остальной части стола.
+
+Помогите организаторам определить, какое максимальное количество игроков может одновременно 
+сидеть за этим столом.
+
+\inputfmtSection
+
+Вводится два целых числа $d$ и $r$ $(1 \leq d, r \leq 2 \cdot 10^{9})$ - минимальная длина личного 
+пространства и радиус круглого стола.
+
+\outputfmtSection
+
+Если нельзя усадить за стол даже двух игроков, выведите $-1$, иначе выведите единственное 
+положительное число - максимальное количество игроков, которых можно разместить за столом.
+
+\markSection
+
+Баллы за задачу будут начисляться пропорционально количеству успешно пройденных тестов.
+
+\sampleTitle{1}
+
+\begin{myverbbox}[\small]{\vinput}
+    6 3
+\end{myverbbox}
+
+\begin{myverbbox}[\small]{\voutput}
+    2
+\end{myverbbox}
+\inputoutputTable
+
+\sampleTitle{2}
+
+\begin{myverbbox}[\small]{\vinput}
+    7 2
+\end{myverbbox}
+
+\begin{myverbbox}[\small]{\voutput}
+    -1
+\end{myverbbox}
+\inputoutputTable
+
+\sampleTitle{3}
+
+\begin{myverbbox}[\small]{\vinput}
+    12 1000
+\end{myverbbox}
+
+\begin{myverbbox}[\small]{\voutput}
+    523
+\end{myverbbox}
+\inputoutputTable
+
+\sampleTitle{4}
+
+\begin{myverbbox}[\small]{\vinput}
+    3 3
+\end{myverbbox}
+
+\begin{myverbbox}[\small]{\voutput}
+    6
+\end{myverbbox}
+\inputoutputTable
+
+\includeSolutionIfExistsByPath{1st_tour/inf2/try_3/task_02}

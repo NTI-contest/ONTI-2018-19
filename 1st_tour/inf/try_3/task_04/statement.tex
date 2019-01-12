@@ -1,0 +1,73 @@
+\assignementTitle{Игра Жизнь}{10}
+
+Правила этой игры просты:
+
+\begin{itemize}
+    \item Игра Жизнь проходит на клеточном поле, которое, традиционно, называется Вселенная.
+    \item Каждая клетка может быть живой или мёртвой (живая — *, мёртвая — x).
+    \item Поколения сменяются синхронно по следующим правилам:
+    \item \begin{itemize}
+        \item в пустой (мёртвой) клетке, рядом с которой ровно три живые клетки, зарождается жизнь;
+        \item если у живой клетки есть две или три живые соседки, то эта клетка продолжает жить;
+        \item в противном случае клетка умирает от одиночества или от перенаселённости.
+    \end{itemize}
+\end{itemize}
+
+Для заданного начального состояния определите:
+
+\begin{itemize}
+    \item Вечная ли Жизнь во Вселенной?
+    \begin{itemize}
+        \item Если да, то укажите номер первой итерации, которая повторила любую из предыдущих.
+        \item Если нет, то сколько итераций осталось до смерти Вселенной
+        \item Под итерацией понимается процесс смены поколения во Вселенной.
+    \end{itemize}
+\end{itemize}
+
+\inputfmtSection
+В первой строке задается целое число $n \space(1\leq n \leq 10)$  — величина стороны Вселенной.
+
+Далее в $n$ строках подаются значения клеточного поля.
+
+\outputfmtSection
+В первой строке Yes или No ответ на первый вопрос.
+
+Во второй строке неотрицательное целое число — комментарий к ответу.
+
+\markSection
+
+Баллы за задачу будут начислены, если все тесты будут пройдены успешно.
+
+\sampleTitle{1}
+
+\begin{myverbbox}[\small]{\vinput}
+    5
+    xxxxx
+    xx*xx
+    ***xx
+    xx*xx
+    xxxxx
+\end{myverbbox}
+\begin{myverbbox}[\small]{\voutput}
+    Yes
+    10
+\end{myverbbox}
+\inputoutputTable
+
+\sampleTitle{2}
+
+\begin{myverbbox}[\small]{\vinput}
+    5
+    *xxxx
+    x*xxx
+    x**xx
+    xxxxx
+    xxxxx
+\end{myverbbox}
+\begin{myverbbox}[\small]{\voutput}
+    No
+    5
+\end{myverbbox}
+\inputoutputTable
+
+\includeSolutionIfExistsByPath{1st_tour/inf/try_3/task_04}

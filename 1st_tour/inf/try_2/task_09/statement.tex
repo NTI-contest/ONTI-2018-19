@@ -1,0 +1,64 @@
+\assignementTitle{Длина пути}{10}
+
+Робот умеет двигаться по траектории, задаваемой некоторой полиномиальной функцией $f(x)$ с 
+целочисленными показателями. Свой путь он начинает в координате $(0, f(0))$  и двигается в 
+сторону возрастания значений по оси абсцисс. Но, как вы знаете, на любое движение нужна 
+энергия, наш робот не исключение. Он снабжен аккумулятором, которые позволяет ему 
+проехать путь длиной $s$. Где окажется робот в конце пути?  
+
+\inputfmtSection
+В первой строке задается $n \space (0 \leq n \leq 5)$  — степень полинома, задающего 
+траекторию робота.
+
+Во второй строке через пробел задаются целочисленные значения $a_i \space (-10 \leq a_i \leq 10)$  — 
+коэффициенты перед степенями многочлена, в порядке от старшей степени к младшей.
+
+В третьей строке вещественное число $s \space (0 \leq s \leq 100)$  — длина пути робота.
+
+\outputfmtSection
+В отдельной строке абсцисса координаты, где остановится робот, с абсолютной точностью не менее $10^{-3}$.
+
+\markSection
+
+Баллы за задачу будут начисляться пропорционально количеству успешно пройденных тестов.
+
+\sampleTitle{1}
+
+\begin{myverbbox}[\small]{\vinput}
+    0
+    5
+    100
+\end{myverbbox}
+
+\begin{myverbbox}[\small]{\voutput}
+    100.00000002054185
+\end{myverbbox}
+\inputoutputTable
+
+\sampleTitle{2}
+
+\begin{myverbbox}[\small]{\vinput}
+    1
+    1 1
+    100
+\end{myverbbox}
+
+\begin{myverbbox}[\small]{\voutput}
+    70.71068001124502
+\end{myverbbox}
+\inputoutputTable
+
+\sampleTitle{3}
+
+\begin{myverbbox}[\small]{\vinput}
+    2
+    2 3 5
+    100
+\end{myverbbox}
+
+\begin{myverbbox}[\small]{\voutput}
+    6.350909999928737
+\end{myverbbox}
+\inputoutputTable
+
+\includeSolutionIfExistsByPath{1st_tour/inf/try_2/task_09}

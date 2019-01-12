@@ -1,0 +1,44 @@
+\assignementTitle{Анна и красивая строка}{20}
+
+Анна написала генератор красивых строк. Она считает строку красивой, если она одинаково читается 
+как слева направо, так и справа налево. Например, $rrr$ и $anna$ - красивые строки, а 
+$abc$ и $adba$ - нет.
+
+Но она допустила ошибку в коде и генератор выводит не красивые строки, а строки, которые можно 
+сделать красивыми, если из каждой удалить ровно один символ. По крайней мере, она так думает.
+
+Она просит вас помочь определить, верно ли её предположение.
+
+\inputfmtSection
+
+В первой строке вводится строка $s$ состоящая из маленьких латинских букв ($4 \le |s| \le 10^5$, где $|s|$ - длина строки).
+
+\outputfmtSection
+
+Выведите YES , если можно удалить один символ из строки так, чтобы она стала красивой; иначе - NO .
+
+\markSection
+
+Баллы начисляются только если ваша программа прошла все тесты.
+
+\sampleTitle{1}
+
+\begin{myverbbox}[\small]{\vinput}
+    abca
+\end{myverbbox}
+\begin{myverbbox}[\small]{\voutput}
+    YES
+\end{myverbbox}
+\inputoutputTable
+
+\sampleTitle{2}
+
+\begin{myverbbox}[\small]{\vinput}
+    abcd
+\end{myverbbox}
+\begin{myverbbox}[\small]{\voutput}
+    NO
+\end{myverbbox}
+\inputoutputTable
+
+\includeSolutionIfExistsByPath{1st_tour/inf2/try_3/task_03}

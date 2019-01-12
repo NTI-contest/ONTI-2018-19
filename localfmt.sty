@@ -1,0 +1,118 @@
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\selectlanguage{russian}
+\usepackage{multicol}
+
+\usepackage{mathtools}
+
+%описание границ страницы
+\usepackage{geometry}
+\geometry{total={210mm,297mm},
+left=25mm,right=25mm,%
+bindingoffset=0mm, top=20mm,bottom=20mm}
+
+\usepackage{titlesec}
+
+% нужно для изменения формата "части"
+\newcommand\headerdisplay[1]{%
+	\filcenter\MakeUppercase{#1}%
+}
+% переопределяет формат "части"
+\titleclass{\part}{top}
+\titleformat{\part}[hang]
+{\Huge\bfseries}
+{\arabic{part}. }
+{0pt}
+{\headerdisplay}
+
+% Позволяет делать главу, которая начинается на той же странице
+% где закончилась предыдущая
+%\usepackage{etoolbox}
+%\makeatletter
+%\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{}
+%\makeatother
+
+\titleformat
+{\chapter} % команда
+[hang] % форма
+{\bfseries\huge} % формат
+{} % как выглядит формат номера (лейбл)
+{0ex} % разделитель
+{ } % код, предшествующий тексту названия
+
+%формат секций первого уровня
+\titleformat
+{\section} %команда
+[hang] %форма, для \section используется hang
+{\Large\bfseries} %формат 
+%{Assignement \thesection. } %как выглядит формат номера (лейбл), вывод номера отключается добавление * после команды \section
+{\thesection. } %как выглядит формат номера (лейбл), вывод номера отключается добавление * после команды \section
+{0em} %горизонтальный разделитель между лейблом и текстом названия
+{} %код, предшествующий тексту названия
+
+%формат секций второго уровня 
+\titleformat
+{\subsection} %команда
+[hang] %форма, для \section используется hang
+{\large\bfseries\itshape} %формат 
+{Задача \thesubsection. } %как выглядит формат номера (лейбл)
+{0em} %горизонтальный разделитель между лейблом и текстом названия
+{} %код, предшествующий тексту названия
+
+%формат секций второго уровня 
+\titleformat
+{\subsubsection} %команда
+[hang] %форма, для \section используется hang
+{\bfseries\itshape} %формат 
+{\thesection.} %как выглядит формат номера (лейбл)
+{0em} %горизонтальный разделитель между лейблом и текстом названия
+{} %код, предшествующий тексту названия
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\thepage}
+
+%делать отступ для первого параграфа в главе
+\usepackage{indentfirst}
+%отступ первой строчки параграфа
+\setlength{\parindent}{4ex}
+%пространство между параграфами
+\setlength{\parskip}{0.5em}
+
+\usepackage{enumitem}
+%        Пространство между предыдущим параграфом и первым элементом списка
+%        |          Пространство между параграфом внутри списка (каждый элемент расценивается, как параграф)
+%        |          |            Пространство между соседними элементами списка
+%        |          |            |             Отступ слева для теста элемента списка, маркер элемента выравнивается от него
+\setlist{topsep=0em,parsep=0.2em,itemsep=0.2em,leftmargin=8ex}
+
+\usepackage{graphicx}
+%для формата секций с моноширным текстом
+\usepackage{verbatimbox}
+
+%для переноса длинных url на другую строку
+\usepackage{url}
+\makeatletter
+\g@addto@macro{\UrlBreaks}{\UrlOrds}
+\makeatother
+
+\usepackage{fmtcount}
+\usepackage{makecell}
+
+% Для подсветки синтаксиса в коде программ
+\usepackage{minted}
+%\usepackage[cache=false,outputdir=.texpadtmp]{minted}
+%\usepackage[cache=false]{minted}
+\usemintedstyle{tango}
+
+% Взято из файлов математиков для корректного отображения формул
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+% Нужно, чтобы позволять выстраивать относительные пути для импорта
+% рисунков и других файлов
+% Например: \subimport{team_final/}{content.tex}
+\usepackage{import}

@@ -1,0 +1,34 @@
+\documentclass[a4paper,12pt,oneside]{book}
+
+\usepackage{localfmt}
+\usepackage{localshortcuts}
+
+%-------------------------------------------------------------%
+
+% Это нужно раскомментировать, чтобы после каждой задачи по
+% программированию добавлялось разбор решения и пример кода.
+
+\def\withsolution{1}
+
+\def\withgrading{1}
+
+%\usepackage{draftwatermark}
+%\SetWatermarkScale{4}
+%\SetWatermarkLightness{0.9}
+
+\begin{document}
+
+\input{titlepage}
+
+\setcounter{tocdepth}{1}
+
+\tableofcontents
+
+%\input{track_intro}
+%\input{introduction}
+
+\input{1st_tour}
+%\input{2nd_tour}
+%\input{final}
+
+\end{document}

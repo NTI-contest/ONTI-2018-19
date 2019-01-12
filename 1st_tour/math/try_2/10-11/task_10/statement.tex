@@ -1,0 +1,29 @@
+\assignementTitle{}{10}
+
+Соня, Андрей и Егор живут в домах $A$, $B$, $C$ соответственно. 
+Эти дома соединены прямыми улицами -- Cадовой, Огородной и Персиковой. 
+Известно, что Садовая и Персиковая улицы пересекаются у дома Сони под углом $45$ градусов, 
+Персиковая и Огородная -- под углом $60$ градусов у дома Егора и, наконец, 
+Огородная и Садовая пересекаются под окнами у Андрея. Равноудаленно от домов $B$ и $C$ внутри 
+треугольника $ABC$ построили магазин. Известно, что прямая улица, которая соединяет магазин и дом Егора, 
+пересекается с Персиковой под углом $15$ градусов. 
+Между домом Сони и магазином также есть прямая улица. Под каким углом она пересекается с Садовой?
+
+Ответ укажите в градусах с точностью до десятитысячных.
+
+\soultionSection
+
+Обозначим искомый угол буквой $\alpha$. 
+
+\putImgWOCaption{7cm}{1}
+
+$\angle BAC = 45^\circ \Rightarrow \angle OAC = 45^\circ - \alpha$. 
+$\angle OCA = 15^\circ \Rightarrow \angle AOC = 120^\circ + \alpha$. \linebreak
+$\angle OCB = \angle OBC = 60^\circ - 15^\circ = 45^\circ \Rightarrow \angle BOC = 90^\circ$. 
+$\angle ABO = 30^\circ$. По теореме синусов:
+$$\frac{\sin\alpha}{OB} = \frac{\sin 30^\circ}{AO} \Rightarrow AO = \frac{OB}{2\sin\alpha}$$
+$$\frac{\sin 15^\circ}{OA} = \frac{\sin (45^\circ - \alpha)}{OC} \Rightarrow AO = \frac{OC\sin 15^\circ}{\sin (45^\circ - \alpha)}$$ \\
+Так как $OB = OC$, 
+$$\sin (45^\circ - \alpha) = 2\sin\alpha \sin 15^\circ \Rightarrow \alpha = 30^\circ.$$
+
+\answerMath{30.}

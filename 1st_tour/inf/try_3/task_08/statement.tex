@@ -1,0 +1,163 @@
+\assignementTitle{Анализ текста}{10}
+
+Олеся занимается статистическим анализом текстов. Помогите ей посчитать, сколько каких слов 
+встречается в тексте. Для этого:
+
+\begin{enumerate}
+    \item В скачанном тексте замените все знаки, не являющиеся латинскими буквами, на пробелы.
+    \item Приведите текст к нижнему регистру.
+    \item Для каждого слова посчитайте, сколько его вхождений есть в тексте. Выведите список пар слово — количество его повторений в порядке убывания количества вхождений. Если несколько слов входят в текст равное количество раз, укажите их в лексикографическом порядке.
+\end{enumerate}
+
+\explanationSection
+
+Эталонный ответ и ваш будут сравниваться как последовательность слов без разделителей. Таким образом, ответы "answer 1" и "answer 01" будут считаться различными, а "answer 1" и "answer        1" одинаковыми. Для избежания ошибок, рекомендуем загружать ответ в виде файла в однобайтовой кодировке.
+
+\sampleTitle{1}
+
+\begin{myverbbox}[\small]{\vinput}
+    Five little girls, of Five, Four, Three, Two, One:
+    Rolling on the hearthrug, full of tricks and fun.
+    
+    Five rosy girls, in years from Ten to Six:
+    Sitting down to lessons - no more time for tricks.
+    
+    Five growing girls, from Fifteen to Eleven:
+    Music, Drawing, Languages, and food enough for seven!
+    
+    Five winsome girls, from Twenty to Sixteen:
+    Each young man that calls, I say "Now tell me which you mean!"
+    
+    Five dashing girls, the youngest Twenty-one:
+    But, if nobody proposes, what is there to be done?
+    
+    Five showy girls - but Thirty is an age
+    When girls may be engaging, but they somehow don't engage.
+    
+    Five dressy girls, of Thirty-one or more:
+    So gracious to the shy young men they snubbed so much before!
+    
+    Five passe girls - Their age? Well, never mind!
+    We jog along together, like the rest of human kind:
+    But the quondam "careless bachelor" begins to think he knows
+    The answer to that ancient problem "how the money goes"!
+\end{myverbbox}
+
+\begin{myverbbox}[\small]{\voutput}
+    five 9
+    girls 9
+    to 8
+    the 7
+    but 4
+    of 4
+    from 3
+    one 3
+    age 2
+    and 2
+    be 2
+    for 2
+    is 2
+    more 2
+    so 2
+    that 2
+    they 2
+    thirty 2
+    tricks 2
+    twenty 2
+    young 2
+    along 1
+    an 1
+    ancient 1
+    answer 1
+    bachelor 1
+    before 1
+    begins 1
+    calls 1
+    careless 1
+    dashing 1
+    don 1
+    done 1
+    down 1
+    drawing 1
+    dressy 1
+    each 1
+    eleven 1
+    engage 1
+    engaging 1
+    enough 1
+    fifteen 1
+    food 1
+    four 1
+    full 1
+    fun 1
+    goes 1
+    gracious 1
+    growing 1
+    he 1
+    hearthrug 1
+    how 1
+    human 1
+    i 1
+    if 1
+    in 1
+    jog 1
+    kind 1
+    knows 1
+    languages 1
+    lessons 1
+    like 1
+    little 1
+    man 1
+    may 1
+    me 1
+    mean 1
+    men 1
+    mind 1
+    money 1
+    much 1
+    music 1
+    never 1
+    no 1
+    nobody 1
+    now 1
+    on 1
+    or 1
+    passe 1
+    problem 1
+    proposes 1
+    quondam 1
+    rest 1
+    rolling 1
+    rosy 1
+    say 1
+    seven 1
+    showy 1
+    shy 1
+    sitting 1
+    six 1
+    sixteen 1
+    snubbed 1
+    somehow 1
+    t 1
+    tell 1
+    ten 1
+    their 1
+    there 1
+    think 1
+    three 1
+    time 1
+    together 1
+    two 1
+    we 1
+    well 1
+    what 1
+    when 1
+    which 1
+    winsome 1
+    years 1
+    you 1
+    youngest 1
+\end{myverbbox}
+\inputoutputTable
+
+\includeSolutionIfExistsByPath{1st_tour/inf/try_3/task_08}

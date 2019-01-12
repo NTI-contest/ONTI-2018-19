@@ -1,0 +1,368 @@
+%часто повторяющиеся команды
+\newcommand{\pointsAndWord}[1]%
+{%
+    \ifstrequal{#1}{1}{1 балл}{%
+        \ifstrequal{#1}{2}{2 балла}{%
+            \ifstrequal{#1}{3}{3 балла}{%
+                \ifstrequal{#1}{4}{4 балла}{#1 баллов}%
+            }%
+        }%
+    }%
+}
+
+\newcommand{\assignementTitle}[2]{
+\subsection{#1 (\pointsAndWord{#2})}
+}
+
+\newcommand{\inputfmtSection}{
+\begin{center}
+\noindent
+\textbf{Формат входных данных}
+\end{center}
+}
+
+\newcommand{\outputfmtSection}{
+\begin{center}
+\noindent
+\textbf{Формат выходных данных}
+\end{center}
+}
+
+\newcommand{\markSection}{
+\begin{center}
+\noindent
+\textbf{Система оценки}
+\end{center}
+}
+
+\newcommand{\explaneSection}{
+\begin{center}
+\noindent
+\textbf{Пояснения}
+\end{center}
+}
+
+\newcommand{\exampleSection}{
+\subsubsection*{Примеры}
+}
+
+\newcommand{\soultionSection}{
+\subsubsection*{Решение}
+}
+
+\newcommand{\paramSection}{
+\subsubsection*{Требования к числовым параметрам}
+}
+
+\newcommand{\explanationSection}{
+\subsubsection*{Пояснения к ответу}
+}
+
+\newcommand{\answerMath}[1]{
+\vspace{0.3cm}
+\noindent\textbf{Ответ:} #1
+}
+
+\newcommand{\gradingSection}{
+\subsubsection*{Способ оценки работы}
+}
+
+\newcommand{\commentsSection}{
+\begin{center}
+\noindent
+\textbf{Комментарии}
+\end{center}
+}
+
+\newcommand{\sampleTitle}[1]{
+%\vspace{3mm}
+\begin{center}
+\noindent
+\textit{Пример №#1}
+\end{center}
+%\vspace{3mm}
+}
+
+\newcommand{\codeExample}{
+\begin{center}
+\noindent
+\textbf{Вариант верного решения}
+\end{center}
+}
+
+\newcommand{\additionalCriteria}{
+\begin{center}
+\noindent
+\textbf{Дополнительные критерии оценки}
+\end{center}
+}
+
+\newcommand{\stageTitle}[1]{
+\subsection*{#1 этап}
+}
+
+\newcommand{\stageCriteria}{
+\subsubsection*{Критерии прохождения этапа и начисления баллов}
+}
+
+\newcommand{\twoitems}[3]{
+#1:
+\begin{itemize}
+  \item #2
+  \item #3
+\end{itemize}
+}
+
+\newcommand{\threeitems}[4]{
+#1:
+\begin{itemize}
+  \item #2
+  \item #3
+  \item #4
+\end{itemize}
+}
+
+\newcommand{\putImg}[3]{
+\begin{figure}[h]
+\includegraphics[width=#1]{#2}
+\centering
+\caption{#3}
+\end{figure}
+}
+
+\newcommand{\putImgForRef}[4]{
+\begin{figure}[h]
+\includegraphics[width=#1]{#2}
+\centering
+\caption{#3}
+\label{#4}
+\end{figure}
+}
+
+\newcommand{\putImgWOCaption}[2]{
+\begin{figure}[H]
+\includegraphics[width=#1]{#2}
+\centering
+\end{figure}
+}
+
+\newcommand{\putTwoImg}[4]{
+\begin{figure}[H]
+  \includegraphics[width=#1]{#2}
+  \hfill
+  \includegraphics[width=#3]{#4}
+\end{figure}
+}
+
+\newcommand{\inputoutputTable}[0]{
+\begin{tabular}{| l |}
+\hline
+\textbf{Стандартный ввод} \\
+\hline
+\begin{minipage}{0.9\textwidth}
+\addvbuffer[3pt]{\vinput}
+\end{minipage} \\
+\hline
+\hline
+\textbf{Стандартный вывод} \\
+\hline
+\begin{minipage}{0.9\textwidth}
+\addvbuffer[3pt]{\voutput}
+\end{minipage} \\
+\hline
+\end{tabular}
+}
+
+\newcommand*{\SoutionHomePath}{}
+\newcommand{\includeSolutionIfExistsByPath}[1]{
+\ifx\withsolution\undefined
+\else
+\renewcommand*{\SoutionHomePath}{#1}
+\InputIfFileExists{\SoutionHomePath/solution.tex}{}{}
+\fi
+}
+
+\newcommand{\inputPythonSource}{
+Ниже представлено решение на языке Python3
+
+\inputminted[fontsize=\footnotesize, linenos]{python}{\SoutionHomePath/source.py}
+}
+
+\newcommand{\inputJavaSource}{
+Ниже представлено решение на языке Java
+
+\inputminted[fontsize=\footnotesize, linenos]{java}{\SoutionHomePath/source.java}
+}
+
+\newcommand{\inputCPPSource}{
+Ниже представлено решение на языке C++
+
+\inputminted[fontsize=\footnotesize, linenos]{cpp}{\SoutionHomePath/source.cpp}
+}
+
+\newcommand*{\GradingHomePath}{}
+\newcommand{\includeGradingIfExistsByPath}[1]{
+\ifx\withgrading\undefined
+\else
+\renewcommand*{\GradingHomePath}{#1}
+\InputIfFileExists{\GradingHomePath/grading.tex}{}{}
+\fi
+}
+
+\newcommand{\inputGradingScript}{
+Для проверки результата использовался следующий код на языке Python3
+
+\inputminted[fontsize=\footnotesize]{python}{\GradingHomePath/grading.py}
+}
+
+\newcommand{\threegrades}[3]{
+\threeitems{За решение задачи начислялось}
+{\textbf{#1 баллов}, если пройдена только первая группа тестов;}
+{\textbf{#2 баллов}, если пройдена первая и вторая группы тестов;}
+{\textbf{#3 баллов}, если пройдены все тесты.}
+}
+
+\newcommand{\twogrades}[2]{
+\twoitems{За решение задачи начислялось}
+{\textbf{#1 баллов}, если пройдена только первая группа тестов;}
+{\textbf{#2 баллов}, если пройдены все тесты.}
+}
+
+\newcommand{\onegrade}[1]{
+За решение задачи начислялось:
+\begin{itemize}
+  \item \textbf{#1 баллов}, если пройдены все тесты.
+\end{itemize}
+}
+
+% от математиков %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\bs}{\backslash}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\R}{\mathbb R}
+\newcommand{\Co}{\mathbb C}
+\newcommand{\A}{\mathbb A}
+
+\newcommand{\GA}{\mathfrak A}
+
+\newcommand{\e}{\varepsilon}
+
+\newcommand{\g}{\circ}
+
+\newcommand{\got}[1]{{\mathfrak{#1}}}
+
+\def\dfrac#1#2{\displaystyle\frac{#1}{#2}}
+
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\renewcommand{\le}{\leqslant}
+\renewcommand{\ge}{\geqslant}
+
+\def\divs{\,\lower.4ex\vdots\,}
+\def\Skfrac#1#2{\left(\dfrac{#1}{#2}\right)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
+\newcommand{\twoimage}[5]{
+\begin{figure}[h]
+\begin{minipage}[h]{0.49\linewidth}
+\center{\includegraphics[width=0.6\linewidth]{#1} \\#2}
+\end{minipage}
+\hfill
+\begin{minipage}[h]{0.49\linewidth}
+\center{\includegraphics[width=0.6\linewidth]{#3} \\#4}
+\end{minipage}
+\caption{#5}
+%\label{wwwwwww}
+\end{figure}
+}
+
+\newcounter{EpicCounter}
+\newcommand{\newepic}[1]{%
+  \stepcounter{EpicCounter}%
+  \vspace{0.5cm}
+  \noindent
+  {\large%
+  \textbf{EPIC-\padzeroes[2]{\decimal{EpicCounter}} #1}%
+  }
+  \vspace{0.5cm}
+}
+
+\newcommand{\USnum}{%
+\padzeroes[3]{\decimal{USCounter}}%
+}
+
+\newcounter{USCounter}
+\newcommand{\newuserstory}[1]{%
+  \stepcounter{USCounter}%
+  \vspace{0.3cm}
+  \noindent
+  {\large%
+  \textit{US-\USnum\space #1}%
+  }
+  \vspace{0.3cm}
+}
+
+\newcounter{ACCounter}[USCounter]
+\newcommand{\newcriteria}{%
+  \stepcounter{ACCounter}%
+  (AC-\USnum-\padzeroes[2]{\decimal{ACCounter}})
+}
+
+\newcommand{\scriptTitle}[0]{
+\begin{tabular}{| l |}
+\hline
+\textbf{Имя скрипта} \\
+\hline
+\begin{minipage}{0.9\textwidth}
+\addvbuffer[3pt]{\scriptFile}
+\end{minipage} \\
+\hline
+\end{tabular}
+}
+
+\newcommand{\scriptExample}[1]{
+\begin{tabular}{| l |}
+\hline
+\textbf{Использование скрипта} \\
+\hline
+\begin{minipage}{0.9\textwidth}%
+\addvbuffer[3pt]{\cmdLine}
+\end{minipage} \\
+\hline
+\begin{minipage}[t]{0.9\columnwidth}
+#1
+\end{minipage} \\
+\hline
+\end{tabular}
+}
+
+\newcommand{\acceptanceCriteria}[1]{
+\begin{tabular}{| l |}
+\hline
+\textbf{Пример вызова команды \newcriteria} \\
+\hline
+\begin{minipage}{0.9\textwidth}%
+\addvbuffer[3pt]{\output}
+\end{minipage} \\
+\hline
+\begin{minipage}[t]{0.9\columnwidth}
+\textit{Комментарий:} #1
+\end{minipage} \\
+\hline
+\end{tabular}
+}
+
+\newcommand{\func}[1]{\texttt{#1()}}
+
+\newcommand{\contractAcceptanceCriteria}[1]{
+\begin{tabular}{| l |}
+\hline
+\textbf{Ожидание к выполнению метода \newcriteria} \\
+\hline
+\begin{minipage}[t]{0.9\columnwidth}
+#1
+\end{minipage} \\
+\hline
+\end{tabular}
+}
