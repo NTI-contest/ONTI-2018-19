@@ -25,30 +25,28 @@ def get_next(n, s):
                 
     return new_s    
 
-def solve(dataset):
-    dataset = sys.stdin.read()
-    d = dataset.split()
-    n = int(d[0])
-    p = ''
-    for x in d[1:]:
-        p += x
-    
-    died = 'x' * n * n
-    
-    s = set([died])
-    
-    while True:
-        if p in s:
-            break
-        else:
-            s.add(p)
-            p = get_next(n, p)
-    
-    ans = ''
-    if p == died:
-        ans += 'No\n'
+dataset = sys.stdin.read()
+d = dataset.split()
+n = int(d[0])
+p = ''
+for x in d[1:]:
+    p += x
+
+died = 'x' * n * n
+
+s = set([died])
+
+while True:
+    if p in s:
+        break
     else:
-        ans += 'Yes\n'
-    ans += str(len(s) - 1) + '\n'
-        
-    print(ans)
+        s.add(p)
+        p = get_next(n, p)
+
+ans = ''
+if p == died:
+    print('No')
+else:
+    print('Yes')
+
+print(len(s) - 1)
