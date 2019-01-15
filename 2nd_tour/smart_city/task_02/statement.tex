@@ -1,0 +1,33 @@
+\assignementTitle{}{5}
+
+Текущая дата на городских табло представляется в виде последовательности из 4 цифр. Однако табло 
+производят две разные фирмы, каждая из которых использует свой формат даты: ДДММ или ММДД, где ММ - 
+номер месяца (от 01 до 12), \linebreak а ДД - номер дня месяца (от 01 до 31) с ведущими нулями. Гарантируется, что дата хотя бы в одном формате указана верно.
+
+От вас требуется определить, можно ли по заданной последовательности из 4 цифр однозначно определить сегодняшнюю дату.
+
+\inputfmtSection
+
+В единственной строке дано четырёхзначное число, представляющее дату в одном из описанных форматов.
+
+\outputfmtSection
+
+YES, если дату можно определить однозначно, и NO в противном случае.
+
+\begin{myverbbox}[\small]{\vinput}
+    3112
+\end{myverbbox}
+\begin{myverbbox}[\small]{\voutput}
+    YES
+\end{myverbbox}
+\inputoutputTable
+
+\begin{myverbbox}[\small]{\vinput}
+    1011
+\end{myverbbox}
+\begin{myverbbox}[\small]{\voutput}
+    NO
+\end{myverbbox}
+\inputoutputTable
+
+%\includeSolutionIfExistsByPath{2nd_tour/smart_city/task_01}
