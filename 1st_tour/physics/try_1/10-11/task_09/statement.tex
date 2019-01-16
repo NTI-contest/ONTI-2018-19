@@ -31,13 +31,13 @@ $t$  меняется в пределах от $3$ до $10$ c, шаг $0.5$ c.
 
 Радиус геостационарной орбиты определяется из приравнивания угловой скорости обращения спутника вокруг 
 планеты с угловой скоростью самой планеты:
-$$m \cdot \omega^2 \cdot R_{orb}=G \cdot \dfrac{M \cdot m}{R_{orb}^2} ; R_{orb}=\sqrt[3]{\dfrac{G \cdot M}{\omega^2}}$$
+$$m \cdot \omega^2 \cdot R_{orb}=G \cdot \frac{M \cdot m}{R_{orb}^2} ; R_{orb}=\sqrt[3]{\frac{G \cdot M}{\omega^2}}$$
 Масса планеты не дана, но её можно посчитать, зная ускорение свободного падения на планете: 
-$g=\dfrac{G \cdot M}{R^2} \Rightarrow G \cdot M = g \cdot R^2$. 
+$g=\frac{G \cdot M}{R^2} \Rightarrow G \cdot M = g \cdot R^2$. 
 
-Отсюда $$R_orb=\sqrt[3]{\dfrac{g \cdot R^2}{\omega^2}}=\sqrt[3]{\dfrac{9.8 \cdot \left(\dfrac{40000000}{2 \cdot \pi}\right)^2}{\left(\dfrac{2 \cdot \pi}{24 \cdot 3600}\right)^2}} \approx 42191 \space \text{км}.$$
+Отсюда $$R_orb=\sqrt[3]{\frac{g \cdot R^2}{\omega^2}}=\sqrt[3]{\frac{9.8 \cdot \left(\frac{40000000}{2 \cdot \pi}\right)^2}{\left(\frac{2 \cdot \pi}{24 \cdot 3600}\right)^2}} \approx 42191 \space \text{км}.$$
 Начальное полное ускорение станции направлено под углом 45 градусов к её скорости, следовательно, начальное тангенциальное ускорение равно нормальному ускорению на этой геостационарной орбите. А оно, в свою очередь, равно:
-$$a=\omega^2 \cdot R=\dfrac{42191 \cdot (2 \cdot \pi)^2}{(24 \cdot 3600)^2}  \cdot 1000=0.223  \text{м⁄с}^2$$ 
+$$a=\omega^2 \cdot R=\frac{42191 \cdot (2 \cdot \pi)^2}{(24 \cdot 3600)^2}  \cdot 1000=0.223  \text{м⁄с}^2$$ 
 Таким образом, единица измерения ускорения на этом графике равна $a = 0.223$ м/c$^2$.
 
 Динамический акселерометр определяет только тангенциальное ускорение у этой станции, потому что нормальное ускорение компенсируется 
@@ -46,12 +46,12 @@ $a_{\text{ср.}}(t)=a \cdot (\frac{t}{4}+0.5)$.
 
 Среднее ускорение на участке, пройденном со второй секунды по секунду $t$, равно отношению разности скоростей к потраченному 
 времени ($t - 2$ секунды):
-$$a_{\text{ср.пер}}=\dfrac{v(t)-v(2)}{t-2}.$$
+$$a_{\text{ср.пер}}=\frac{v(t)-v(2)}{t-2}.$$
 
 Так как на графике даны значения среднего ускорения, то: 
-$$v(t)=a \cdot \left(\frac{t}{4}+0.5\right) \cdot (t-2)+v(2)=a \cdot \left(\dfrac{t^2}{4}-1\right)+v(2) $$
+$$v(t)=a \cdot \left(\frac{t}{4}+0.5\right) \cdot (t-2)+v(2)=a \cdot \left(\frac{t^2}{4}-1\right)+v(2) $$
 Чтобы получить отсюда ускорение, рассмотрим приращение за малое время $\Delta t$ скорости:
-$$a(t)=\dfrac{(v(t+\Delta t)-v(t))}{\Delta t}=\dfrac{a}{4} \cdot \dfrac{(t+\Delta t)^2-t^2}{\Delta t}=\dfrac{a}{4} \cdot (2 \cdot t+\Delta t),\Delta t \rightarrow 0.$$
+$$a(t)=\frac{(v(t+\Delta t)-v(t))}{\Delta t}=\frac{a}{4} \cdot \frac{(t+\Delta t)^2-t^2}{\Delta t}=\frac{a}{4} \cdot (2 \cdot t+\Delta t),\Delta t \rightarrow 0.$$
 Отсюда получаем формулу для ускорения при $t>2$:  $a(t)=0.5 \cdot a \cdot t=0.112 \cdot t$.
 
 \answerMath{$0.112 \cdot t$.}
