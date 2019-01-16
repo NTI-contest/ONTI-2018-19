@@ -18,13 +18,12 @@ def dfs(graph, root, p_inv=1, visited=None, leaves=None):
     return leaves
 
 
-def solve():
-    dataset = sys.stdin.read()
-    edges = [tuple(int(v) for v in edge.split()) for edge in dataset.splitlines()[1:]]
+dataset = sys.stdin.read()
+edges = [tuple(int(v) for v in edge.split()) for edge in dataset.splitlines()[1:]]
 
-    graph = defaultdict(set)
-    for src, dst in edges:
-        graph[src].add(dst)
+graph = defaultdict(set)
+for src, dst in edges:
+    graph[src].add(dst)
 
-    probs = dfs(graph, 0)
-    return print('\n'.join('{}: {}'.format(v, '1' if probs[v] == 1 else '1/{}'.format(probs[v])) for v in sorted(probs.keys())))
+probs = dfs(graph, 0)
+print('\n'.join('{}: {}'.format(v, '1' if probs[v] == 1 else '1/{}'.format(probs[v])) for v in sorted(probs.keys())))
