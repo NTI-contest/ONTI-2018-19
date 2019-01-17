@@ -1,0 +1,71 @@
+\assignementTitle{Язык структурированных запросов}{5}
+
+С самых ранних времен финансовые отношения всегда ассоциировались с информацией. Объемы информации росли, уже невозможно было использовать только бухгалтерскую книгу (гроссбух, ledger). А затем, товаро-денежные отношения между участниками усложнились, что выборка информации, определение цен, подведение итогов и т.п. стала невозможна вручную. Между тем, типовые операции с данными, выполняемые в рамках таких отношений, демонстрировали очевидность их автоматизации.
+
+Сначала появились реляционные базы данных (\url{https://bit.ly/2IZvBjL}). А затем для работы с 
+данными в базах данных с реляционной моделью был придуман и стандартизирован язык структурированный запросов 
+(structured query language, SQL; \url{https://bit.ly/2kip6IQ}).
+
+С точки зрения языка SQL данные хранятся в таблицах. Команды языка SQL позволяют управлять таблицами, изменять их содержимое, читать данные из таблиц.
+
+Например, команда
+
+\begin{minted}[fontsize=\footnotesize, linenos]{sql}
+    SELECT * FROM Payments;
+\end{minted}
+
+выведет все строки (записи) из таблицы Payments, а команда
+
+\begin{minted}[fontsize=\footnotesize, linenos]{sql}
+    SELECT Sender, Receiver FROM Payments WHERE (Value > 50);
+\end{minted}
+
+выведет только отправителя и получателя для тех записей, где сумма платежа больше 50.
+
+Ознакомьтесь с основами языка SQL в курсе ''Базы данных'' \url{https://stepik.org/2614}, (модули 4 - 8) и найдите решение к следующей задаче.
+
+\subsubsection*{Формулировка задачи}
+
+В реляционной базе данных есть две таблицы. transactions указаны транзакции пользователей (три столбца: sender, recipient, val). Другая таблица result используется для промежуточного хранения результата (один столбец: res).
+
+Вставьте в таблицу result только одну строку, в которой будет подсчитан конечный баланс пользователя ''Frank''. Начальный баланс пользователя считать 0.
+
+Примечание: нужно написать такую одну сложносоставную команду на языке SQL, которая бы как запрашивала 
+нужные данные из таблицы transactions, так и вставляла бы данные в таблицу result. Из-за особенностей 
+проверки задач на SQL-запросы платформы Stepik, даже правильные ответы будут проверяться на полное решение. 
+Т.е. ответы подобные
+
+\begin{minted}[fontsize=\footnotesize, linenos]{sql}
+    INSERT INTO result (res) VALUES (число);
+\end{minted}
+
+приниматься не будут.
+
+\subsection*{Пример}
+
+Чтобы попрактиковаться в составлении запроса, вставьте следующий код в онлайн-консоль для тестирования SQL команд (\url{https://www.tutorialspoint.com/execute_sql_online.php}):
+
+\begin{minted}[fontsize=\footnotesize, linenos]{sql}
+    BEGIN TRANSACTION;
+
+    CREATE TABLE transactions (sender VARCHAR(20), recipient VARCHAR(20), val INT);
+    INSERT INTO transactions (sender, recipient, val) VALUES ('Alice', 'Frank', 10);
+    INSERT INTO transactions (sender, recipient, val) VALUES ('Alice', 'Frank', 20);
+    INSERT INTO transactions (sender, recipient, val) VALUES ('Clare', 'Frank', 5);
+    INSERT INTO transactions (sender, recipient, val) VALUES ('Clare', 'Alice', 7);
+    INSERT INTO transactions (sender, recipient, val) VALUES ('Frank', 'Alice', 3);
+    
+    CREATE TABLE result (res INT);
+    COMMIT;
+    
+    /* Данный запрос должен быть изменен на тот, что будет использоваться в 
+       Stepik в качестве ответа */
+    INSERT INTO result (res) VALUES(32);
+    /* Конец запроса для Stepik */
+    
+    SELECT * FROM result;
+\end{minted}
+
+Исполните данный запрос, нажав кнопку ''Execute''.
+
+Затем измените команду ''INSERT INTO result (res) VALUES (32);'' на ту, что будете использовать в качестве ответа.
