@@ -1,0 +1,48 @@
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage{mathtools}
+\selectlanguage{russian}
+\usepackage[left=3cm,right=1.5cm,
+    top=1cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\pagestyle{empty}
+
+\usepackage{fontspec}
+\setmainfont{Chevin Cyrillic}
+
+\usepackage{setspace}
+% одинарный интервал
+\singlespacing
+\setlength{\parskip}{2mm}
+
+\usepackage{graphicx}
+\newcommand{\putImgWOCaption}[2]{
+\begin{figure}[h]
+\includegraphics[width=#1]{#2}
+\centering
+\vspace{0cm}
+\end{figure}
+}
+
+\usepackage{import}
+
+\newcommand{\assignementTitle}[2]{
+    \underline{Задача #1: #2}
+}
+
+\usepackage{titlesec}
+
+\titleformat
+{\section} %команда
+[hang] %форма, для \section используется hang
+{\fontsize{16}{5}\bfseries} %формат 
+%{Assignement \thesection. } %как выглядит формат номера (лейбл), вывод номера отключается добавление * после команды \section
+{} %как выглядит формат номера (лейбл), вывод номера отключается добавление * после команды \section
+{0em} %горизонтальный разделитель между лейблом и текстом названия
+{}
+
+\newcommand{\bold}[2]{
+    \begin{center}
+        \fontsize{#1}{0}\textbf{#2}
+    \end{center}
+}
