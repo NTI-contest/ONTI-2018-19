@@ -46,3 +46,23 @@
         \fontsize{#1}{0}\textbf{#2}
     \end{center}
 }
+
+\newcommand{\putTwoImg}[4]{
+\begin{figure}[H]
+  \includegraphics[width=#1]{#2}
+  \hfill
+  \includegraphics[width=#3]{#4}
+\end{figure}
+}
+
+\newcommand{\twoImg}[5]{
+\begin{figure}[!h]
+\begin{minipage}[!h]{0.49\linewidth}
+\center{\includegraphics[width=#1\linewidth]{#2} \\ #3}
+\end{minipage}
+\hfill
+\begin{minipage}[!h]{0.49\linewidth}
+\center{\includegraphics[width=#1 \linewidth]{#4} \\ #5}
+\end{minipage}
+\end{figure}
+}
