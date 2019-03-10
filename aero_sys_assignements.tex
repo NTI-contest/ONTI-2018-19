@@ -1,0 +1,43 @@
+\documentclass[a4paper,12pt,oneside]{book}
+
+\usepackage{localfmt}
+\usepackage{localshortcuts}
+
+\def\withsolution{1}
+
+\def\withgrading{1}
+
+\begin{document}
+
+\begin{titlepage}
+    \vspace*{\stretch{1.0}}
+    \begin{center}
+        \huge{МАТЕРИАЛЫ ЗАДАНИЙ} \\
+        \Large{командной инженерной олимпиады школьников} \\
+        \Large{<<Олимпиада Национальной технологической инициативы>>} \\
+        \Large{Профиль: <<Аэрокосмические системы>>} \\
+        \large{2018/2019 учебный год} \\
+        \vspace{2cm}
+        \Large{\today}  
+    \end{center}
+    \vspace*{\stretch{2.0}}
+\end{titlepage}
+
+\setcounter{tocdepth}{1}
+
+\tableofcontents
+
+\part{Первый этап}
+
+\input{1st_tour/physics/physics_assignements.tex}
+\input{1st_tour/inf/inf_assignements.tex}
+
+\part{Второй этап}
+
+\input{2nd_tour/aero_sys/aero_sys_assignements.tex}
+
+\part{Заключительный этап}
+
+%\input{final/subject_tour/physics1303_bas_9/physics1303_bas_9_assignements.tex}
+
+\end{document}
