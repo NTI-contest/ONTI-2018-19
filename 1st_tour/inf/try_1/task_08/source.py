@@ -1,6 +1,5 @@
 import sys
 
-
 dataset = sys.stdin.read()
 lst = list(map(int, dataset.split()))
 n = lst[0]

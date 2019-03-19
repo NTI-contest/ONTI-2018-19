@@ -1,6 +1,5 @@
 import sys
          
-
 dataset = sys.stdin.read()
 
 input = dataset.split()
