@@ -25,7 +25,6 @@ def fire_clean(picture, i, j):
                 (i + 1, j + 1),
             ]      
     return
-        
 
 def solve_test(n, picture):
     groups = 0

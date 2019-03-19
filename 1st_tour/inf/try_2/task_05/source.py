@@ -63,7 +63,6 @@ for i in range(3):
         ten_p -= x
         q[i][idx] -= x
         idx -= 1   
-
     
 sum2 = [sum([q[j][i] * i for i in range(101)]) for j in range(3)]
 
