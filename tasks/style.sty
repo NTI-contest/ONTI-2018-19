@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english, russian]{babel}
 \usepackage{mathtools}
+\usepackage{wrapfig}
 \selectlanguage{russian}
 \usepackage[left=3cm,right=1.5cm,
     top=1cm,bottom=2cm,bindingoffset=0cm]{geometry}
@@ -48,7 +49,7 @@
 }
 
 \newcommand{\putTwoImg}[4]{
-\begin{figure}[H]
+\begin{figure}[!h]
   \includegraphics[width=#1]{#2}
   \hfill
   \includegraphics[width=#3]{#4}
