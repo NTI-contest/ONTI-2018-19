@@ -173,6 +173,18 @@
 \end{tabular}
 }
 
+\newcommand{\outputTable}[0]{
+\begin{tabular}{| l |}
+\hline
+\textbf{Стандартный вывод} \\
+\hline
+\begin{minipage}{0.9\textwidth}
+\addvbuffer[3pt]{\voutput}
+\end{minipage} \\
+\hline
+\end{tabular}
+}
+
 \newcommand*{\SoutionHomePath}{}
 \newcommand{\includeSolutionIfExistsByPath}[1]{
 \ifx\withsolution\undefined

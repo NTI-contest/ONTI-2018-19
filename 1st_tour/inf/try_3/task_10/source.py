@@ -26,4 +26,5 @@ for src, dst in edges:
     graph[src].add(dst)
 
 probs = dfs(graph, 0)
-print('\n'.join('{}: {}'.format(v, '1' if probs[v] == 1 else '1/{}'.format(probs[v])) for v in sorted(probs.keys())))
+print('\n'.join('{}: {}'.format(v, '1' if probs[v] == 1 else '1/{}'.format(probs[v])) 
+    for v in sorted(probs.keys())))

@@ -1,55 +1,93 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <math.h>
 
 using namespace std;
-typedef long long ll;
-const ll inf_ll = 1e16;
-const int MAXN = 1e5 + 100;
 
-ll x[MAXN], y[MAXN];
-ll dis[MAXN];
+///===========================================================================
+/// Problem solving
+double *T;
+double *x;
+int N;
+double J = 0.0;
+extern void solve();
 
-ll dist(int a, int b) {
-    return (x[a] - x[b]) * (x[a] - x[b]) + (y[a] - y[b]) * (y[a] - y[b]);
+int main()
+{
+        cin >> N;
+        x = new double[N];
+        T = new double[N];
+        for (int i = 0; i < N; i++)
+        {
+            cin >> x[i];
+        }
+        for (int i = 0; i < N; i++)
+        {
+            cin >> T[i];
+        }
+
+        /// solve problem
+        solve();
+
+        /// set output
+    	cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        cout.precision(10);
+        cout << J << endl << endl;
+
+        delete x;
+        delete T;
+
+    return 0;
 }
 
-bool used[MAXN];
+///===========================================================================
+void solve()
+{
+    double sumTx2 = 0.0;
+    double sumTx1 = 0.0;
+    double sumTx0 = 0.0;
 
-int main() {
-    int n;
-    cin >> n;
-    ll k;
-    cin >> k;
-    for (int i = 1; i <= n; ++i) {
-        cin >> x[i] >> y[i];
-    }
-    int s, t;
-    cin >> s >> t;
-    for (int i = 1; i <= n; ++i) {
-        dis[i] = inf_ll;
-    }
-    dis[s] = 0;
-    for (int i = 1; i <= n; ++i) {
-        int ver = -1;
-        for (int e = 1; e <= n; ++e) {
-            if (!used[e] && (ver == -1 || dis[e] < dis[ver])) {
-                ver = e;
-            }
-        }
+    double sumx4 = 0.0;
+    double sumx3 = 0.0;
+    double sumx2 = 0.0;
+    double sumx1 = 0.0;
+    double sumx0 = 0.0;
 
-        int v = ver;
-        used[v] = 1;
-        for (int to = 1; to <= n; ++to) {
-            if (dist(v, to) > k)
-                continue;
-            if (dis[to] > dis[v] + dist(v, to)) {
-                dis[to] = dis[v] + dist(v, to);
-            }
-        }
+    for (int i = 0; i < N; i++)
+    {
+        sumTx2 += T[i]*x[i]*x[i];
+        sumTx1 += T[i]*x[i];
+        sumTx0 += T[i];
+
+        sumx4 += x[i]*x[i]*x[i]*x[i];
+        sumx3 += x[i]*x[i]*x[i];
+        sumx2 += x[i]*x[i];
+        sumx1 += x[i];
+        sumx0 += 1.0;
     }
 
-    if (dis[t] == inf_ll) {
-        cout << -1 << endl;
-    } else {
-        cout << dis[t] << endl;
+    double a11 = sumx4; double a12 = sumx3; double a13 = sumx2;
+    double a21 = sumx3; double a22 = sumx2; double a23 = sumx1;
+    double a31 = sumx2; double a32 = sumx1; double a33 = sumx0;
+
+    double b1 = sumTx2;  double b2 = sumTx1;  double b3 = sumTx0;
+
+    double delta = a11*(a22*a33 - a23*a32) - a12*(a21*a33 - a23*a31) + 
+        a13*(a21*a32 - a22*a31);
+
+    double delta1 =  b1*(a22*a33 - a23*a32) - b2*(a12*a33 - a13*a32) + 
+        b3*(a12*a23 - a13*a22);
+    double delta2 = -b1*(a21*a33 - a23*a31) + b2*(a11*a33 - a13*a31) - 
+        b3*(a11*a23 - a13*a21);
+    double delta3 =  b1*(a21*a32 - a22*a31) - b2*(a11*a32 - a12*a31) + 
+        b3*(a11*a22 - a12*a21);
+
+    double a = delta1/delta;
+    double b = delta2/delta;
+    double c = delta3/delta;
+
+    J = 0.0;
+    for (int i = 0; i < 13; i++)
+    {
+        J += 0.5*pow(T[i] - a*x[i]*x[i] - b*x[i] - c, 2.0);
     }
 }

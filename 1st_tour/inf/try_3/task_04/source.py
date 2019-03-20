@@ -14,7 +14,8 @@ def get_next(n, s):
                    ((i + 1), j), \
                    ((i + 1), j + 1)] 
             
-            idx = [x * n + y for (x, y) in idx if x >= 0 and x < n and y >= 0 and y < n]
+            idx = [x * n + y for (x, y) in idx if x >= 0 and x < n and 
+                y >= 0 and y < n]
             alive = sum([1 for x in idx if s[x] == '*'])
             if s[i * n + j] == 'x' and alive == 3:
                 new_s += '*'
