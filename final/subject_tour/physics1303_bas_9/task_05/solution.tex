@@ -1,1 +1,22 @@
 \solutionSection
+
+\begin{tabular}{l|}
+    Дано: \\
+    $H = 19400$ км \\
+    $\alpha = 20^\circ$ \\
+    $v = 1246$ МГц \\
+    $c = 3 \cdot 10^8$ м/с \\
+    $R_\text{З} = 6400$ км \\
+    \hline \\
+    $\lambda, X, \Delta t $ - ?
+\end{tabular}
+
+$$\lambda = \frac{c}{v} = \frac{3 \cdot 10^8}{1246 \cdot 10^6} \approx 0.24 \: \text{м} = 24 \: \text{см}$$
+
+По теореме косинусов:
+$$X^2 = R^2_\text{З} + (R_\text{З} + H)^2 - 2 \cdot R_\text{З}(R_\text{З} + H) \cos \alpha$$
+$$X = \sqrt{(6400 \cdot 10^3)^2 + \left( (19400 + 6400) \cdot 10^3 \right)^2 - 2 \cdot 6400 \cdot 10^3 \cdot (19400+6400)\cdot 10^3 \cos 20^\circ} =$$
+$$=\sqrt{(6400^2+25800^2-2\cdot 6400\cdot 25800\cdot \cos 20^\circ)} \cdot 10^3 \approx 19907 \: \text{км}$$
+$$\Delta t = \frac{X}{c} = \frac{19906680.01}{3\cdot 10^3} \approx 0.066 = 66 \text{мс}$$
+
+\answerMath{$\lambda = 24$ см, $X = 19907$ км, $\Delta t = 66$ мс.}

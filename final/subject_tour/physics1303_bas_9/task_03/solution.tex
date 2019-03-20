@@ -1,1 +1,27 @@
 \solutionSection
+
+\begin{tabular}{l|}
+    Дано: \\
+    $m = 0.1$ кг \\
+    $M = 50$ кг \\
+    $v = 10$ км/c \\
+    $V = 7$ км/с \\
+    $\alpha = 120^\circ$ \\
+    \hline \\
+    $\Delta W_\text{К}$ - ?
+\end{tabular}
+
+
+Запишем закон сохранения импульса:
+$$\overrightarrow{p}_\text{после столкновения} = \overrightarrow{p}_c + \overrightarrow{p}_\text{м}$$
+
+\putImgWOCaption{4cm}{2}
+
+По теореме косинусов (см. рисунок)
+$$((M+m)U)^2 =(MV)^2+(mv)^2 - 2MVmv\cos\beta, \space \beta = 180^\circ - \alpha$$
+$$U = \frac{\sqrt{(MV)^2+(mv)^2 - MVmv}}{M+m} =$$
+$$= \frac{\sqrt{(50 \cdot 7000)^2 + (0.1 \cdot 10000)^2 -50 \cdot 7000 \cdot 0.1 \cdot 10000}}{50 + 0.1} = 6976.069321 \space \text{м/с}$$
+$$\Delta W_K = \frac{MV^2}{2} - \frac{(M+m)U^2}{2}=\frac{50 \cdot 7000^2}{2} - \frac{(50+0.1)\cdot 6976.069321^2}{2} =$$
+$$= 5928144 \: \text{Дж} \approx 5.9 \: \text{МДж}$$
+
+\answerMath{5.9 МДж.}
