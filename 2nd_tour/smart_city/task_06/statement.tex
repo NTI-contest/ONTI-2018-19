@@ -30,6 +30,8 @@ $ C $ и $ D $ ($ 1 \le A, B, C, D \le 10^6 $).
 строке выведите минимальное число, удовлетворяющее заданным условиям. Если
 такого числа не существует, выведите «$ -1 $».
 
+\sampleTitle{1}
+
 \begin{myverbbox}[\small]{\vinput}
     3 2 2 1
 \end{myverbbox}
@@ -37,6 +39,8 @@ $ C $ и $ D $ ($ 1 \le A, B, C, D \le 10^6 $).
     33939
 \end{myverbbox}
 \inputoutputTable
+
+\sampleTitle{2}
 
 \begin{myverbbox}[\small]{\vinput}
     5 4 4 1
@@ -46,4 +50,18 @@ $ C $ и $ D $ ($ 1 \le A, B, C, D \le 10^6 $).
 \end{myverbbox}
 \inputoutputTable
 
-%\includeSolutionIfExistsByPath{2nd_tour/smart_city/task_03}
+\solutionSection
+
+Для существования описанного числа значения $A$, $B$, $C$, $D$ 
+должны удовлетворять некоторым условиям:
+\begin{itemize}
+    \item разность между $C$ и $D$ не должна превышать 1;
+    \item $А$ должно быть не меньше, чем $C$ и $D$;
+    \item $B$ должно быть не меньше, чем $C$ и $D$.
+\end{itemize}
+
+Если одно из условий не выполняется, в ответ сразу можно 
+вывести <<-1>>. В противном случае строим минимальное число, 
+удовлетворяющее всем условиям и выводим его.
+
+\includeSolutionIfExistsByPath{2nd_tour/smart_city/task_06}
