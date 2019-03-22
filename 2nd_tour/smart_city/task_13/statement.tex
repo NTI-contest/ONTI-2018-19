@@ -23,6 +23,8 @@ $ N $ строк
 один из столбцов таблицы будет состоять только из символов «a». Если такое состояние получить невозможно,
 выведите «-1».
 
+\sampleTitle{1}
+
 \begin{myverbbox}[\small]{\vinput}
     3 6
     ababab
@@ -33,6 +35,8 @@ $ N $ строк
     2
 \end{myverbbox}
 \inputoutputTable
+
+\sampleTitle{2}
 
 \begin{myverbbox}[\small]{\vinput}
     3 3
@@ -45,4 +49,12 @@ $ N $ строк
 \end{myverbbox}
 \inputoutputTable
 
-%\includeSolutionIfExistsByPath{2nd_tour/smart_city/task_03}
+\solutionSection
+
+Если во входных данных есть хотя бы одна строка, состоящая только из букв «b», 
+то решения задача не имеет и в ответ выводится «-1». В противном случае ответ существует всегда.
+
+Для каждого символа каждой строки посчитаем расстояние до ближайшего слева или справа символа «a». 
+Для каждого столбика посчитаем сумму этих значений. Ответом является минимальная из этих сумм.
+
+\includeSolutionIfExistsByPath{2nd_tour/smart_city/task_03}

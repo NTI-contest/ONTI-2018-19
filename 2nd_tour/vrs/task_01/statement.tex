@@ -72,3 +72,85 @@
     \item Штрафные баллы: 3
     \item Описание штрафа: Касание обруча
 \end{itemize}
+
+\solutionSection
+
+Для решения данных задач участнику необходимо реализовать:
+
+\begin{itemize}
+    \item регулятор управления курсом и глубиной (подойдет релейный или простой пропорциональный);
+    \item алгоритм поиска полосок и треугольника (подойдет как встроенный в murAPI, так и простая бинаризация)  
+    \item алгоритм определения наличия полоски в кадре;
+    \item алгоритм определения угла полоски (подойдет встроенный в OpenCV или murAPI).
+\end{itemize}
+
+Начнем с реализации регуляторов глубины и курса. 
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+    void yaw_and_depth_regulator(float yaw, float depth, int power)
+    {
+        constexpr float k_yaw = 1.3f;
+        constexpr float k_depth = 6.0f;
+
+        float yaw_diff = mur.getYaw() - yaw;
+        if (yaw_diff < 0.0f) {
+            yaw_diff += 360.0f;
+        }
+
+        if (yaw_diff > 180.0f) {
+            yaw_diff -= 360.0f;
+        }
+
+        yaw_diff *= k_yaw;
+
+        float depth_diff = mur.getInputAOne() - depth;
+        depth_diff *= k_depth;
+
+        mur.setPorts(-power + yaw_diff, -power - yaw_diff, -depth_diff, 0);
+    }
+\end{minted}
+
+Наши регуляторы готовы. 
+
+Теперь перейдем к поиску линии и треугольника. 
+
+Для решения данной задачи мы воспользуемся встроенными в murAPI функциями поиска прямоугольников и линий. Однако, нам необходимо проверять наличие полоски в кадре. 
+
+С помощью данной функции мы будем определять наличие или отсутствии оранжевых полосок в кадре.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+    bool is_line(cv::Mat image)
+    {
+        cv::Mat hsv_image;
+        // BGR -> HSV
+        cv::cvtColor(image, hsv_image, CV_BGR2HSV);
+    
+        // Бинаризуем изображение по нижней и верхней границе красного
+        cv::Mat lower_red_hue_range;
+        cv::Mat upper_red_hue_range;
+        cv::inRange(hsv_image, cv::Scalar(0, 100, 100), 
+            cv::Scalar(10, 255, 255), lower_red_hue_range);
+        cv::inRange(hsv_image, cv::Scalar(160, 100, 100), 
+            cv::Scalar(179, 255, 255), upper_red_hue_range);
+        cv::Mat red_hue_image;
+        cv::addWeighted(lower_red_hue_range, 1.0, 
+            upper_red_hue_range, 1.0, 0.0, red_hue_image);
+    
+        std::vector<std::vector<cv::Point>> contours;
+    
+        // Ищем контуры на бинаризованном изображениее
+        cv::findContours(red_hue_image, contours, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+    
+        for (std::size_t i = 0; i < contours.size(); i++) {
+            if (std::fabs(cv::contourArea(contours.at(i))) < 800.0) {
+                continue;
+            }
+            return true;
+        }
+        return false;
+    }    
+\end{minted}
+
+Алгоритм определения наличия линий готов. Для распознавания линий их углов и треугольника будем использовать встроенные в murAPI функции.
+
+\includeSolutionIfExistsByPath{2nd_tour/vrs/task_01}

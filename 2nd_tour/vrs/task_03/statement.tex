@@ -119,3 +119,292 @@
     \item Штрафные баллы: 3
     \item Описание штрафа: Касание обруча
 \end{itemize}
+
+\solutionSection
+
+Для решения данных задач участнику необходимо реализовать:
+
+\begin{itemize}
+    \item регулятор управления курсом и глубиной (подойдет релейный или простой пропорциональный);
+    \item алгоритмы поиска полосок, определения цвета ворот, определения цвета корзин, поиск мишени и поиск треугольника (подойдет как встроенные в murAPI, так и простая бинаризация)  
+    \item алгоритм определения наличия полоски в кадре;
+    \item алгоритм определения угла полоски (подойдет встроенный в OpenCV или murAPI).
+\end{itemize}
+
+Начнем с реализации регуляторов глубины и курса. 
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+void cw(bool move = false)
+{
+    mur.setPortA(-30);
+    mur.setPortB(0);
+
+    if (move) {
+        mur.setPortB(30);
+    }
+}
+
+void ccw(bool move = false)
+{
+    mur.setPortA(0);
+    mur.setPortB(-30);
+
+    if (move) {
+        mur.setPortA(30);
+    }
+}
+
+void yaw_and_depth_regulator(float yaw, float depth, int power)
+{
+    auto c_yaw = mur.getYaw();
+    constexpr float k_depth = 6;
+
+    auto d = std::fmod((yaw - c_yaw + 540.0f), 360.0f) - 180.0f;
+    bool move = false;
+    if (power == 0) {
+        move = true;
+    }
+
+    if (d > 0) {
+        cw(move);
+    } else {
+        ccw(move);
+    }
+
+    float depth_diff = mur.getInputAOne() - depth;
+    depth_diff *= k_depth;
+    mur.setPortC(-depth_diff);
+}
+\end{minted}
+
+Наши регуляторы готовы. 
+
+Теперь перейдем к поиску линии и треугольника. 
+
+Для решения данной задачи мы воспользуемся встроенными в murAPI функциями поиска прямоугольников и линий. Однако, нам необходимо проверять наличие полоски в кадре и количество полосок. 
+
+С помощью данной функции мы будем определять наличие или отсутствии оранжевых полосок в кадре и их количество.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+int is_line(cv::Mat image)
+{
+    int line_count = 0;
+    cv::Mat hsv_image;
+    // BGR -> HSV
+    cv::cvtColor(image, hsv_image, CV_BGR2HSV);
+
+    // Бинаризуем изображение по нижней и верхней границе красного
+    cv::Mat lower_red_hue_range;
+    cv::Mat upper_red_hue_range;
+    cv::inRange(hsv_image, cv::Scalar(0, 100, 100), 
+        cv::Scalar(10, 255, 255), lower_red_hue_range);
+    cv::inRange(hsv_image, cv::Scalar(160, 100, 100), 
+        cv::Scalar(179, 255, 255), upper_red_hue_range);
+    cv::Mat red_hue_image;
+    cv::addWeighted(lower_red_hue_range, 1.0, 
+        upper_red_hue_range, 1.0, 0.0, red_hue_image);
+
+    std::vector<std::vector<cv::Point>> contours;
+
+    // Ищим контуры на бинаризованном изображениее
+    cv::findContours(red_hue_image, contours, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+
+    for (std::size_t i = 0; i < contours.size(); i++) {
+        if (std::fabs(cv::contourArea(contours.at(i))) < 800.0) {
+            continue;
+        }
+        line_count++;
+    }
+    return line_count;
+}
+\end{minted}
+
+Алгоритм определения наличия линий готов. Для распознавания линий их углов и треугольника будем использовать встроенные в murAPI функции. 
+
+Теперь перейдем к распознаванию зеленого цвета.
+
+Данный детектор нам необходим для определения зеленого сектора ворот и зеленой корзины.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+Object detect_green_object(cv::Mat img)
+{
+    int hmin = 50, hmax = 75;
+    int smin = 105, smax = 255;
+    int vmin = 0, vmax = 255;
+
+    cv::Scalar lower(hmin, smin, vmin);
+    cv::Scalar upper(hmax, smax, vmax);
+
+    cv::Mat hsv;
+    cv::cvtColor(img, hsv, CV_BGR2HSV);
+    cv::inRange(hsv, lower, upper, hsv);
+
+    std::vector<std::vector<cv::Point>> contours;
+    cv::findContours(hsv, contours, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+    Object object_to_ret;
+
+    for (std::size_t i = 0; i < contours.size(); i++) {
+        if (contours.at(i).size() < 5) {
+            continue;
+        }
+        if (std::fabs(cv::contourArea(contours.at(i))) < 300.0) {
+            continue;
+        }
+        cv::RotatedRect b_ellipse = cv::fitEllipse(contours.at(i));
+        object_to_ret.x = (int)b_ellipse.center.x;
+        object_to_ret.y = (int)b_ellipse.center.y;
+        object_to_ret.angle = b_ellipse.angle;
+        object_to_ret.type = Object::RECTANGLE;
+        return object_to_ret;
+    }
+    return object_to_ret;
+}
+\end{minted}
+
+Алгоритм распознавания зеленого готов, теперь добавим алгоритм движения к центру зеленой части ворот и корзины. 
+
+Для ворот нам достаточно смещаться влево или вправо относительно координаты X на кадре:
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+bool move_to_v_center(int x_val)
+{
+    constexpr auto center_v = 320 / 2;
+    auto center_diff = x_val - center_v;
+
+    if (std::abs(center_diff) < 25) {
+        mur.setPortD(0);
+        return true;
+    }
+
+    if (center_diff < 0) {
+        mur.setPortD(-15);
+    }
+
+    if (center_diff > 0) {
+        mur.setPortD(15);
+    }
+    return false;
+}
+\end{minted}
+
+Для корзины нам необходимо смещаться по оси X и Y:
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+bool move_to_hv_center(int x, int y)
+{
+    constexpr auto center_v = 320 / 2;
+    constexpr auto center_h = 240 / 2;
+
+    auto center_x_diff = x - center_v;
+    auto center_y_diff = y - center_h;
+    if (std::abs(center_x_diff) < 10 && std::abs(center_y_diff) < 10) {
+        mur.setPortD(0);
+        return true;
+    }
+
+    if (center_x_diff < 0) {
+        mur.setPortD(-15);
+    }
+
+    if (center_x_diff > 0) {
+        mur.setPortD(15);
+    }
+
+    if (center_y_diff < 0) {
+        mur.setPortA(-15);
+        mur.setPortB(-15);
+    }
+
+    if (center_y_diff > 0) {
+        mur.setPortA(15);
+        mur.setPortB(15);
+    }
+
+    return false;
+}
+\end{minted}
+
+У нас готовы алгоритмы распознавания зеленого и движения к центру зеленых областей. 
+
+Теперь перейдем к поиску мишени и алгоритму движения к ее центру. 
+
+Искать мишень мы будем при помощи бинаризации по желтому цвету.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+Object detect_yellow_object(cv::Mat img)
+{
+    int hmin = 20, hmax = 30;
+    int smin = 100, smax = 255;
+    int vmin = 100, vmax = 255;
+
+    cv::Scalar lower(hmin, smin, vmin);
+    cv::Scalar upper(hmax, smax, vmax);
+
+    cv::Mat hsv;
+    cv::cvtColor(img, hsv, CV_BGR2HSV);
+    cv::inRange(hsv, lower, upper, hsv);
+    cv::imshow("W", hsv);
+    cv::waitKey(1);
+    std::vector<std::vector<cv::Point>> contours;
+    cv::findContours(hsv, contours, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+    Object object_to_ret;
+
+    for (std::size_t i = 0; i < contours.size(); i++) {
+        if (contours.at(i).size() < 5) {
+            continue;
+        }
+        if (std::fabs(cv::contourArea(contours.at(i))) < 150.0) {
+            continue;
+        }
+        cv::RotatedRect b_ellipse = cv::fitEllipse(contours.at(i));
+        object_to_ret.x = (int)b_ellipse.center.x;
+        object_to_ret.y = (int)b_ellipse.center.y;
+        object_to_ret.angle = b_ellipse.angle;
+        object_to_ret.type = Object::RECTANGLE;
+        object_to_ret.size = cv::contourArea(contours.at(i));
+
+        return object_to_ret;
+    }
+    return object_to_ret;
+}
+\end{minted}
+
+Алгоритм поиска желтого готов, теперь перейдем к алгоритму движения к центру мишени:
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+bool move_to_hv_center_front(int x, int y)
+{
+    constexpr auto center_v = 320 / 2;
+    constexpr auto center_h = 240 / 2;
+
+    mur.setPortA(0);
+    mur.setPortB(0);
+
+    auto center_x_diff = x - center_v;
+    auto center_y_diff = y - center_h;
+    if (std::abs(center_x_diff) < 10 && std::abs(center_y_diff) < 10) {
+        mur.setPortD(0);
+        return true;
+    }
+
+    if (center_x_diff < 0) {
+        mur.setPortD(-15);
+    }
+
+    if (center_x_diff > 0) {
+        mur.setPortD(15);
+    }
+
+    if (center_y_diff < 0) {
+        mur.setPortC(-15);
+    }
+
+    if (center_y_diff > 0) {
+        mur.setPortC(15);
+    }
+
+    return false;
+}
+\end{minted}
+
+\includeSolutionIfExistsByPath{2nd_tour/vrs/task_03}
