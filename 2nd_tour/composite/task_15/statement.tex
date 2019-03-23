@@ -10,5 +10,35 @@ $q$. Площадь поверхности
 $\lambda_1$ и $\lambda_3$, толщины слоев 1, 2 и 3 равны $l_1$, $l_2$ и $l_3$ соответственно. 
 Дайте ответ с точностью до сотых.
 
-$q$ = 30 Вт/м$^2$, $S$ = 2 м$^2$, $\Delta t$ = 5, $\lambda_1$ = 20 Вт/(м$\cdot$К),
-$\lambda_3$ = 8 Вт/(м$\cdot$К), $l_1$ = 0,05 м, $l_2$ = 0,3 м, $l_3$ = 0,15 м.
+$q$ = 30 Вт/м$^2$, 
+
+$S$ = 2 м$^2$, 
+
+$\Delta t$ = 5, 
+
+$\lambda_1$ = 20 Вт/(м$\cdot$К),
+
+$\lambda_3$ = 8 Вт/(м$\cdot$К), 
+
+$l_1$ = 0,05 м, 
+
+$l_2$ = 0,3 м, 
+
+$l_3$ = 0,15 м.
+
+\explanationSection
+
+Найдем общую (суммарную) теплопроводность панели, толщина 
+которой равна $l=l_1+l_2+l_3$. Используем закон Фурье для плоской стенки:
+
+$$\lambda=\frac{q \cdot l}{\Delta t}=3 \: [\text{Вт⁄(м} \cdot \text{К})] \qquad (1)$$
+
+Для нахождения теплопроводности слоя 2 воспользуемся формулой суммы тепловых сопротивлений:
+
+$$\frac{l}{\lambda}=\frac{l_1}{\lambda_1}+\frac{l_2}{\lambda_2}+\frac{l_3}{\lambda_3}, \qquad (2)$$
+
+Откуда:
+
+$$\lambda_2=\frac{l_2 \cdot \lambda \cdot \lambda_1 \cdot \lambda_3}{l \cdot \lambda_1 \cdot \lambda_3-l_1 \cdot \lambda \cdot \lambda_3-l_3 \cdot \lambda \cdot \lambda_1}=2.06 \: [\text{Вт⁄(м} \cdot \text{К})] \qquad (3)$$
+
+\answerMath{2.06 Вт⁄(м $\cdot$ К).}

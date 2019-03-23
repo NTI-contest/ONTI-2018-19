@@ -1,1 +1,78 @@
 \solutionSection
+
+\begin{enumerate}
+    %1
+    \item Общий объём памяти под один снимок будет:
+    $$I=1800\cdot3000\cdot10=5.4\cdot10^7 \text{  бит/снимок}$$
+    Тогда общее количество снимков, которое можно записать в память спутника, составит c учётом того,  1 Байт=8 бит:
+    $$n=\frac{N}{\frac{1}{8}\cdot I}=\frac{67.5\cdot10^9\text{ Байт}}{\frac{1}{8}\frac{\text{ Байт}}{\text{бит}}\cdot5.4\cdot10^7 \frac{\text{бит}}{\text{снимок}}}=10^4\text{ снимков}$$
+    \answerMath{$10^4$  снимков.}
+    %2
+    \item Пусть разрешение (проекция пикселя) обозначена L . При условии, что соседние снимки не перекрываются, общая площадь, отснятая спутником между сеансами связи, составляет:
+    \begin{eqnarray}\nonumber
+    S_\text{общ}=n\cdot1800\cdot3000\cdot L^2=n\cdot1800\cdot3000\cdot\left(\frac{H}{f} \cdot\delta\right)^2=
+    \\\nonumber
+    =10^4\cdot1800\cdot3000\cdot\left(\frac{5\cdot10^5}{5}\cdot12\cdot10^{-6} \right)^2=10^4\cdot1800\cdot3000\cdot1.44
+    \\\nonumber
+    =77760\cdot10^6\text{ м}^2=77760 \: \text{км}^2
+    \end{eqnarray}
+
+    \answerMath{$77760 \text{км}^2$.}
+    %3
+    \item Так как угол визирования мал, то принять Землю плоской здесь уже нельзя. Обозначим $\alpha$ – угол между направлением из центра Земли на станцию и направлением из центра Земли на спутник. Запишем теоремы синусов и косинусов для треугольника, обозначив дальность до спутника d. 
+    сеансами связи, составляет:
+    \begin{equation*}\nonumber
+    \begin{cases}
+    \frac{R_\text{зем}+H}{\sin\left(\frac{\pi}{2}+\theta\right)}=\frac{d}{\sin\alpha}
+    \\
+    d^2=(R_\text{зем}+H)^2+R_\text{зем}^2-2\cdot R_\text{зем}\cdot(R_\text{зем}+H)\cdot\cos\alpha
+    \end{cases}
+    \end{equation*}
+    Избавимся от ненужной нам дальности $d$ :
+    $$d=\frac{R_\text{зем}+H}{\sin\left(\frac{\pi}{2}+\theta\right)}\cdot\sin\alpha$$
+    И составим уравнение относительно угла $\alpha$ :
+    $$\left(\frac{R_\text{зем}+H}{\sin\left(\frac{\pi}{2}+\theta\right)}\right)^2\cdot \sin^2\alpha =(R_\text{зем}+H)^2+R_\text{зем}^2-2\cdot R_\text{зем}\cdot(R_\text{зем}+H)\cdot\cos\alpha$$
+    Сделаем замену $x=\cos\alpha$:
+    $$\left(\frac{R_\text{зем}+H}{\sin\left(\frac{\pi}{2}+\theta\right)}\right)^2\cdot(1-x^2 )=(R_\text{зем}+H)^2+R_\text{зем}^2-2\cdot R_\text{зем}\cdot(R_\text{зем}+H)\cdot x$$
+    В результате получаем квадратное уравнение относительно $x=\cos\alpha$
+    $$\left(\frac{R_\text{зем}+H}{\sin\left(\frac{\pi}{2}+\theta\right)}\right)^2\cdot x^2-2\cdot R_\text{зем}\cdot(R_\text{зем}+H)\cdot x+$$
+    $$+\left[(R_\text{зем}+H)^2+R_\text{зем}^2-\left(\frac{R_\text{зем}+H}{\sin\left(\frac{\pi}{2}+\theta\right)}\right)^2\right]=0$$
+    Вычислим отдельно коэффициенты $a$,$b$,$c$:
+    $$a=\left(\frac{R_\text{зем}+H}{\sin\left(\frac{\pi}{2}+\theta\right)}\right)^2=\left(\frac{6870\cdot10^3}{0.9848}\right)^2=5.344\cdot10^{13}$$
+    $$b=-2\cdot R_\text{зем}\cdot(R_\text{зем}+H)=-2\cdot6370\cdot10^3\cdot6870\cdot10^3=-87.5238\cdot10^{12}$$
+    $$c=\left[(R_\text{зем}+H)^2+R_\text{зем}^2-\left(\frac{R_\text{зем}+H}{\sin\left(\frac{\pi}{2}+\theta\right)}\right)^2\right]=$$
+    $$=(R_\text{зем}+H)^2\cdot\left(1-\left(\frac{1}{\sin\left(\frac{\pi}{2}+\theta\right)}\right)^2\right)+R_\text{зем}^2=$$
+    $$=(6870\cdot10^3 )^2\cdot\left(1-\left(\frac{1}{0.9848}\right)^2\right)+(6370\cdot10^3)^2=3.432\cdot10^{13}$$
+    Получаем два корня $\alpha_1=\arccos(0.9866)=9.38^\circ$ и $\alpha_2=\arccos(0.65)=49.39^\circ$. \\
+    Из рисунка очевидно, что вследствие малой высоты спутника  $$\alpha_2=\arccos(0.65)=49,39^\circ$$ нереализуем, так как линия визирования проходит через толщу Земли. Следовательно, нужен первый корень.                     
+    
+    Угловая скорость спутника находится как:
+    $$\omega=\frac{1}{(R_\text{зем}+H)}\cdot\sqrt{\frac{G\cdot M_\text{зем}}{R_\text{зем}+H}}$$
+    Следовательно, время длительности сеанса связи можно определить как (с учётом того, что радиус-вектор спутника за время связи повернётся на угол $2\alpha^\circ$:
+    $$t_\text{связи}=\frac{2\cdot\alpha}{\omega}=\frac{2\cdot\alpha}{\frac{1}{(R_\text{зем}+H)}\cdot\sqrt{\frac{G\cdot M_\text{зем}}{R_\text{зем}+H}}}=\frac{2\cdot\frac{9.38}{57.29}}{\frac{1}{6870\cdot10^3}\cdot\sqrt{\frac{6.67\cdot10^{-11}\cdot5.97\cdot10^{24}}{6870\cdot10^3}}}=296\text{ секунд}$$
+    Тогда объём переданной информации:
+    $$N=t_\text{связи}\cdot p=5.4\cdot10^7\cdot296=15.98\cdot10^9\text{ бит}=15\text{ Гбит}=1.9\text{ ГБайт}$$
+    Количество переданных снимков $m$
+    $$m=\frac{t_\text{связи}}{\frac{I}{p}}=\frac{296}{\frac{5.4\cdot10^7}{5.4\cdot10^7}}=296\text{ снимков}$$
+    \answerMath{296 снимков.}
+    %4
+    \item С учётом малости времени выдержки снимка общие энергозатраты за 1 виток можно определить как:
+    $$W_\text{виток}=100\cdot W_\text{съёмки}\cdot t_\text{обработки}+10\cdot W_\text{пер}$$
+    Общая энергия, поступившая от солнечных батарей площадью S за время нахождения спутника на солнечной половине витка, составляет:
+    $$E_\text{виток}=\eta\cdot\Phi\cdot S\cdot \frac{T_\text{обращения}}{2}=\frac{1}{2}\cdot\eta\cdot\Phi\cdot S\cdot\frac{2\cdot\pi\cdot(R_\text{зем}+H)}{\sqrt\frac{G\cdot M_\text{зем}}{R_\text{зем}+H}}$$
+    Получаем уравнение с одной переменной: площадью батарей S 
+    $$100\cdot W_\text{съёмки}\cdot t_\text{обработки}+10\cdot W_\text{пер}=\frac{1}{2}\cdot\eta\cdot\Phi\cdot S\cdot\frac{2\cdot\pi\cdot(R_\text{зем}+H)^{\frac{3}{2}}}{\sqrt{G\cdot M_\text{зем}}}$$
+    Тогда
+    $$S=\frac{100\cdot W_\text{съёмки}\cdot t_\text{обработки}+10\cdot W_\text{пер}}{\eta\cdot\Phi\cdot\frac{\pi\cdot(R_\text{зем}+H)^{\frac{3}{2}}}{\sqrt{G\cdot M_\text{зем}}}}=\frac{100\cdot W_\text{съёмки}\cdot t_\text{обработки}+10\cdot W_\text{пер}}{0.15\cdot 400\cdot 2833.444}=$$
+    $$=\frac{100\cdot W_\text{съёмки}\cdot t_\text{обработки}+10\cdot W_\text{пер}}{170006.64}=\frac{100\cdot 100\cdot 0.5+10\cdot 169.507\cdot 10^3}{170006.64}=10\text{м}^2$$
+    \answerMath{10$\text{м}^2$.}
+    %5
+    \item Общий тепловой баланс за время пролёта дневной стороны витка определяется как:
+    $$\varphi\cdot\frac{T_\text{обращения}}{2}\cdot\varepsilon\cdot S=c\cdot m\cdot\Delta t+\varepsilon\cdot\sigma\cdot t^4\cdot\frac{T_\text{обращения}}{2}\cdot2\cdot S$$
+    \textit {Здесь учтено, что излучают обе поверхности батареи, значит, площадь в слагаемом с законом Стефана-Больцмана должна быть удвоенной. Кроме того, $\Delta t\ll t$.}
+    Тогда 
+    $$\Delta t=\frac{\varphi\cdot\frac{T_\text{обращения}}{2}\cdot\varepsilon\cdot S-\varepsilon\cdot\sigma\cdot t^4\cdot\frac{T_\text{обращения}}{2}\cdot2\cdot S}{c\cdot m}=$$
+    $$=\frac{\frac{T_\text{обращения}}{2}\cdot\varepsilon\cdot(\varphi\cdot S-\varepsilon\cdot\sigma\cdot t^4\cdot2\cdot S)}{c\cdot m}=\frac{\frac{\pi\cdot(R_\text{зем}+H)^{\frac{3}{2}}}{\sqrt{G\cdot M_\text{зем}}}\cdot\varepsilon\cdot S\cdot(\varphi-\cdot\sigma\cdot t^4\cdot2)}{c\cdot\rho\cdot S}=$$
+    $$=\frac{2833.444\cdot0.8\cdot(1300-5.67\cdot10^{-8}\cdot327^4\cdot2)}{678\cdot1.5}=\frac{(2833.444\cdot0.8\cdot3.4058}{678\cdot1.5}=7,6 \text{К}$$
+    \answerMath{на 7.6 К.}
+\end{enumerate}
