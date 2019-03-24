@@ -54,3 +54,54 @@
 \end{itemize}
 
 При выполнении нескольких условий баллы суммируются.
+
+\solutionSection
+В задаче дан шаблон:
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+#определение камеры
+camera = spacecraft.device("camera").function(0)
+#определение навигатора
+navigator = spacecraft.device("navigator").function(0)
+
+
+def on_target(flight_time, coords):
+    #TODO: Your code here
+    return False
+
+
+def loop():
+    #счетчик времени миссии
+    flight_time = runtime.flight_time()
+
+    #использование метода location устройства "Навигатор" для определения текущих координат
+    location = navigator.location()
+    #текущие координаты
+    coords = (location[0], location[1])
+
+    #условие включения камеры
+    if on_target(flight_time, coords):
+        if not camera.enabled():
+            camera.enable()
+    else:
+        if camera.enabled():
+            camera.disable()
+
+\end{minted}
+Сделаем небольшой предварительный расчёт. Допустимая погрешность съёмки составляет 30 км. Это соответствует углу:
+$$ \alpha=frac{180^\circle*}{2\pi*R_\text{зем}}$$
+
+Вычисляя, получаем: $\alpha = 0.27^\circle$
+Подключим библиотеку math, дописав первой строкой: import math
+Теперь можем дописать функцию def on\_target следующим образом:
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    def on_target(flight_time, coords):
+        #TODO: Your code here
+        if (math.fabs(coords[0] - 53.1774) < 0.27 and math.fabs(coords[1] - 50.1165) < 0.27):
+            return True
+        if (math.fabs(coords[0] - 59.8783) < 0.27 and math.fabs(coords[1] - 29.9000) < 0.27):
+            return True
+        if (math.fabs(coords[0] - 39.0256) < 0.27 and math.fabs(coords[1] + 95.6834) < 0.27):
+            return True
+        return False
+
+\end{minted}

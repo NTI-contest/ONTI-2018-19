@@ -88,50 +88,55 @@
     $$N_text{ретр}=\frac{360^\circ}{2\cdot \theta}=\frac{360^\circ}{2\cdot arctg x}=frac{360^\circ}{2\cdot 31,929 }=5,64 $$
     Очевидно, что число спутников не может быть дробным. Значит, ретрансляторы будут работать с небольшим перекрытием зон радиовидимости, а их нужно 6 штук.
     
-    б) Так как по условию, разрешение снимка для точки $\Pi$ должно быть $0,7\cdot а$, 
-    то и высота орбиты в перигее должна быть $0,7\cdot Н$. Тогда с учётом  второго закона Кеплера и закона сохранения момента импульса:
+    \item[б)] Так как по условию, разрешение снимка для точки $\pi$ должно быть $0,7\cdot а$, 
+    то и высота орбиты в перигее должна быть $0.7\cdot Н$. Тогда с учётом  второго закона Кеплера и закона сохранения момента импульса:
     $$(V_\text{орб}-\Delta V)\cdot (R_\text{зем}+H)=V_\text{перигей}·(R_\text{зем}+0,7·H)$$
     Где $V_\text{орб}$ – скорость спутника на первоначальной круговой орбите с высотой $Н$
     
     С другой стороны, по закону сохранения энергии, 
-    $$frac{m \cdot (V_\text{орб}-\Delta V)^2}{2}-frac{G \cdot M_\text{зем} \cdot m}{R_\text{зем}+H}=frac{m \cdot (V_\text{перигей} )^2}{2}-frac{G \cdot M_\text{зем}\cdot m}{R_\text{зем}+0,7\cdot H}$$
+    $$frac{m \cdot (V_\text{орб}-\Delta V)^2}{2}-frac{G \cdot M_\text{зем} \cdot m}{R_\text{зем}+H}=frac{m \cdot (V_\text{перигей} )^2}{2}-frac{G \cdot M_\text{зем}\cdot m}{R_\text{зем}+0.7\cdot H}$$
     Тогда
-    $$frac{V_\text{орб}-\Delta V)^2}{2}-frac{G \cdot M_\text{зем}}{R_\text{зем}+H}=frac{\left((V_\text{орб}-\ Delta V)\cdot frac{(R_\text{зем}+H)}/{(R_\text{зем}+0,7\cdot H)} \right)^2}{2}-frac{G \cdot M_\text{зем}}/{R_\text{зем}+0,7 \cdot H}$$
+    $$frac{V_\text{орб}-\Delta V)^2}{2}-frac{G \cdot M_\text{зем}}{R_\text{зем}+H}=frac{\left((V_\text{орб}-\ Delta V)\cdot frac{(R_\text{зем}+H)}/{(R_\text{зем}+0.7\cdot H)} \right)^2}{2}-frac{G \cdot M_\text{зем}}/{R_\text{зем}+0,7 \cdot H}$$
     
     После преобразования и домножения на 2:
-    $$-(V_\text{орб}-\Delta V)^2+\left((V_\text{орб}-\Delta V)\cdot frac{(R_\text{зем}+H)}{(R_\text{зем}+0,7\cdot H)} \right)^2==2\cdot G \cdot M_\text{зем}\cdot \left(frac{1}{R_\text{зем}+0,7\cdot H}-frac{1}{R_\text{зем}+H}\right)
-    (V_\text{орб}-\Delta V)^2\cdot \left(frac{(R_\text{зем}+H)^2}{(R_\text{зем}+0,7\cdot H)^2}\right) -1)=2\cdot G\cdot M_\text{зем}\cdot \left(frac{1}{(R_\text{зем}+0,7\cdot H}-frac{1}{R_\text{зем}+H}\right)$$
+    $$-(V_\text{орб}-\Delta V)^2+\left((V_\text{орб}-\Delta V)\cdot frac{(R_\text{зем}+H)}{(R_\text{зем}+0.7\cdot H)} \right)^2==2\cdot G \cdot M_\text{зем}\cdot \left(frac{1}{R_\text{зем}+0.7\cdot H}-frac{1}{R_\text{зем}+H}\right)
+    (V_\text{орб}-\Delta V)^2\cdot \left(frac{(R_\text{зем}+H)^2}{(R_\text{зем}+0,7\cdot H)^2}\right) -1)=2\cdot G\cdot M_\text{зем}\cdot \left(frac{1}{(R_\text{зем}+0.7\cdot H}-frac{1}{R_\text{зем}+H}\right)$$
     
     Приведём дробь справа к общему знаменателю:
     
-    $$(V_орб-\Delta V)^2 \cdot \left( frac{(R_\text{зем}+H)^2}{(R_\text{зем}+0,7 \cdot H)^2} -1 \right)=2\cdot G \cdot M_\text{зем} \cdot \left( frac{R_\text{зем}+H-R_\text{зем}-0,7 \cdot H}{(R_\text{зем}+0,7·H)·(R_\text{зем}+H) )\right)    
-    (V_орб-\Delta V)^2 \cdot \left(frac{(R_\text{зем}+H)^2-(R_\text{зем}+0,7\cdot H)^2}{(R_\text{зем}+0,7\cdot H)^2}\right)==2\cdot G \cdot M_\text{зем}\cdot \left(frac{0,3\cdot H}{(R_\text{зем}+0,7 \cdot H)\cdot (R_\text{зем}+H)} \right)$$
+    $$(V_\text{орб}-\Delta V)^2 \cdot \left( frac{(R_\text{зем}+H)^2}{(R_\text{зем}+0.7 \cdot H)^2} -1 \right)=2 \cdot G \cdot M_\text{зем} \cdot \left( frac{R_\text{зем}+H-R_\text{зем}-0.7 \cdot H}{(R_\text{зем}+0.7 \cdot H)\cdot(R_\text{зем}+H)} \right)$$    
+    $$(V_\text{орб}-\Delta V)^2 \cdot \left(frac{(R_\text{зем}+H)^2-(R_\text{зем}+0.7\cdot H)^2}{(R_\text{зем}+0.7\cdot H)^2}\right)==2\cdot G \cdot M_\text{зем}\cdot \left(frac{0.3\cdot H}{(R_\text{зем}+0.7 \cdot H)\cdot (R_\text{зем}+H)} \right)$$
     
     
     Раскроем разность квадратов слева в числителе:
-    $$(V_\text{орб}-\Delta V)^2 \cdot \left(frac{2\cdot R_\text{зем}\cdot H+H^2-2\cdot 0,7\cdot R_\text{зем}\cdot H-0,49\cdot H^2}{(R_\text{зем}+0,7\cdot H)^2} \right)==2 \cdot G \cdot M_\text{зем}\cdot \left(frac{0,3·H}{{(R_\text{зем}+0,7\cdot H)\cdot (R_\text{зем}+H)}\right)
-    (V_\text{орб}-\Delta V)^2\cdot \left(frac{0,6\cdot R_\text{зем}\cdot H+0,51\cdot H^2}{(R_\text{зем}+0,7\cdot H)} \right)=2\cdot G \cdot M_\text{зем}\cdot \left(frac{0,3\cdot H}{(R_\text{зем}+H)} \right)    
-    (V_\text{орб}-\Delta V)^2 \cdot \left( frac{0,6 \cdot R_\text{зем}+0,51 \cdot H}{(R_\text{зем}+0,7\cdot H} \right)=2\cdot G \cdot M_\text{зем}\cdot \left(frac{0,3}{(R_\text{зем}+H)} \right)$$
+    $$(V_\text{орб}-\Delta V)^2 \cdot \left(frac{2\cdot R_\text{зем} \cdot H+H^2-2\cdot 0.7\cdot R_\text{зем}\cdot H-0.49\cdot H^2}{(R_\text{зем}+0.7\cdot H)^2} \right)=$$
+    $$=2\cdot G\cdot M_\text{зем}\cdot \left(frac{0,3·H}{(R_\text{зем}+0,7\cdot H)\cdot (R_\text{зем}+H)}\right)$$
+    $$(V_\text{орб}-\Delta V)^2\cdot \left(frac{0.6\cdot R_\text{зем}\cdot H+0.51\cdot H^2}{(R_\text{зем}+0.7\cdot H)} \right)=2\cdot G \cdot M_\text{зем}\cdot \left(frac{0.3\cdot H}{(R_\text{зем}+H)} \right)$$    
+    $$(V_\text{орб}-\Delta V)^2 \cdot \left( frac{0.6 \cdot R_\text{зем}+0.51 \cdot H}{(R_\text{зем}+0.7\cdot H} \right)=2\cdot G \cdot M_\text{зем}\cdot \left(frac{0.3}{(R_\text{зем}+H)} \right)$$
     
     Тогда для скорости спутника сразу после выдачи тормозного импульса
-    $$V_\text{орб}-\Delta V = sqrt{frac {2 \cdot G \cdot M_\text{зем}\cdot /left(frac{0,3}{(R_\text{зем}+H)} \right)}{frac{0,6\cdot R_\text{зем}+0,51\cdot H}{R_\text{зем}+0,7 \cdot H)}}}$$
+    $$V_\text{орб}-\Delta V = \sqrt{frac {2 \cdot G \cdot M_\text{зем}\cdot \left(frac{0.3}{(R_\text{зем}+H)} \right)}{frac{0.6\cdot R_\text{зем}+0.51\cdot H}{R_\text{зем}+0.7 \cdot H)}}}$$
     Итак,
-    $$\Delta V =  V_text{орб}-sqrt{frac{2\cdot G \cdot M_\text{зем}\cdot \left(frac{0,3}{(R_\text{зем}+H)} \right)}{frac{0,6\cdot R_\text{зем}+0,51\cdot H}{(R_\text{зем}+0,7\cdot H)}}}=sqrt{frac{G\cdot M_\text{зем}}{R_\text{зем}+H}-sqrt{frac{2\cdot G \cdot M_\text{зем} \cdot \left( frac{0,3}{(R_\text{зем}+H)} /right)}{frac{0,6\cdot R_\text{зем}+0,51\cdot H}{(R_\text{зем}+0,7\cdot H)}}}==sqrt{frac{6,67\cdot 10^(-11)\cdot 5,97\cdot 10^24}{1000\cdot (6370+500) }-sqrt{frac{frac{2\cdot 6,67\cdot 10^(-11)\cdot 5,97\cdot 10^24}{1000}\cdot \left(frac{0,3}{6370+500}\right)}{frac{0,6\cdot 6370+0,51\cdot 500}{6370+350}}=7613,28-sqrt{frac{frac{2\cdot 6,67\cdot 10^(-11)\cdot 5,97\cdot 10^24}{10^3} \cdot 4,3668 \cdot 10^(-5)}{0,606696}=7613,28-sqrt{frac{2 \cdot 6,67 \cdot 5,97 \cdot 10^5 \cdot 4,3668}{0,606696}=7613,28-7571,14=42,14  м/с$$
+    $$\Delta V =  V_text{орб}-\sqrt{frac{2\cdot G \cdot M_\text{зем}\cdot \left(frac{0.3}{(R_\text{зем}+H)} \right)}{frac{0.6\cdot R_\text{зем}+0.51\cdot H}{(R_\text{зем}+0.7\cdot H)}}}=\sqrt{frac{G\cdot M_\text{зем}}{R_\text{зем}+H}-\sqrt{frac{2\cdot G \cdot M_\text{зем} \cdot \left( frac{0.3}{(R_\text{зем}+H)} /right)}{frac{0.6\cdot R_\text{зем}+0.51\cdot H}{(R_\text{зем}+0.7\cdot H)}}}=$$
+    $$=\sqrt{frac{6.67\cdot 10^(-11)\cdot 5.97\cdot 10^24}{1000\cdot (6370+500) }-\sqrt{frac{frac{2\cdot 6.67\cdot 10^(-11)\cdot 5.97\cdot 10^24}{1000}\cdot \left(frac{0.3}{6370+500}\right)}{frac{0.6\cdot 6370+0.51\cdot 500}{6370+350}}$$
+    $$=7613.28-\sqrt{frac{frac{2\cdot 6.67\cdot 10^(-11)\cdot 5.97\cdot 10^24}{10^3} \cdot 4.3668 \cdot 10^(-5)}{0.606696}$$
+    $$=7613.28-\sqrt{frac{2 \cdot 6.67 \cdot 5.97 \cdot 10^5 \cdot 4.3668}{0.606696}=7613.28-7571.14=42.14  м/с$$
     
-    в) Для старой, круговой орбиты, большая полуось эллипса равна $R\text{зем} + Н $. 
+    \item[в)] Для старой, круговой орбиты, большая полуось эллипса равна $R\text{зем} + Н $. 
     Для новой, эллиптической орбиты, большая полуось эллипса будет: 
     
-    $$0,5 \cdot (2 \cdot R_\text{зем}+H+0,7 \cdot H)=R_\text{зем}+0,85 \cdot H$$
+    $$0.5 \cdot (2 \cdot R_\text{зем}+H+0.7 \cdot H)=R_\text{зем}+0.85 \cdot H$$
     
     Тогда по третьему закону Кеплера:
-    $$frac{T_нов}{T_круг}=\left(frac{R_\text{зем}+0,85\cdot H}{R_\text{зем}+H}\right)^1,5$$
+    $$frac{T_\text{нов}{T_\text{круг}=\left(frac{R_\text{зем}+0.85\cdot H}{R_\text{зем}+H}\right)^1.5$$
     Отсюда: 
-    $$T_нов=T_круг \left(frac{R_\text{зем}+0,85 \cdot H}{R_\text{зем}+H}\right)^1,5=2π frac{(R_\text{зем}+H)^1,5}{sqrt{G \cdot M_\text{зем}} \left(frac{R_\text{зем}+0,85 \cdot H)}{R_\text{зем}+H}\right)^1,5$$
+    $$T_\text{нов}=T_\text{круг} \left(frac{R_\text{зем}+0.85 \cdot H}{R_\text{зем}+H}\right)^1.5=2\pi frac{(R_\text{зем}+H)^1,5}{sqrt{G \cdot M_\text{зем}} \left(frac{R_\text{зем}+0,85 \cdot H)}{R_\text{зем}+H}\right)^1,5$$
     
     Тогда разность периодов обращения:
-    $$T_нов-T_круг=2π frac{(R_\text{зем}+H)^1,5}{(G \cdot M_\text{зем} } \left((frac{R_\text{зем}+0,85\cdot H}{R_\text{зем}+H)^1,5-1\right)=5667 \cdot \left((frac{6795}{6870})^1,5-1\right)=-92,54 \text{с}$$
-    
+    $$T_нов-T_круг=2π frac{(R_\text{зем}+H)^1.5}{(G \cdot M_\text{зем} } \left((frac{R_\text{зем}+0.85\cdot H}{R_\text{зем}+H)^1.5-1\right)=5667 \cdot \left((frac{6795}{6870})^1.5-1\right)=-92.54 \text{с}$$
     
 \end{enumerate}
 
-\answerMath{}
+\answerMath{
+    а) 6, б) 42.14, в) 92.54 .
+}
