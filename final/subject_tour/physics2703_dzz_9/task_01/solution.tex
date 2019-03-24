@@ -1,9 +1,49 @@
 \solutionSection
 
 \begin{enumerate}
-    \item Орбитальная скорость спутника $V_\text{орб}$
-    $$V_\text{орб}=\sqrt{\frac{G \cdot M_\text{зем}}{R_\text{зем}+H}}$$
-    Тогда скорость подспутниковой точки с учётом круглости Земли можно определить как:
-    %$$V_\text{пст} = V_\text{орб} \cdot \frac{R_\text{зем}}{R_\text{зем}+H} = \frac{R_\text{зем}}{R_\text{зем}+H} \cdot \sqrt{\frac{G \cdot M_\text{зем}}{R_\text{зем}+H}}=\frac{6370 \cdot 10^3}{6870 \cdot 10^3} \cdot \sqrt{((6.67 \cdot 10^{-11} \cdot 5,97 \cdot 〖10〗^24)/(6870〖10〗^3 ))}=7059,18  м/с$$
+    \item Составим уравнение на основе закона всемирного тяготения:
+    $$\frac{m\cdot V_\text{орб}^2}{R_\text{зем}+h}=\frac{GmM_\text{зем}}{(R_\text{зем}+h)^2}$$
+    Тогда для орбитальной скорости получаем
+    $$V_\text{орб}=\sqrt{\frac{G\cdot M_\text{зем}}{R_\text{зем}+h}}=\sqrt{\frac{6.67\cdot10^{-11}\cdot5.97\cdot10^{24}}{(6370+500)\cdot10^3}}=7613.28  \text{м/с}$$
     
-\end{enumerate}
+    \answerMath{$7613.28\text{ м/с}$}
+    %2
+    \item Угловая скорость спутника: 
+    $$\omega_\text{спутн}=\frac{V_\text{орб}}{R_\text{зем}+h}=\sqrt{\frac{G\cdot M_\text{зем}}{(R_\text{зем}+h)^3}}$$
+    Из этого находим скорость тени спутника по поверхности Земли
+    \begin{eqnarray}\nonumber
+    V_\text{тени}=\omega_\text{отн}\cdot R_\text{зем}=\frac{V_\text{орб}}{R_\text{зем}+h}\cdot R_\text{зем}=\sqrt{\frac{G\cdot M_\text{зем}}{(R_\text{зем}+h)^3}}\cdot R_\text{зем}=
+    \\\nonumber
+    =\sqrt{\frac{6.67\cdot10^{-11}\cdot5.97\cdot10^{24}}{(6370+500)^3\cdot 10^9}} \cdot6370\cdot10^3=7059.18\text{ м/с}
+    \end{eqnarray}
+    
+    \answerMath{$7059.18\text{ м/с}$}
+    %3
+    \item За время между съёмкой изображений спутник пролетит расстояние L и при этом
+    $$\frac{0.5\cdot L}{h}=\tg(\alpha)$$
+    Тогда для времени между снимками имеем:
+    $$T_\text{между}=\frac{L}{V_\text{орб}}=\frac{2\cdot\tg(\alpha)\cdot h}{V_\text{орб}}$$
+    При этом автомобиль пройдёт расстояние S:
+    $$S=u\cdot T_\text{между}$$
+    Количество пикселей, на которое сместился автомобиль, составит:
+    $$N=\frac{S}{d}=\frac{u\cdot T_\text{между}}{d}=\frac{u}{d}\cdot\frac{2\cdot\tg(\alpha)\cdot h}{V_\text{орб}}=\frac{10}{1.5}\cdot\frac{2\cdot0.1\cdot500\cdot10^3}{7613.28}=88\text{ пикселей}$$
+    
+    \answerMath{$88\text{ пикселей}$}
+    %4
+    \item Так как ограничения по угловой скорости вращения спутника нет, то считаем, что от угла 90 градусов до 45 градусов происходит разгон вращения, а от 45 градусов до 0 градусов - замедление вращения. Именно в таком режиме вращения врем поворота спутника минимально, угол в 45 градусов – половина от общего угла поворота. Здесь 0 градусам соответствует направление оптической оси камеры на Землю. Тогда:
+    $$T_\text{разгон}=T_\text{замедл}=\sqrt{\frac{2\cdot(\frac{\pi}{180}\cdot45)}{\varepsilon}}$$
+    Общее время переориентации спутника
+    $$T_\text{поворот}=2\cdot T_\text{разгон}=2\cdot\sqrt{\frac{2\cdot\frac{\pi}{4}}{\varepsilon}}=2\cdot\sqrt{\frac{1.571}{0.01571}}=20\text{ c}$$
+    
+    \answerMath{$20\text{ c}$}
+    %5
+    \item При заданных условиях Землю можно считать плоской. 
+    
+    Тогда для угла крена $\theta$:
+    $$\theta=\arctg\left(\frac{d\cdot\frac{1}{\sqrt 2}}{h}\right)=\arctg\left(\frac{125\cdot\frac{1}{\sqrt 2}}{500}\right)=10\text{ градусов}$$
+    Угол тангажа равен углу крена, 10 градусов, так как по условию, город находится строго к юго-востоку от Москвы.
+    
+    \answerMath{$10\text{ градусов}$}
+    
+    
+    \end{enumerate}
