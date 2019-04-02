@@ -1,0 +1,18 @@
+\solutionSection
+
+Обозначим за $x$ количество стрел, которые попали в очередного гладиатора со здоровьем $h$. Общий урон этих стрел равен $D + (D + K) + (D + 2*K) + \cdots + D + x * K = 1/2 * (D + D + x * K) * x = 1/2 * K*x^2 + D*x$.
+
+Тогда по условию задачи нужно найти наименьшее целое $x$, при котором $Kx^2 + (2D - K)x \ge 2 * h$.
+
+Решая неравенство, получим:
+
+$x = \sqrt{(2*D - K)^2 + 8*K*h}$
+$x_1 = \lfloor\frac{K - 2*D - x}{2*K}\rfloor$
+$x_2 = \lceil\frac{K - 2*D + x}{2*K}\rceil$
+
+Выбираем положительный корень. Суммируем величины, полученные для каждого гладиатора.
+
+\codeExample
+
+\inputPythonSource
+%\inputminted[fontsize=\footnotesize, linenos]{python}{final/subject_tour/inf1303_bas/task_02/source.py}
