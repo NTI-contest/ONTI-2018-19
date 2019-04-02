@@ -1,0 +1,97 @@
+\assignementTitle{Задача 2.1}{15}{}
+
+Изучите расстановку группы геостационарных спутников некоторой компании. Напишите программу, которая по заданному списку координат геостационарных спутников определяет для каждого количество спутников в зоне видимости. Под зоной видимости понимается возможность прохождения сигнала между спутниками по прямолинейной траектории.
+
+Если геостационарная орбита имеет радиус 42164км с центром, совпадающим с центром Земли, что соответствует высоте над уровнем моря 35786км. То, радиус Земли равен 6378км. Таким образом, Земля закрывает $\angle \alpha \approx 17.2034^{circ}$ градусов обзора.
+
+\putImgWOCaption{12cm}{1}
+
+При этом у Земли есть толстые слои атмосферы, которые сильно искажают сигналы. В связи с этим,  $\angle \alpha = 20^{\circ}$,$\angle \alpha = 40^{\circ}$. Обратите внимание, что границы угла позволяют осуществлять передачу данных.
+
+\inputfmtSection
+
+В первой строке подается число $n\space (1\leq n \leq 100)$ — количество спутников у компании.
+
+Далее в $n$ строках через пробел подаются $s_i\space(1\leq(s_i)\leq 50)$ и $c_i\space(-180\lt (c_i)\leq 180)$ — латинские названия спутников без разделителей и их целочисленные координаты (положительные — восточное полушарие, отрицательные — западное полушарие). В одной координате не располагается более одного спутника.
+
+\outputfmtSection
+
+Единственное число — ответ на задачу.
+
+\markSection
+
+Баллы за задачу будут начислены, если все тесты будут пройдены успешно.
+
+\sampleTitle{1}
+
+\begin{myverbbox}[\small]{\vinput}
+    9
+    NewStar-1 0
+    NewStar-2 -40
+    NewStar-3 160
+    NewStar-4 80
+    NewStar-5 40
+    NewStar-6 -120
+    NewStar-7 -160
+    NewStar-8 120
+    NewStar-9 -80
+\end{myverbbox}
+\begin{myverbbox}[\small]{\voutput}
+    NewStar-7 -160 8
+    NewStar-6 -120 8
+    NewStar-9 -80 8
+    NewStar-2 -40 8
+    NewStar-1 0 8
+    NewStar-5 40 8
+    NewStar-4 80 8
+    NewStar-8 120 8
+    NewStar-3 160 8
+\end{myverbbox}
+\inputoutputTable
+
+\sampleTitle{2}
+
+\begin{myverbbox}[\small]{\vinput}
+    18
+    TVPoint-1 100
+    TVPoint-2 -90
+    TVPoint-3 80
+    TVPoint-4 -80
+    TVPoint-5 -110
+    TVPoint-6 -115
+    TVPoint-7 110
+    TVPoint-8 120
+    TVPoint-9 -100
+    TVPoint-10 -105
+    TVPoint-11 -120
+    TVPoint-12 95
+    TVPoint-13 -85
+    TVPoint-14 90
+    TVPoint-15 115
+    TVPoint-16 85
+    TVPoint-17 -95
+    TVPoint-18 105
+    \end{myverbbox}
+\begin{myverbbox}[\small]{\voutput}
+    TVPoint-11 -120 17
+    TVPoint-6 -115 16
+    TVPoint-5 -110 15
+    TVPoint-10 -105 14
+    TVPoint-9 -100 13
+    TVPoint-17 -95 12
+    TVPoint-2 -90 11
+    TVPoint-13 -85 10
+    TVPoint-4 -80 10
+    TVPoint-3 80 10
+    TVPoint-16 85 10
+    TVPoint-14 90 11
+    TVPoint-12 95 12
+    TVPoint-1 100 13
+    TVPoint-18 105 14
+    TVPoint-7 110 15
+    TVPoint-15 115 16
+    TVPoint-8 120 17
+\end{myverbbox}
+\inputoutputTable
+
+\includeSolutionIfExistsByPath{final/subject_tour/inf2703_dzz/task_03}
