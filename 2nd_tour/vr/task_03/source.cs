@@ -204,6 +204,3 @@ public class AutoBallControl : BallControl
         return dy > 0 ? MoveTypeBottom : MoveTypeTop;
     }
 }
-
-
-
