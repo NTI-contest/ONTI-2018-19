@@ -154,7 +154,6 @@ pythontex-files-*/
 .Trashes
 ehthumbs.db
 Thumbs.db
-.vscode
 
 # latexindent backups
 *.bak
