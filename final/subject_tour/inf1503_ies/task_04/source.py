@@ -64,6 +64,4 @@ def sanity(fn):
     else:
         print("ALL RIGHT :D")
 
-#Можно получить из проверяющего добавлением к нему строки
-
-print(solve(input()))
+print(solve(sys.stdin.read()))
