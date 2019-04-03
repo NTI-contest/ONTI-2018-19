@@ -1,0 +1,20 @@
+\solutionSection
+
+Для того что проверить попадёт ли игрок в мишень достаточно проверить следующее условие: $R^2 \le x^2 + y^2$.
+
+Для вычисления времени полёта дротика до мишени используем формулу $t = z / v$. Используем формулу $Rotation = w \cdot t$ для того, чтобы узнать, на сколько градусов повернётся мишень во время полёта дротика.
+
+Далее вычислим угол $StartAngle$ к оси координат $OX$  радиус-вектора ($x$, $y$). Для удобства повернём $StartAngle$ на $-\pi/2$. $StartAngle = atan2(y, x) - \pi/2$.
+
+Посчитаем конечный угол в радианах: $ResultAngle = StartAngle + Rotation / 360 \cdot 2 \cdot \pi$.
+
+Преобразуем угол $ResultAngle$ так, чтобы он лежал в диапазоне от $0$ до $2 \cdot \pi$.
+
+Размер одного сектора $OneSector = 2 \cdot \pi / n$.
+
+Тогда искомый индекс $n - \lfloor ResultAngel / OneSector \rfloor$. 
+
+\codeExample
+
+\inputCPPSource
+%\inputminted[fontsize=\footnotesize, linenos]{python}{final/subject_tour/inf2003_vr/task_01/source.cpp}
