@@ -16,7 +16,8 @@ def generate_cube():
     return c
 
 def generate_one():
-    cubes = "\n".join(" ".join("{:.5}".format(x) for x in generate_cube()) for _ in range(NUM_CUBES))
+    cubes = "\n".join(" ".join("{:.5}".format(x) for x in generate_cube())
+        for _ in range(NUM_CUBES))
     return cubes
 
 def generate():

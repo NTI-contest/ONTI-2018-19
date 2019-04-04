@@ -138,7 +138,8 @@ def solve(dataset):
     nnodes = int(ls[0])
     nodes = [(int(x), float(y)) for (x, y) in (l.split() for l in ls[1:nnodes+1])]
     nedges = int(ls[nnodes+1])
-    edges = [(int(x), int(y), float(z)) for (x, y, z) in (l.split() for l in ls[nnodes+2:nnodes+nedges+2])]
+    edges = [(int(x), int(y), float(z)) for (x, y, z) in 
+        (l.split() for l in ls[nnodes+2:nnodes+nedges+2])]
     
     (root,score) = solution(nodes,edges)
     return str(root)
