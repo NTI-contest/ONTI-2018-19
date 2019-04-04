@@ -4,7 +4,7 @@
 
 \inputfmtSection
 
-В качестве тренировочной выборки вам даны некоторые данные GPS-навигации о движении транспорта в Красноярске.\\ \url{https://drive.google.com/open?id=1QdZJT05NiqgCDPYrPHJBWCK2SeORK2Fo6HN-ODT7cgE}
+В качестве тренировочной выборки вам даны некоторые данные GPS-навигации о движении транспорта в Красноярске.\\ \url{https://docs.google.com/spreadsheets/d/1QdZJT05NiqgCDPYrPHJBWCK2SeORK2Fo6HN-ODT7cgE/edit?usp=sharing}
 
 В качестве признаков имеются средняя скорость, время в пути, пройденная дистанция,  rating -- оценочный параметр, выражающий насколько данное средство передвижения удобно для перемещения по городу(3 -- удобно, 2 -- нормально, 1 -- плохо), а также ответ --  $'car'$ или $'bus'$.
 
@@ -12,9 +12,6 @@
 обучающей только отсутствие столбца car\_or\_bus. Как вы уже могли догадаться, ваша задача -- 
 обучиться на обучающей выборке и научиться предсказывать для тестовой выборки тип каждого из 
 указанных в ней средств передвижения (car или bus).
-
-
-
 
 \outputfmtSection
 
@@ -36,4 +33,232 @@ test.csv.
 
 Обратите внимание, у вас есть только 5 попыток.
 
-%\includeSolutionIfExistsByPath{2nd_tour/big_data/task_02}
+\solutionSection
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import cross_val_score
+from featexp import get_univariate_plots
+\end{minted}
+
+\textit{Загрузка и исследование данных}
+
+Для загрузки данных из csv таблицы используем библиотеку pandas.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+# Загружаем данные
+data = pd.read_csv('train - train.csv')
+data.head()
+\end{minted}
+
+Для использования в калссификаторах классы должны быть закодированы числами. Заменим метку 'car' на 0 и 'bus' на 1
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+# Заменим метку car_or_bus на 0 или 1
+mapping = {'car': 0,
+        'bus': 1}
+data['car_or_bus'] = data['car_or_bus'].map(mapping)
+print("Dataset Size: {}".format(len(data)))
+data.head()
+\end{minted}
+
+Используем библиотеку featexp, чтобы построить графики зависимости класса от признаков. По оси x отложен признак, а по оси y отложено среднее значение метки. Так как 0 кодирует машину, а 1 кодирует автобус,
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+# Используем библиотеку featexp, чтобы получить красивые графики, 
+# показывающие зависимость метки от признаков
+get_univariate_plots(data=data, target_col='car_or_bus', 
+    features_list=data.columns[:-1])
+\end{minted}
+
+\newpage
+
+\begin{center}
+    Plots for v
+\end{center}
+
+\putImgWOCaption{16cm}{1}
+
+\begin{center}
+    Plots for t
+\end{center}
+
+\putImgWOCaption{16cm}{2}
+
+\begin{center}
+    Plots for distance   
+\end{center}
+
+\putImgWOCaption{16cm}{3}
+
+\begin{center}
+    Plots for rating  
+\end{center}
+
+\putImgWOCaption{16cm}{3}
+
+Все признаки имеют зависимость с классом, поэтому не стоит их выбрасывать.
+
+Признак distance это $t \cdot v$ (в чем легко убедиться, перемножив столбцы). Он не вносит новых данных 
+и можно попробовать его убрать. В результате эксперимента мы выяснили, что без признака distance точность 
+всех классификаторов становится ниже, а значит, он важен для представления данных.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+# Разделим данные на признаки и метки класса
+X = data.iloc[:, :-1].values
+y = data.iloc[:, -1].values
+
+# Мы будем использовать модели, для которых важно, чтобы признаки были численно 
+# одного порядка, поэтому мы нормализуем их (вычтем среднее и поделим на 
+# стандартное отклонение).
+# Потом normalizer мы будем использовать для тестовых данных
+normalizer = StandardScaler()
+X = normalizer.fit_transform(X)
+\end{minted}
+
+Так как у нас очень мало данных, то мы будем использовать особую стратегию для оценки моделей - Leave One Out. Мы будем выделять одно наблюдение из всего датасета, обучать модель на оставшихся наблюдениях, а затем этой моделью предсказывать метку для выделенного наблюдения.
+
+Такая стратегия нужна для того, чтобы при валидации модель предсказывала метку только для наблюдений, которые она не видела в процессе тренировки, и при этом использовала максимум данных для обучения. В решении следующей задачи мы будем разделять выборку на две части - обучающую и валидационную, не использую такую сложную стратегию, потому что данных намного больше.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+def loo_accuracy(model):
+    """
+    Производит оценку точности модели на датасете X, y (внешние переменные), 
+    использую стратегию Leave One Out. Возвращает сре
+    """
+    from sklearn.model_selection import LeaveOneOut
+
+    loo = LeaveOneOut()
+    correct = 0
+    for train_ind, val_ind in loo.split(X, y):
+        X_train,  y_train = X[train_ind], y[train_ind]
+        X_val, y_val = X[val_ind], y[val_ind]
+        
+        model.fit(X_train, y_train)
+        correct += (model.predict(X_val) == y_val)[0]
+        
+    return correct / len(X)
+\end{minted}
+
+\textit{SVM}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+svm = SVC(gamma='auto')
+
+# Выведем точность модели
+loo_accuracy(svm)
+\end{minted}
+
+\textit{Логистическая регрессия}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+# Инициализируем модель и обучим на данных
+log_reg = LogisticRegression(C=0.1, solver='lbfgs')
+
+# Выведем точность модели
+loo_accuracy(log_reg)
+\end{minted}
+
+\textit{N ближайших соседей}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+# Найдем лучшее значение для n_neighbors
+best_n_neighbors = 0
+best_acc = 0
+
+for n_neighbors in range(1, 20):
+    # Инициализируем модель и обучим на данных
+    model = KNeighborsClassifier(n_neighbors=n_neighbors)
+    
+    # Найдем точность модели
+    acc = loo_accuracy(model)
+    
+    if acc > best_acc:
+        best_n_neighbors = n_neighbors
+        best_acc = acc
+        
+print('Best accuracy: {:0.2f} for {} neighbors'.format(float(best_acc), 
+    best_n_neighbors))
+\end{minted}
+
+\textit{Градиентный бустинг}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+# Найдем лучшее значение для n_estimators
+best_n_estimators = 0
+best_acc = 0
+
+for n_estimators in range(1, 30):
+    # Инициализируем модель и обучим на данных
+    model = GradientBoostingClassifier(n_estimators=n_estimators, 
+        learning_rate=0.1)
+    
+    # Найдем точность на валидации
+    acc = loo_accuracy(model)
+
+    if acc > best_acc:
+        best_n_neighbors = n_neighbors
+        best_acc = acc
+        
+print('Best accuracy: {:0.2f} for {} estimators'.format(float(best_acc), 
+    best_n_neighbors))
+\end{minted}
+
+\textit{Наивный байес}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+# Инициализируем модель и обучим на данных
+model = GaussianNB()
+
+# Выведем точность можеди
+loo_accuracy(model)
+\end{minted}
+
+\textit{Итоговая модель}
+
+Так как N ближайших соседей оказался лучшим, мы будем использовать именно его с лучшим n\_neighbors
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+# Инициализируем модель, используя best_n_neighbors = 4
+model = KNeighborsClassifier(n_neighbors=best_n_neighbors)
+
+# обучим на всем датасете
+model.fit(X, y)
+\end{minted}
+
+\textit{Получение ответа}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+# Загрузим тестовые данные
+data_test = pd.read_csv('DATASET2.csv')
+
+# Нормализуем их, использую тот же normalizer, что и для обучающей выборки
+X_test = normalizer.transform(data_test.values)
+
+# Запишем результат в pandas.Series
+result = pd.Series(model.predict(X_test))
+
+# Преобразуем 0 и 1 в метки классов, сделав словарь с обратым маппингом
+inv_map = {v: k for k, v in mapping.items()}
+result = result.map(inv_map)
+result
+
+# Запишем результат в файл
+result.to_csv('second_task_res.csv', index=False)
+\end{minted}
+
+Если вы никогда раньше не работали с pandas и sklearn, то вы можете начать свое изучение с этой статьи (\url{https://habr.com/post/202090/}). Так же очень полезно пользоваться документацией по sklearn и pandas, в большинстве случаев достаточно вбить в поисковую строку "pandas/sklearn + (название вещи, про которую вы хотите узнать)".
+
+GitHub страница библиотеки featexp с документацией \\(\url{https://github.com/abhayspawar/featexp}).
+
+Отличный курс (\url{https://github.com/Yorko/mlcourse.ai}) по машинному обучению от OpenDataScience (сейчас он идет на английском, но русские итерации тоже бывают)

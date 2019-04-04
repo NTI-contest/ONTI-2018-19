@@ -1,4 +1,176 @@
+\solutionSection
+
+Для определения границ препятствия сначала определим координаты робота в момент замеров. Для этого мы найдем точки пересечения двух окружностей, образованных от центров маяков, которые "видят" робота в данный момент времени. Схема представлена на рис.\ref{eq:02_beacons_01_01}, где: \\
+
+\begin{itemize}
+	\item $M_1$ - маяк $N$, установленный в координатах $(a_1; b_1)$
+	\item $M_2$ - маяк $K$, установленный в координатах $(a_2; b_2)$
+	\item $r_1$ - радиус первой окружности (расстояние от маяка $N$ до центра робота)
+	\item $r_2$ - радиус второй окружности (расстояние от маяка $K$ до центра робота)
+\end{itemize}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics{2nd_tour/irs/task_11/02_beacons_01_01.pdf}
+	\caption{}
+	\label{fig:02_beacons_01_01}
+\end{figure}
+
+Сначала найдем расстояние между центрами маяков: $d$ $(M_1$;$M_2)$ (можно включить проверку отсутствие решений: $d = |M_1 - M_2|$, при $d > r_1 + r_2$ (круги не пересекаются) или $d < |r_2 - r_1|$ (одна окружность находится внутри другой)).
+На схеме (рис.\ref{eq:02_beacons_01_01}) видно, что $r_1$ и $r_2$ - катеты $\triangle M_1M_2K_1$, а искомая сторона $M_1M_2$ - гипотенуза. Исходя из теоремы Пифагора, найдем гипотенузу по формуле (\ref{eq:02_beacons_01_01}).
+
+\begin{equation}
+	d = \sqrt{{(a_2 - a_1)}^2 + {(b_2 - b_1)}^2}
+	\label{eq:02_beacons_01_01}
+\end{equation}
+
+Далее нам надо найти $r_2$, $M_1S = d_1$; $M_2S = d_2$.
+
+\[
+\left\{ 
+	\begin{aligned}
+		& d_1 + d_2 = d \\
+		& h = \sqrt{{r_1}^2 - {d_1}^2} = \sqrt{{r_2}^2 - {d_2}^2}
+	\end{aligned}
+	\right.
+	\qquad \Rightarrow \qquad
+	\left\{ 
+	\begin{aligned}
+		& d_1 + d_2 = d \\
+		& {r_1}^2 - {d_1}^2 = {r_2}^2 - {d_2}^2
+	\end{aligned}
+\right.
+\qquad	\Rightarrow
+\]
+\[
+	\left\{ 
+		\begin{aligned}
+			& d_1 + d_2 = d \\
+			& {d_2}^2 - {d_1}^2 = {r_2}^2 - {r_1}^2
+		\end{aligned}
+		\right.
+		\qquad \Rightarrow \qquad
+		\left\{ 
+		\begin{aligned}
+			& d_1 + d_2 = d \\
+			& (d_2 - d_1)(d_2 + d_1) = {r_2}^2 - {r_1}^2
+		\end{aligned}
+	\right.
+	\qquad \Rightarrow
+\]
+\[
+	(d_2 - d_1) = \frac{{r_2}^2 - {r_1}^2}{d} \qquad \Rightarrow \qquad
+	d_2 = \frac{{r_2}^2 - {r_1}^2}{d} + d_1 = \frac{{r_2}^2 - {r_1}^2}{d} + d - d_2 \qquad \Rightarrow
+\]
+
+\begin{equation}
+	2\cdot d_2 = \frac{{r_2}^2 - {r_1}^2}{d} + d \qquad \Rightarrow \qquad 
+	d_2 = \frac {{r_2}^2 - {r_1}^2}{2\cdot d} + \frac{d}{2}
+	\label{eq:02_beacons_01_02}
+\end{equation}
+
+Теперь найдем катет $d_2$ в треугольнике $K_1M_2S$ по формуле (\ref{eq:02_beacons_01_02}).
+
+Зная расстояния $d$ и $d_2$, находим $d_1$ по формуле (\ref{eq:02_beacons_01_03}):
+\begin{equation*}
+	d_1 = d - d_2
+	\label{eq:02_beacons_01_03}
+\end{equation*}
+
+Зная катет $d_1$ и гипотенузу $r_1$ найдем катет $h$ в $\triangle M_1K_1S$ по формуле (\ref{eq:02_beacons_01_04}):
+
+\begin{equation}
+	h = \sqrt{{r_1}^2 - {d_1}^2}
+	\label{eq:02_beacons_01_04}
+\end{equation}
+
+Далее находим координаты точки $S$ через формулу деления отрезка в данном отношении (через координаты $M_1$ и $M_2$ и отношения $k$):
+\begin{eqnarray}
+		k = \frac{d_1}{d_2} \nonumber \\
+		x_s = \frac{a_1 + k \cdot a_2}{1 + k} \label{eq:02_beacons_01_05} \\
+		y_s = \frac{b_1 + k \cdot b_2}{1 + k} \label{eq:02_beacons_01_06}
+\end{eqnarray}
+
+Далее найдем координаты обоих точек пересечения окружностей по формулам (\ref{eq:02_beacons_01_07}, \ref{eq:02_beacons_01_08}, \ref{eq:02_beacons_01_09}, \ref{eq:02_beacons_01_10}):
+
+\begin{equation}
+x_1 = \frac{h}{d} \cdot (b_1 - b_2)+x_s
+\label{eq:02_beacons_01_07}
+\end{equation}
+\begin{equation}
+y_1 = \frac{h}{d} \cdot (a_2 - a_1)+y_s
+\label{eq:02_beacons_01_08}
+\end{equation}
+\begin{equation}
+x_2 = -\frac{h}{d} \cdot (b_1 - b_2)+x_s
+\label{eq:02_beacons_01_09}
+\end{equation}
+\begin{equation}
+y_2 = -\frac{h}{d} \cdot (a_1 - a_2)+y_s
+\label{eq:02_beacons_01_10}
+\end{equation}
+
+Для выбора координат из полученных $(x_1, y_1)$ и $(x_2, y_2)$ проверим значения по координатам 3 маяка (на выбор).
+
+Для вычисления координат точки на препятствии, видимую датчиком расстояния, сначала найдем угол $\alpha$ робота по формуле (\ref{eq:02_beacons_01_11}):
+\begin{equation}
+	\alpha_{robot} = atan2(x_i - x_{i-1};  y_i - y_{i-1})
+	\label{eq:02_beacons_01_11}
+\end{equation}
+
+после чего найдем угол дальномера $\beta$ (с учетом того, что дальномер направлен влево по ходу движения робота) по формуле (\ref{eq:02_beacons_01_12}):
+
+\begin{equation}
+	\beta = \alpha_{robot} + \frac{\pi}{2}
+	\label{eq:02_beacons_01_12}
+\end{equation}
+
+координаты точки на препятствии, вычисляемые с показаний дальномера, находим по формулам (\ref{eq:02_beacons_01_13}, \ref{eq:02_beacons_01_14}):
+\begin{equation}
+	x_o = x_{i\;robot} + d \cdot cos(\beta)
+	\label{eq:02_beacons_01_13}
+\end{equation}
+\begin{equation}
+	y_o = y_{i\;robot} + d \cdot sin(\beta)
+	\label{eq:02_beacons_01_14}
+\end{equation}
+
+где $d$ - показания с дальномера до препятствия.
+\\
+
+Результаты вычислений показаны на рис. \ref{fig:02_beacons_01_02}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics{2nd_tour/irs/task_11/02_beacons_01_02.pdf}
+	\caption{Траектория движения робота и границы препятствия}
+	\label{fig:02_beacons_01_02}
+\end{figure}
+
+
+По полученным координатам точек многоугольника находим площадь препятствия по формуле площади Гаусса (\ref{eq:02_beacons_01_15}):
+\begin{equation}
+	\begin{aligned}
+		A & =\frac{1}{2} 
+		\left|\sum_{i=1}^{n-1} x_i y_{i+1} + x_n y_1 - \sum_{i=1}^{n-1} x_{i+1} y_i -  x_1 y_n \right| \\ 
+		& =
+		\frac {1}{2} |x_1 y_2 + x_2 y_3 + \cdots + x_{n-1}y_n + x_n y_1 - x_2 y_1 - x_3 y_2- \cdots - x_n y_{n-1} - x_1 y_n |
+	\end{aligned}
+	\label{eq:02_beacons_01_15}
+\end{equation}
+
+где,
+\begin{itemize}
+	\item $A$ - площадь многоугольника
+	\item $n$ - количество сторон многоугольника
+	\item $(x_i, y_i)$ при $i = 1, 2, \dots n $ – координаты вершин многоугольника	
+\end{itemize} 
+
+
+В ответ выводим полученную площадь препятствия.
+
+
 \codeExample
 
 \inputPythonSource
-%\inputminted[fontsize=\footnotesize, linenos]{python}{1st_tour/inf/try_1/task_03/source.py}
+%\inputCPPSource

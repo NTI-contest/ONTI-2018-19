@@ -4,7 +4,8 @@ def code(word):
     res = ''
     for p in parts:
         a = [int(digit) for digit in p]
-        b = [(a[0] + a[1] + a[2]) % 2, (a[1] + a[2] + a[3]) % 2, (a[0] + a[1] + a[3]) % 2]
+        b = [(a[0] + a[1] + a[2]) % 2, (a[1] + a[2] + a[3]) % 2, 
+            (a[0] + a[1] + a[3]) % 2]
         res += ''.join(str(x) for x in a + b)
     
     return res
@@ -18,7 +19,8 @@ def decode(word):
         b = a[4:]
         a = a[:4]
         
-        s = [(a[0] + a[1] + a[2] + b[0]) % 2, (a[1] + a[2] + a[3] + b[1]) % 2, (a[0] + a[1] + a[3] + b[2]) % 2]
+        s = [(a[0] + a[1] + a[2] + b[0]) % 2, (a[1] + a[2] + a[3] + b[1]) % 2, 
+            (a[0] + a[1] + a[3] + b[2]) % 2]
         
         if s == [0, 1, 1]:
             a[3] = (a[3] + 1) % 2     

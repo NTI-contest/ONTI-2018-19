@@ -1,0 +1,41 @@
+\assignementTitle{Игра}{100}
+
+Как-то Ильнар и Азат придумали игру для двух человек. На доске пишется число $n$, после чего игроки делают свои ходы.
+
+Ходят по очереди. Первым ходит Ильнар. За один ход игрок должен заменить написанное на доске число (обозначим его $m$) на число $m-x$, где $x$ является степенью числа $2$, то есть $x = 2^k$ для некоторого целого неотрицательного числа $k$, и выполняется условие $1 \le x \le m$. Игрок, который не может сделать ход, проигрывает.
+
+Определите, кто выиграет при оптимальной игре.
+
+\inputfmtSection
+
+В первой строке вводится одно целое число $n$ ($0 \le n \le 10^9$) — начальное число.
+
+\outputfmtSection
+
+Выведите \textit{Ilnar won!}, если выиграет Ильнар, или \textit{Azat won!}, если выиграет Азат.
+
+\exampleSection
+
+\sampleTitle{1}
+
+\begin{myverbbox}[\small]{\vinput}
+2
+\end{myverbbox}
+\begin{myverbbox}[\small]{\voutput}
+Ilnar won!
+\end{myverbbox}
+\inputoutputTable
+
+\sampleTitle{2}
+
+\begin{myverbbox}[\small]{\vinput}
+0
+\end{myverbbox}
+\begin{myverbbox}[\small]{\voutput}
+Azat won!
+\end{myverbbox}
+\inputoutputTable
+
+\includeGradingIfExistsByPath{final/subject_tour/inf0903_irs/task_01}
+
+\includeSolutionIfExistsByPath{final/subject_tour/inf0903_irs/task_01}
