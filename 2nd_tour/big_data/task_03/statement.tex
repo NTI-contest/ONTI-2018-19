@@ -44,4 +44,507 @@ Python и фреймворк Scrapy. Небольшой туториал по э
     \item Если 0.9 <= accuracy\_score <= 1.0, то вы получаете 60 баллов.
 \end{enumerate}
 
-%\includeSolutionIfExistsByPath{2nd_tour/big_data/task_03}
+\solutionSection
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+# Флаг, определяет, использовать ли видеокарту при подсчёте
+USE_CUDA = True
+
+import pandas as pd
+import numpy as np
+import time
+
+### Загрузим данные небольшой порцией
+#data_text = pd.read_json('./news2.jsonlines', lines=True, chunksize=1000, 
+#encoding='utf8')
+# data_text = pd.read_csv('./news2.csv', chunksize=1000, encoding='utf8')
+# data_text = next(iter(data_text))
+
+### Для загрузки всего датасета в оперативную память (её может не хватить)
+data_text = pd.read_csv('./news2.csv', encoding='utf8')
+
+from sklearn.preprocessing import LabelEncoder
+
+label_enc = LabelEncoder()
+data_text['class'] = label_enc.fit_transform(data_text['class'])
+\end{minted}
+
+Загруженные данные разделим на train и test, сохраним их, т.к. DataLoader'ы считывают данные из файлов
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+from sklearn.model_selection import train_test_split
+data_train, data_val = train_test_split(data_text, test_size=0.5)
+
+data_train.to_csv('train.csv', encoding='utf-8', index=False)
+data_val.to_csv('val.csv', encoding='utf-8', index=False)
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.optim import lr_scheduler
+\end{minted}
+
+pymorphy2 - библиотека, схожая с NLTK, но предназначенная для русского языка
+
+morphy\_tokenizer - лемматизирует слова в предложении и возвращает их список
+
+Лемматизация — процесс приведения словоформы к лемме — её нормальной (словарной) форме.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+import pymorphy2
+morph = pymorphy2.MorphAnalyzer()
+def morphy_tokenizer(s):
+    import re
+    lemmatized_words = []
+    
+    for word in re.split("[^а-яА-ЯёЁA-Zа-я]", s):
+        word_repr = morph.parse(word.replace('.',''))
+        if len(word_repr) != 0:
+            normal_form = word_repr[0].lexeme[0].word
+            lemmatized_words.append(normal_form)
+    return lemmatized_words
+\end{minted}
+
+\textit{Создадим класс рекуррентного слоя}
+
+Embedding - замена каждого слова на вектор из некоторого количества вещественых чисел.
+
+\putImgWOCaption{15cm}{1}
+
+Так может выглядеть embedding матрица, в которой каждому индексу сопоставляется несколько чисел. Если смотреть embedding вектора как на вектора в некотором пространстве, то окажется, что близкие по смыслу слова окажутся близко и в этом пространстве.
+
+\putImgWOCaption{10cm}{2}
+
+Сверху двумерные вектора слов после embedding'а.
+
+\putImgWOCaption{13cm}{3}
+
+\begin{center}
+    Обычная рекуррентная нейросеть.
+\end{center}
+
+\putImgWOCaption{13cm}{4}
+
+\begin{center}
+    LSTM ячейка. Благодаря начилию долгосрочной памяти, она лучше обрабатывает длинные последовательности.
+\end{center}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+    
+    class RNN(nn.Module):
+    
+        def __init__(self, hidden_size, encoder, num_layers=1):
+            '''
+            Args:
+                hidden_size: размер вектора внутреннего состояния LSTM
+                encoder: ссылка на слой эмбеддинга
+                num_layers: количество LSTM слоев
+            '''
+            super(RNN, self).__init__()
+            # embedding        
+            self.encoder = encoder
+            # dropout после embedding
+            self.drop_en = nn.Dropout(p=0.6)
+            # рекуррентный слой
+            self.rnn = nn.LSTM(input_size=encoder.weight.size(1), 
+                hidden_size=hidden_size, num_layers=num_layers, dropout=0.5, 
+                batch_first=True, bidirectional=True)
+            # batchnorm после рекуррентных слоев
+            self.bn2 = nn.BatchNorm1d(hidden_size*2)
+    
+        def forward(self, x, seq_lengths):
+            '''
+            Args:
+                x: (batch, time_step, input_size)
+                seq_lengths: длины последовательностей в х (чтобы их можно было 
+                    положить в тензор, они дополнены нулями справа)
+            Returns:
+                Выход полученный на последнем полносвязном слое без применения Softmax.
+            '''
+            # Применяем embedding и dropout
+            x_embed = self.encoder(x)
+            x_embed = self.drop_en(x_embed)
+            # Запаковываем последовательности, чтобы рекуррентный слой мог работать с 
+            # ними, несмотря на то, что они имеют разные длины
+            packed_input = pack_padded_sequence(x_embed, seq_lengths.cpu().numpy(), 
+                batch_first=True)
+    
+            # Получаем выход с рекуррентного слоя
+            packed_output, ht = self.rnn(packed_input, None)
+            # Распаковываем полученный выход
+            out_rnn, _ = pad_packed_sequence(packed_output, batch_first=True)
+    
+            row_indices = torch.arange(0, x.size(0)).long()
+            col_indices = seq_lengths - 1
+            
+            if USE_CUDA:
+                row_indices = row_indices.cuda()
+                col_indices = col_indices.cuda()
+    
+            # Из всех выходов LSTM получаем только выход последнего ненулевого символа
+            last_tensor=out_rnn[row_indices, col_indices, :]
+            # Применяем BatchNorm
+            out = self.bn2(last_tensor)
+            
+            return out
+\end{minted}
+
+\textit{Класс рекуррентной нейросети}
+
+Зададим архитектуру нейронной сети: у неё будет два входа для заголовка и текста. Для кодирования слов здесь используем word embedding
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+class Model(nn.Module):
+    def __init__(self, embedding_matrix, lstm_hdn, num_classes):
+        '''
+        Args:
+            embedding_matrix: матрица предобученных embedding'ов
+            lstm_hdn: размер внутреннего состояния для LSTM
+            num_classes: размерность вектора-реультата (т.е. количество классов, 
+            на которые надо классифицировать)
+        '''
+        super().__init__()
+        # Создаем embedding слой и выключаем для него градиенты
+        self.encoder = nn.Embedding(embedding_matrix.size(0), embedding_matrix.size(1),
+            _weight=embedding_matrix)
+        self.encoder.weight.requires_grad = False
+        
+        # предобученный embedding задает размер 
+        self.text_rnn = RNN(lstm_hdn, self.encoder, num_layers=1)
+        self.title_rnn = RNN(lstm_hdn, self.encoder, num_layers=1)
+        
+        # Выходной слой
+        self.l_out = nn.Linear(lstm_hdn*4, len(label_enc.classes_))
+        
+    def forward(self, X_title, X_text, title_lengths, text_lengths, 
+                title_perm, text_perm):
+        # Так как для LSTM слоя важно, чтобы длины последовательностей в батче 
+        # шли в невозрастающем порядке, наш dataloader возвращает перестановку 
+        # (permutation), которая упорядочивает последовательности.
+        # В рекуррентную часть мы передаем последовательности отсортировано, 
+        # а затем возвращаем исходный порядок
+        title_outp = self.title_rnn(X_title[title_perm], title_lengths[title_perm])
+        title_outp[title_perm] = title_outp
+        
+        # Делаем то же самое для текста
+        text_outp = self.text_rnn(X_text[text_perm], text_lengths[text_perm])
+        text_outp[text_perm] = text_outp
+        
+        # Объединяем выходы с двух рекуррентых модулей и отправляем в полносвязный слой
+        return self.l_out(torch.cat([title_outp, title_outp], dim=1))
+\end{minted}
+
+\textit{Создадим класс-загрузчик данных}
+
+Класс-генератор загрузит данные из файла и предобработает их морфизатором и токенайзером. А также приведёт данные к виду, пригодному для использования в рекуррентной нейросети
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+class TextClassDataLoader(object):
+
+def __init__(self, path_file, word_to_index, batch_size=32, shuffle=True):
+    """
+    Args:
+        path_file:
+        word_to_index:
+        batch_size:
+    """
+
+    self.batch_size = batch_size
+    self.word_to_index = word_to_index
+    self.shuffle = shuffle
+    
+    if word_to_index is None:
+        self.word_to_index = {'null': 0}
+
+    # read file
+    df = pd.read_csv(path_file).fillna('')
+    df['text'] = df['text'].apply(morphy_tokenizer)
+    df['text'] = df['text'].apply(self.generate_indexifyer())
+    
+    print("Columns: {}".format(list(df.columns.values)))
+    
+    df['title'] = df['title'].apply(morphy_tokenizer)
+    df['title'] = df['title'].apply(self.generate_indexifyer())
+    self.samples = df[['title', 'text', 'class']].values.tolist()
+
+    # for batch
+    self.n_samples = len(self.samples)
+    self.n_batches = int(self.n_samples / self.batch_size)
+    self.max_length = self._get_max_length()
+    self._shuffle_indices()
+
+    self.report()
+
+def _shuffle_indices(self):
+    if not self.shuffle:
+        self.indices = np.arange(0, self.n_samples, 1)
+    else:
+        self.indices = np.random.permutation(self.n_samples)
+    self.index = 0
+    self.batch_index = 0
+
+def _get_max_length(self):
+    length = 0
+    for sample in self.samples:
+        length = max(length, len(sample[1]))
+    return length
+
+def generate_indexifyer(self):
+    def indexify(lst_text):
+        indices = []
+        for word in lst_text:
+            if word in self.word_to_index:
+                indices.append(self.word_to_index[word])
+            else:
+                indices.append(0)
+        return indices
+
+    return indexify
+
+@staticmethod
+def _padding(batch_x):
+    batch_s = sorted(batch_x, key=lambda x: len(x))
+    size = len(batch_s[-1])
+    for i, x in enumerate(batch_x):
+        missing = size - len(x)
+        batch_x[i] =  batch_x[i] + [0 for _ in range(missing)]
+    return batch_x
+
+def _create_batch(self):
+    batch = []
+    n = 0
+    while n < self.batch_size:
+        _index = self.indices[self.index]
+        batch.append(self.samples[_index])
+        self.index += 1
+        n += 1
+    self.batch_index += 1
+
+    title, text, label = tuple(zip(*batch))
+
+    # получаем длины всех текстов в батче
+    text_seq_lengths = torch.LongTensor(list(map(len, text)))
+
+    # создаем тензор, в котором в каждой строчке находится последовательность,
+    # дополненная нулями справа.
+    # NOTE: длина строки тензора должна быть такой же, как и самая длинная 
+    # последовательность мы могли бы взять большую длину, но в этом нет смысла, 
+    # так как все последовательности уже точно поместятся
+    text_seq_tensor = torch.zeros((len(text), text_seq_lengths.max())).long()
+    for idx, (seq, seqlen) in enumerate(zip(text, text_seq_lengths)):
+        text_seq_tensor[idx, :seqlen] = torch.LongTensor(seq)
+        
+    # Проделывем то же самое для заголовков
+    title_seq_lengths = torch.LongTensor(list(map(len, title)))
+    
+    # создаем тензор, в котором в каждой строчке находится последовательность,
+    # дополненная нулями справа.
+    # NOTE: длина строки тензора должна быть такой же, как и самая длинная 
+    # последовательность мы могли бы взять большую длину, но в этом нет смысла, 
+    # так как все последовательности уже точно поместятся
+    title_seq_tensor = torch.zeros((len(title), title_seq_lengths.max())).long()
+    for idx, (seq, seqlen) in enumerate(zip(title, title_seq_lengths)):
+        title_seq_tensor[idx, :seqlen] = torch.LongTensor(seq)
+
+    # Запомним перестановку, которая делает последовательности упорядоченными по длине, 
+    # чтобы передать ее в саму модель. Это важно так как в стандартный модуль LSTM 
+    # можно передавать только последовательности, идущие по уменьшению длины.
+    _, text_perm_idx = text_seq_lengths.sort(0, descending=True)
+    _, title_perm_idx = title_seq_lengths.sort(0, descending=True)
+
+    # Переведем лэйблэ в тензор, чтобы не пришлось делать этого потом. 
+    # (Для работы функции потерь лэйблы должны лежать в pytorch тензоре)
+    label = torch.LongTensor(label)
+
+    return text_seq_tensor, title_seq_tensor, label, text_seq_lengths, \ 
+            title_seq_lengths, text_perm_idx, title_perm_idx
+
+def __len__(self):
+    return self.n_batches
+
+def __iter__(self):
+    self._shuffle_indices()
+    for i in range(self.n_batches):
+        if self.batch_index == self.n_batches:
+            raise StopIteration()
+        yield self._create_batch()
+
+def show_samples(self, n=10):
+    for sample in self.samples[:n]:
+        print(sample)
+
+def report(self):
+    print('# samples: {}'.format(len(self.samples)))
+    print('max len: {}'.format(self.max_length))
+    print('# vocab: {}'.format(len(self.word_to_index)))
+    print('# batches: {} (batch_size = {})'.format(self.n_batches, self.batch_size))
+\end{minted}
+
+\textit{Word embedding}
+
+Для эмбеддинга будем использовать часть предобученной на Википедии эмбеддинг-матрицы из fasttext. Она сопаставит каждому слову специальный вектор из 300 чисел.
+
+\url{https://fasttext.cc/docs/en/crawl-vectors.html}
+
+(файл прилагается с тетрадкой)
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+import pickle
+word_to_index = pickle.load(open('word_index.pkl', 'rb'))
+emb_tensor = torch.FloatTensor(np.load('embedding_matrix.npy', encoding='bytes'))
+
+batch_size = 32
+
+dataloaders = {'train': TextClassDataLoader('./train.csv', word_to_index, batch_size), 
+            'val': TextClassDataLoader('./val.csv', word_to_index, batch_size)}
+dataset_sizes = {'train': dataloaders['train'].n_samples, 
+                'val': dataloaders['val'].n_samples}
+\end{minted}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+from tqdm import tqdm_notebook
+def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
+    since = time.time()
+
+    for epoch in range(num_epochs):
+        print('Epoch {}/{}'.format(epoch, num_epochs - 1))
+        print('-' * 10)
+
+        # каждя эпоха имеет обучающую и тестовую стадии
+        for phase in ['train', 'val']:
+            if phase == 'train':
+                scheduler.step()
+                model.train(True)  # установаить модель в режим обучения
+            else:
+                model.train(False)  # установить модель в режим предсказания
+
+            running_loss = 0.0
+            running_corrects = 0
+
+            # итерируемся по батчам
+            for data in tqdm_notebook(dataloaders[phase]):
+                new_data = list(data)
+                if USE_CUDA:
+                    for i in range(len(data)):
+                        new_data[i] = data[i].cuda()
+                    
+                # получаем картинки и метки
+                X_title, X_text, label, title_lengths, text_lengths, 
+                    title_perm, text_perm = new_data
+                
+                # инициализируем градиенты параметров
+                optimizer.zero_grad()
+
+                # forward pass
+                outputs = model(X_title, X_text, title_lengths, text_lengths, 
+                                title_perm, text_perm)
+                _, preds = torch.max(outputs.data, 1)
+                loss = criterion(outputs, label)
+
+                # backward pass + оптимизируем только если это стадия обучения
+                if phase == 'train':
+                    loss.backward()
+                    optimizer.step()
+
+                # статистика
+                running_loss += loss.item()
+                running_corrects += int(torch.sum(preds == label.data))
+
+            # Выводим статистику о качестве модели во время обучения
+            epoch_loss = running_loss / dataset_sizes[phase]
+            epoch_acc = running_corrects / dataset_sizes[phase]
+            
+            print('{} Loss: {:.4f} Acc: {:.4f}'.format(
+                phase, epoch_loss, epoch_acc))
+
+        print()
+
+    time_elapsed = time.time() - since
+    print('Training complete in {:.0f}m {:.0f}s'.format(
+        time_elapsed // 60, time_elapsed % 60))
+
+    return model, losses
+\end{minted}
+
+\textit{Обучение}
+
+Передадим в нашу модель embedding матрицу
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+model = Model(emb_tensor, 32, len(label_enc.classes_))
+if USE_CUDA:
+    model = model.cuda()
+
+# В качестве cost function используем кросс-энтропию
+loss_fn = nn.CrossEntropyLoss()
+
+# В качестве оптимизатора - стохастический градиентный спуск
+optimizer_ft = optim.Adam(model.parameters(), lr=0.001)
+
+# Умножает learning_rate на 0.1 каждые 7 эпох 
+# (это одна из эвристик, не было на лекциях)
+exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+\end{minted}
+
+\textit{Обучение происходит здесь}
+
+Процесс необходимо остановить, как только val Loss перестанет убывать
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    train_model(model, loss_fn, optimizer_ft, exp_lr_scheduler, num_epochs=25)
+\end{minted}
+
+Сохраним модель
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+torch.save(model.state_dict(), './model.pth')
+
+model.load_state_dict(torch.load('./model.pth'))
+\end{minted}
+
+\textit{Предсказание на тестовой выборке}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+data_test = pd.read_csv('FINAL_TEST.csv')
+data_test['class'] = 0
+data_test.to_csv('./test_with_dummy_class.csv', index=False)
+data_test
+
+# Создадим массив из нулей для будущих предсказаний
+predictions = np.zeros((762,))
+index_to_write = 0
+
+model.train(False)
+for data in tqdm_notebook(TextClassDataLoader('./test_with_dummy_class.csv', 
+                                            word_to_index, 32, shuffle=False)):
+    new_data = list(data)
+    if USE_CUDA:
+        for i in range(len(data)):
+            new_data[i] = data[i].cuda()
+                    
+    # получаем картинки и метки
+    X_title, X_text, label, title_lengths, text_lengths, title_perm, 
+            text_perm = new_data
+
+    # forward pass
+    outputs = model(X_title, X_text, title_lengths, text_lengths, title_perm, text_perm)
+    _, preds = torch.max(outputs.data, 1)
+    
+    predictions[index_to_write: min(index_to_write+32, 762)] = preds.cpu().numpy()
+    index_to_write += 32
+
+predictions = pd.DataFrame({'category': predictions})
+predictions.category = predictions.category.map({i: class_name for i, class_name 
+    in enumerate(label_enc.classes_)})
+predictions.to_csv('res.csv', encoding='utf-8', index=False)
+
+\end{minted}
+
+Основы для кода RNN модуля и dataloader'а взяты из репозитория Pytorch-RNN-text-classification. (\url{https://github.com/keishinkickback/Pytorch-RNN-text-classification})
+
+Статья на русском про LSTM. (\url{http://datareview.info/article/issleduem-lstm-seti-chast-1/})
+
+Чтобы быстро учить нейросеть вы можете использовать Google Collab или, если у вас есть видеокарта с поддержкой CUDA, установить CUDA 
+Toolkit и PyTorch c поддержкой CUDA на свой компьютер. Небольшое руководство (\url{https://habr.com/post/348058/}) по использованию 
+GoogleCollab (в нем используется TensorFlow, но разница с PyTorch незначительна). Руководство по настройке CUDA (\url{https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/index.html}) \linebreak на официальном сайте достаточно полное, но у многих возникают ошибки, решение которых придется искать самому.

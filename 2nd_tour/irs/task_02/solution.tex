@@ -1,4 +1,84 @@
+\solutionSection
+
+Составим схему по данным из условий задачи (рис. \ref{fig:03_camera_01_01}):
+\begin{enumerate}
+	\item Высота установки камеры, $h$
+	\item Угол отклонения камеры от линии горизонта, $\alpha$
+	\item Угол обзора камеры, $\beta$
+	\item Разрешение камеры по высоте, $height$
+\end{enumerate}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/task_02/03_camera_01_01.pdf}
+	\caption{}
+	\label{fig:03_camera_01_01}
+\end{figure}
+
+Теперь вполне очевидно, что искомое значение $x$ - это катет $b$ прямоугольного треугольника $\triangle ABC$ (рис. \ref{fig:03_camera_01_02})
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/task_02/03_camera_01_02.pdf}
+	\caption{}
+	\label{fig:03_camera_01_02}
+\end{figure}
+
+Как вариант, найти длину катета $b$ можно через $tg(\angle CAB)$, тогда пусть $\angle CABD~=~\omega$.\\
+Для нахождения угла $\omega$ нам надо найти углы $\theta$ и $\gamma$. \\
+Для нахождения угла $\theta$ нам надо знать расстояние $x_1$. В нашем случае, расстояние $x_1$ - это высота в пикселях от нижней границы изображения до нижней границы предмета на изображении. см. рис.\ref{fig:03_camera_01_03}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/task_02/03_camera_01_03.pdf}
+	\caption{}
+	\label{fig:03_camera_01_03}
+\end{figure}
+
+Нахождение расстояния $x_1$:
+По условиям задачи известно, что искомый объект на изображении - "однотонный".
+Алгоритм поиска однотонного изображения заключается в поиске близлежащих пикселей одинакового цвета. Для этого используется построчное сканирование изображения с применением алгоритма BFS к каждому непросмотренному пикселю. При этом надо вести учет уже просмотренных ранее пикселей через BFS. Начальный пиксель находится в левом верхнем углу.
+
+После обработки всего изображения сравниваем площади полученных объектов и находим объект с площадью, максимально приближенной к задаваемой в условии задачи.
+
+Далее у этого объекта берем значения пикселя с ближайшими координатами к нижней границе изображения, рис. \ref{fig:03_camera_01_04}.
+\\
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/task_02/03_camera_01_04.pdf}
+	\caption{}
+	\label{fig:03_camera_01_04}
+\end{figure}
+
+Находим расстояние $x_1$:
+\begin{align*}
+x_1 = height - \text{максимальная координата Y объекта} = 1080 - 720 = 320 \text{ пикселей}
+\end{align*}
+
+Угол $\theta$ найдем через пропорцию:
+\begin{equation*}
+\frac{\beta}{\theta} = \frac{height}{x_1} \qquad \Rightarrow \qquad \theta = \frac{x_1 \cdot \beta}{height} \qquad \Rightarrow \qquad \theta = \frac{320 \cdot 49}{1080} = 14.52 ^\circ
+\end{equation*}
+
+Угол $\gamma$ в нашем случае - это сумма угла $\alpha$ и половины угла $\beta$:
+\begin{align*}
+\gamma = \alpha + \frac{\beta}{2} \qquad \Rightarrow \qquad \gamma = 5 +  \frac{49}{2} = 29.5^\circ
+\end{align*}
+
+И, наконец, найдем угол $\omega$:
+\begin{align*}
+\omega = 90 - \gamma + \theta \qquad \Rightarrow \qquad \omega = 90 - 29.5 + 14.52 = 75.02^\circ
+\end{align*}
+
+Теперь найдем $X$, но предварительно переведем градусы в радианы:
+\begin{align*}
+\omega' = \frac{\omega \cdot \pi}{180} \qquad \Rightarrow \qquad \omega' = \frac{95 \cdot \pi}{180} = 1,309346005 \text{ радиан} \\ \\
+x = h \cdot tg(\omega') \qquad \Rightarrow \qquad x = 95 \cdot tg(1,309346005) = 355 \text{ мм}
+\end{align*}
+
+\textbf{Ответ: расстояние от камеры до объекта равно 355 мм}
+
 \codeExample
 
 \inputPythonSource
-%\inputminted[fontsize=\footnotesize, linenos]{python}{1st_tour/inf/try_1/task_03/source.py}
+%\inputCPPSource

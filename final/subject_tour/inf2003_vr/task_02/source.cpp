@@ -64,8 +64,10 @@ int main()
 				for (int jj = j; jj <= W; jj++)
 				{
 					int sum_center = calc_sum(i, j, ii, jj);
-					int res = (ii - i + 1) * (jj - j + 1) - sum_center;
-					int res_outside = calc_sum(1, 1, H, W) - sum_center;
+					int res = (ii - i + 1) * (jj - j + 1) - 
+						sum_center;
+					int res_outside = calc_sum(1, 1, H, W) - 
+						sum_center;
 					res += res_outside;
 					if (res <= N)
 						ans++;

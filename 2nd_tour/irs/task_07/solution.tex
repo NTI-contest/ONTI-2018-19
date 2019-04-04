@@ -1,4 +1,184 @@
+\solutionSection
+
+Рассмотрим движение робота между моментами изменения скоростей. В этот момент линейная и угловая скорости постоянны и мы можем рассматривать движение робота, как показано на рис. \ref{fig:02_beacons_02_01}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics{2nd_tour/irs/task_07/02_beacons_02_01.pdf}
+	\caption{Движение между измерениями скоростей}
+	\label{fig:02_beacons_02_01}
+\end{figure}
+
+По условиям задачи нам известны угловая ($\omega$) и линейная ($v$) скорости робота, а также время между замерами ($t$).\\
+Угол поворота ($\alpha$) вычисляем по формуле (\ref{eq:02_beacon_02_01}). \\
+В начале движения робот находится в координатах ($x_0 = 0; y_0 = 0$) и направлен вдоль оси $X$, т.е. угол $\alpha_0$ = 0.
+
+\begin{equation}
+\alpha = \alpha_0 + w \cdot t
+\label{eq:02_beacon_02_01}
+\end{equation}
+
+Длина пройденного пути (отрезок $AB$) находится по формуле (\ref{eq:02_beacon_02_02}):
+\begin{equation}
+l = v \cdot t
+\label{eq:02_beacon_02_02}
+\end{equation}
+
+Координаты робота в точке $B$ находятся по формулам (\ref{eq:02_beacon_02_03}) и (\ref{eq:02_beacon_02_04}):
+\begin{eqnarray}
+x_i = x_0 + l \cdot cos(\alpha)
+\label{eq:02_beacon_02_03}\\
+y_i = y_0 + l \cdot sin(\alpha)
+\label{eq:02_beacon_02_04}
+\end{eqnarray}
+
+После обработки всех данных получаем путь перемещения робота (рис. \ref{fig:02_beacons_02_02}).
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.5\linewidth]{2nd_tour/irs/task_07/02_beacons_02_02.pdf}
+	\caption{Рассчитанный путь перемещения робота}
+	\label{fig:02_beacons_02_02}
+\end{figure}
+
+
+Зная координаты робота и получаемое расстояние от дальномера $(d)$ мы можем рассчитать координаты точек на окружностях цилиндров (с учетом того, что дальномер направлен прямо по ходу движения робота, см. рис. \ref{fig:02_beacons_02_03}) по формулам (\ref{eq:02_beacon_02_05}) и (\ref{eq:02_beacon_02_06}):
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics{2nd_tour/irs/task_07/02_beacons_02_03.pdf}
+	\caption{}
+	\label{fig:02_beacons_02_03}
+\end{figure}
+
+\begin{equation}
+x'_c = x_{robot} + cos(\alpha) \cdot d
+\label{eq:02_beacon_02_05}
+\end{equation}
+\begin{equation}
+y'_c = y_{robot} + sin(\alpha) \cdot d
+\label{eq:02_beacon_02_06}
+\end{equation}
+
+Координаты точек относятся к цилиндрам определенного цвета. Результат показан на рис. \ref{fig:02_beacons_02_04}.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/task_07/02_beacons_02_04.pdf}
+	\caption{Наборы точек, распределенные по цветам цилиндров}
+	\label{fig:02_beacons_02_04}
+\end{figure}
+
+
+Сейчас нам известны координаты всех точек на окружности каждого цилиндра - найдем координаты центра каждого цилиндра.
+Для этого нам надо выбрать 3 точки из всего множества для каждого цилиндра. Например, две точки - самые крайние с обеих сторон, третья точка - посередине между ними (рис. \ref{fig:02_beacons_02_05}). В примере на рис. \ref{fig:02_beacons_02_05} указан набор точек желтого цвета ($FFFF00$) (из рис. \ref{fig:02_beacons_02_04}).
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/task_07/02_Beacons_02_05.pdf}
+	\caption{Схема нахождения центра цилиндра по трем точкам}
+	\label{fig:02_beacons_02_05}
+\end{figure}
+
+Уравнение прямой, проходящей через две точки, имеет вид:
+\begin{equation*}
+\frac{y-y_1}{y_2-y_1} = \frac{x-x_1}{x_2-x_1}
+\end{equation*}
+В этом случае угловой коэффициент $k$ определятся по формуле:
+\begin{equation*}
+k = \frac{y_2-y_1}{x_2-x_1};
+\end{equation*}
+
+Найдем коэффициенты $k$ и $b$ для прямых $l_1$ и $l_2$ по формулам (\ref{eq:02_beacon_02_09}) и (\ref{eq:02_beacon_02_10}), (\ref{eq:02_beacon_02_11}) и (\ref{eq:02_beacon_02_12}):
+
+\begin{eqnarray}
+\begin{aligned}
+k_{l_1} & = \frac{y_2-y_1}{x_2-x_1} 
+\label{eq:02_beacon_02_09} \\
+b_{l_1} &= y_2 - k_{l_1} \cdot x_2
+\label{eq:02_beacon_02_10}\\
+k_{l_2} &= \frac{y_3-y_2}{x_3-x_2}
+\label{eq:02_beacon_02_11}\\
+b_{l_2} &= y_3 - k_{l_2} \cdot x_3
+\label{eq:02_beacon_02_12}
+\end{aligned}
+\end{eqnarray}
+
+
+Центр цилиндра находится на пересечении двух перпендикулярных прямых $P_1$ и $P_2$, проходящих через середины отрезков $M_1M_2$ и $M_2M_3$. 
+
+Найдем середины отрезков $M_1M_2$ и $M_2M_3$ по формулам (\ref{eq:02_beacon_02_07}) и (\ref{eq:02_beacon_02_08}).
+
+\begin{eqnarray}
+\begin{aligned}
+L_1 &= \left( \frac{x_1+x_2}{2}; \frac{y_1+y_2}{2} \right)
+\label{eq:02_beacon_02_07}\\
+L_2 &= \left( \frac{x_2+x_3}{2}; \frac{y_2+y_3}{2} \right)
+\label{eq:02_beacon_02_08}
+\end{aligned}
+\end{eqnarray}
+
+Прямая, перпендикулярная к линии с коэффициентом наклона $k$ имеет коэффициент наклона: $-1/k$, значит уравнения прямых $P_1$ и $P_2$, перпендикулярных $l_1$ и $l_2$, соответственно, запишем следующим образом: 
+для $P_1$ – по формулам (\ref{eq:02_beacon_02_13}) и (\ref{eq:02_beacon_02_14}), для $P_2$ - по формулам (\ref{eq:02_beacon_02_15}) и (\ref{eq:02_beacon_02_16}):
+\begin{eqnarray}
+\begin{aligned}
+k_{P_1} &= -\frac{1}{k_{l_1}} \qquad \Leftrightarrow \qquad k_{P_1} = -\frac{x_2-x_1}{y_2-y_1} = \frac{x_1-x_2}{y_2-y_1}
+\label{eq:02_beacon_02_13}\\
+b_{P_1} &= y_{L_1} - k_{P_1} \cdot x_{L_1}
+\label{eq:02_beacon_02_14}\\
+k_{P_2} &= -\frac{1}{k_{l_2}} \qquad \Leftrightarrow \qquad k_{P_2} = -\frac{x_3 - x_2}{y_3-y_2} = \frac{x_2 - x_3}{y_3-y_2}
+\label{eq:02_beacon_02_15}\\
+b_{P_2} &= y_{L_2} - k_{P_2} \cdot x_{L_2}
+\label{eq:02_beacon_02_16}
+\end{aligned}
+\end{eqnarray}
+
+Сейчас мы уже можем найти координаты точку центра цилиндра (или точку пересечения прямых $P_1$ и $P_2$) по формулам (\ref{eq:02_beacon_02_17}) и (\ref{eq:02_beacon_02_18}):
+\begin{eqnarray}
+\begin{aligned}
+x &= \frac{b_{P_1} - b_{P_2}}{k_{P_2} - k_{P_1}}
+\label{eq:02_beacon_02_17}\\
+y &= k_{P_1} \cdot x + b_{P_1}
+\label{eq:02_beacon_02_18}
+\end{aligned}
+\end{eqnarray}
+
+Результат расчета центров цилиндров показан на рис. (\ref{fig:02_beacons_02_07}):
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/task_07/02_beacons_02_07.pdf}
+	\caption{Центры цилиндров}
+	\label{fig:02_beacons_02_07}
+\end{figure}
+
+Далее проверяем попарно все цилиндры (каждый с каждым) на возможность проезда между ними робота. Для этого мы должны узнать расстояние между краями цилиндров по формуле (\ref{eq:02_beacon_02_19}). Для примера возьмем цилиндры с цветами $800080$ и $0000FF$.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/task_07/02_beacons_02_08.pdf}
+	\caption{}
+	\label{fig:02_beacons_02_08}
+\end{figure}
+
+\begin{equation}
+L = d - r_1 - r_2
+\label{eq:02_beacon_02_19}
+\end{equation}
+
+где $d$ - расстояние между центрами цилиндров; $r_1$, $r_2$ - радиусы цилиндров. 
+В нашем примере $d = 24.77 \text{ см}$; $r_1=9.94 \text{ см}$; $r_2=9.98 \text{ см}$.
+
+Если полученное расстояние $L$ больше или равно диаметра робота ($L \geq D_{robot}$), значит робот сможет проехать между цилиндрами, иначе – нет.
+
+В примере на рис. (\ref{fig:02_beacons_02_08}) расстояние между краями цилиндров $L=4.85$ см, т.е. робот между этими цилиндрами не проедет, т.к. диаметр робота 20 см.
+\\
+
+В ответ выводим пару цветов цилиндров, между которыми робот сможет проехать. Таких пар может быть несколько.
+\\
+
+\textbf{Ответ: } 0000FF 800080
+
+
 \codeExample
 
 \inputPythonSource
-%\inputminted[fontsize=\footnotesize, linenos]{python}{1st_tour/inf/try_1/task_03/source.py}
+%\inputCPPSource

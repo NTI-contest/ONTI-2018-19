@@ -16,4 +16,5 @@ pairs = [(x[0], int(x[1])) for x in lines]
 
 pairs.sort(key=lambda tup: tup[1])
 
-print('\n'.join(' '.join(str(item) for item in x) + ' ' + str(count(pairs, x)) for x in pairs)  + '\n')
+print('\n'.join(' '.join(str(item) for item in x) + ' ' +
+    str(count(pairs, x)) for x in pairs)  + '\n')
