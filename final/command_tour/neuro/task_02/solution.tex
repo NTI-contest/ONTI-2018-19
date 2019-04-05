@@ -52,21 +52,21 @@
       	potPin = 3;
 
     void setup() {
-    Serial.begin(115200);
-    pinMode(buzzerPin, OUTPUT);
+        Serial.begin(115200);
+        pinMode(buzzerPin, OUTPUT);
     }
 
     void loop() {
-    if (Serial.available()) {
-        int cmd = Serial.read();
-        if (cmd == 49)
-        tone(buzzerPin, 500);
-        if (cmd == 48)
-        noTone(buzzerPin);
-        int potVal = analogRead(potPin) / 4;
-        Serial.write(potVal);
-    }
-    delay(1);
+        if (Serial.available()) {
+            int cmd = Serial.read();
+            if (cmd == 49)
+            tone(buzzerPin, 500);
+            if (cmd == 48)
+            noTone(buzzerPin);
+            int potVal = analogRead(potPin) / 4;
+            Serial.write(potVal);
+        }
+        delay(1);
     }
 \end{minted}
 

@@ -1,0 +1,21 @@
+\codeExample
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+    const int LED_PIN1 = 11;  // каким пином мигаем
+    const int LED_PIN2 = 12;  // каким пином мигаем
+    int LED_PERIOD; // время свечения , мс
+    void setup()
+    {
+        pinMode(LED_PIN1,OUTPUT);
+        pinMode(LED_PIN2,OUTPUT);// тут чего-то не хватает...    
+    }
+    void loop()
+    {
+        digitalWrite(LED_PIN1,HIGH);
+        digitalWrite(LED_PIN2,HIGH);
+        delay(LED_PERIOD);
+        digitalWrite(LED_PIN1,LOW);
+        digitalWrite(LED_PIN2,LOW);
+        delay(LED_PERIOD);  
+    }
+\end{minted}
