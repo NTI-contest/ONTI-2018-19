@@ -15,7 +15,8 @@ random.seed(SEED)
 def generate_one():
     m = random.randint(5, 20)
     n = random.randint(5, 20)
-    field = "\n".join("".join(random.choice("uldr") for _ in range(n)) for _ in range(m))
+    field = "\n".join("".join(random.choice("uldr") for _ in range(n)) 
+        for _ in range(m))
     return "{} {}\n{}\n".format(m, n, field)
 
 def generate():
