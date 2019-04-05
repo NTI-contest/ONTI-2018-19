@@ -1,0 +1,48 @@
+\solutionSection
+
+\subsubsection*{Спутник}
+
+\begin{enumerate}
+    \item Проверка работоспособности устройств:
+    
+    ДУС:
+
+\inputminted[fontsize=\footnotesize, linenos]{python}{final/command_tour/dzz/task_01/source_1.py}
+
+    Магнитометр:
+
+\inputminted[fontsize=\footnotesize, linenos]{python}{final/command_tour/dzz/task_01/source_2.py}
+
+    Маховик:
+
+\inputminted[fontsize=\footnotesize, linenos]{python}{final/command_tour/dzz/task_01/source_3.py}
+
+    \item Стабилизация
+
+    Пример кода для стабилизации:
+
+\inputminted[fontsize=\footnotesize, linenos]{python}{final/command_tour/dzz/task_01/source_4.py}
+
+\end{enumerate}
+
+\subsubsection*{СУПН}
+
+Первоначально подключение Raspberry к ПК осуществляется через патч-корд. Ниже приведен алгоритм действий как можно подключить Raspberry к ПК с GNU/Linux-системой.
+
+\begin{enumerate}
+    \item Можно установить пакет, который поможет осуществить подключение Raspberry к вашему ПК. Например, это может быть dnsmasq. Для этого наберите в терминале:
+    \putImgWOCaption{15cm}{1}
+    \item Далее не лишним будет создать ethernet-соединение, позволяющее подключаться устройствам к вашему ПК, используя диспетчер сети.
+    \item Используя dnsmasq можно определить IP, который имеет Raspberry в локальном подключении:
+    \putImgWOCaption{15cm}{2}    
+    IP вашей Raspberry в данном случае - 10.42.0.90
+    \item Далее подключимся к Raspberry по ssh:
+    \putImgWOCaption{15cm}{3}
+\end{enumerate}
+
+Пароль по умолчанию: raspberry
+
+Если всё прошло успешно имя пользователя сменится на pi@raspberrypi.
+
+Теперь у нас есть доступ к терминалу Raspberry, и мы можем ей управлять.
+ 
