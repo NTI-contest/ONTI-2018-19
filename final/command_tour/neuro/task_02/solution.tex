@@ -1,0 +1,266 @@
+\solutionSection
+
+В данной задаче командам необходимо было разобраться, как выводить оцифрованные значения с третьего аналогового входа платы Arduino поверх изображения с камеры, а также реализовать распознавание различных положений водителя за рулем. 
+
+Для проверки данной задачи использовалось контрольное видео (участники в первый раз его видели при сдаче): \url{https://drive.google.com/file/d/17EHTJLTJGGk1VVMJ3AfoqtjRiMEvCD6U/view?usp=sharing} (сокращенная ссылка: \url{https://clck.ru/FVfGL})
+
+На данном видео были представлены следующие ситуации (1 – «не опасная» ситуация, 2,3,4 – «опасные» ситуации):
+
+\begin{table}[H]
+    \begin{tabular}{|l|c|c|}
+        Момент времени на контрольном видео & Тип ситуации & Описание ситуации \\
+        00:00-00:06 & 1 & Смотрит прямо/в зеркало \\
+        00:06-00:10 & 3 & Смотрит на панель \\
+        00:10-00:17 & 1 & Смотрит прямо/в зеркало \\
+        00:17-00:20 & 2 & Закрыты глаза \\
+        00:20-00:27 & 1 & Смотрит прямо/в зеркало \\
+        00:28-00:32 & 2 & Закрыты глаза \\
+        00:32-00:37 & 1 & Смотрит прямо/в зеркало \\
+        00:37-00:43 & 3 & Смотрит на панель \\
+        00:43-00:48 & 1 & Смотрит прямо/в зеркало \\
+        00:48-00:53 & 2 & Закрыты глаза \\
+        00:53-00:58 & 1 & Смотрит прямо/в зеркало \\
+        00:59-01:04 & 4 & Смотрит на колено \\
+        01:04-01:13 & 1 & Смотрит прямо/в зеркало \\
+        01:13-01:17 & 2 & Закрыты глаза \\
+        01:17-01:25 & 1 & Смотрит прямо/в зеркало \\
+        01:25-01:32 & 3, 2 & Смотрит на панель, затем закрывает \\ глаза \\
+        01:38-01:46 & 1 & Смотрит прямо/в зеркало \\
+        01:46-01:53 & 3 & Смотрит на панель \\
+        01:54-01:59 & 1 & Смотрит прямо/в зеркало \\
+        02:00-02:03 & 2 & Закрыты глаза \\
+    \end{tabular}
+\end{table}
+
+За каждую верно определенную «опасную» ситуацию можно было получить по 2 балла, в сумме не более 20 баллов.
+
+Пример скриншота работающей программы для данной задачи:
+
+\putImgWOCaption{15cm}{1}
+
+\subsubsection*{Скетч для платы Arduino}
+
+Передает результаты оцифровки третьего аналогового входа по Serial и принимает команды на включение и выключение пьезоэлемента: 
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+    const int buzzerPin = 11,
+      	potPin = 3;
+
+    void setup() {
+    Serial.begin(115200);
+    pinMode(buzzerPin, OUTPUT);
+    }
+
+    void loop() {
+    if (Serial.available()) {
+        int cmd = Serial.read();
+        if (cmd == 49)
+        tone(buzzerPin, 500);
+        if (cmd == 48)
+        noTone(buzzerPin);
+        int potVal = analogRead(potPin) / 4;
+        Serial.write(potVal);
+    }
+    delay(1);
+    }
+\end{minted}
+
+\subsubsection*{Программа для обработки видео}
+
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    import cv2
+    import dlib
+    import numpy as np
+    from numpy.linalg import norm
+    from imutils import face_utils
+    from serial import Serial
+
+
+    class DriverControl:
+        """Класс для определения направления поворота головы. Подробности по адресу
+        www.learnopencv.com/head-pose-estimation-using-opencv-and-dlib/"""
+        def __init__(self, size):
+            """Аргументы:
+                size - разрешение изображения
+            Переменные экземпляра класса:
+                maxFrames - Число последовательных кадров на видео, для которых
+                            должны выполняться условия cрабатывания
+                            пьезоэлемента, преждем чем его активировать.
+                earThold -  порог ширины открытия глаз выше ниже которого глаза
+                            считаются закрытыми
+            """
+            self.size = size
+            self.model_points = np.array([
+                                    (0.0, 0.0, 0.0),
+                                    (0.0, -330.0, -65.0),
+                                    (-225.0, 170.0, -135.0),
+                                    (225.0, 170.0, -135.0),
+                                    (-150.0, -150.0, -125.0),
+                                    (150.0, -150.0, -125.0)
+                                ])
+            self.focal_length = size[1]
+            self.center = (size[1]/2, size[0]/2)
+            self.camera_matrix = np.array([
+                                    [self.focal_length, 0, self.center[0]],
+                                    [0, self.focal_length, self.center[1]],
+                                    [0, 0, 1]
+                                ], dtype='double')
+            self.dist_coeffs = np.zeros((4, 1))
+            self.nFrames = 0
+            self.maxFrames = 16
+            self.earThold = 0.3
+
+        def getNosePoint(self, shape):
+            """Вычисляет направление поворота головы.
+            Аргументы:
+                shape - массив ключевых точек лица
+            Возвращаемые значения:
+                nosePoint - координаты конца вектора, указывающего направление
+                            головы. Начало вектора - ключевая точка лица
+                            с индексом 30.
+            """
+            if shape is None:
+                return (0, 0)
+            image_points = np.array([
+                                        shape[30], 	# Nose tip
+                                        shape[8],  	# Chin
+                                        shape[45], 	# Left eye left corner
+                                        shape[36], 	# Right eye right corne
+                                        shape[54], 	# Left Mouth corner
+                                        shape[48]  	# Right mouth corner
+                                    ], dtype="double")
+
+            (success, rotation_vector,
+            translation_vector) = cv2.solvePnP(self.model_points,
+                                                image_points,
+                                                self.camera_matrix,
+                                                self.dist_coeffs,
+                                                flags=cv2.SOLVEPNP_ITERATIVE)
+            (nose_end_point2D, jacobian) = cv2.projectPoints(np.array([(0.0, 0.0,
+                                                                        1000.0)]),
+                                                            rotation_vector,
+                                                            translation_vector,
+                                                            self.camera_matrix,
+                                                            self.dist_coeffs)
+            nosePoint = (int(nose_end_point2D[0][0][0]),
+                        int(nose_end_point2D[0][0][1]))
+            return nosePoint
+
+        def getEAR(self, shape):
+            """Вычисляет ширину открытия глаз.
+            Аргументы:
+                shape - массив ключевых точек лица
+            """
+            leftH = (norm(shape[37]-shape[41]) + norm(shape[38]-shape[40])) / 2
+            leftW = norm(shape[36]-shape[39])
+            leftEAR = leftH / leftW
+            rightH = (norm(shape[43]-shape[47]) + norm(shape[44]-shape[46])) / 2
+            rightW = norm(shape[42]-shape[45])
+            rightEAR = rightH / rightW
+            EAR = (leftEAR + rightEAR) / 2
+            return EAR
+
+        def checkDriver(self, shape):
+            """Возвращает True если человек дольше чем на maxFrames кадров закрыл
+            глаза, смотрит на свой мобильный, который лежит у него на колене или
+            смотрит на автомагнитолу; иначе - False.
+            Аргументы:
+                shape - массив ключевых точек лица
+            """
+            # Получаем координату конца вектора направления поворота головы
+            nosePoint = self.getNosePoint(shape)
+            # Вычисляем ширину открытия глаз
+            ear = self.getEAR(shape)
+            # Проверяем не ниже ли порога ширина открытия глаз и не опустился ли
+            # конец вектора направления поворота головы ниже верхней губы
+            if ear < self.earThold or nosePoint[1] > shape[62][1]:
+                self.nFrames += 1
+                if self.nFrames >= self.maxFrames:
+                    return False
+            else:
+                self.nFrames = 0
+                return True
+
+
+    class LandmarkDetector:
+        """Класс для поиска ключевых точек лица на изображении"""
+        def __init__(self, modelPath='shape_predictor_68_face_landmarks.dat',
+                    showLandmarks=False):
+            """Аргументы:
+                modelPath - путь к файлу с предобученной моделью для поиска
+                            ключевых точек.
+                showLandmarks - отмечать ли ключевые точки на лице.
+            """
+            self.detector = dlib.get_frontal_face_detector()
+            self.predictor = dlib.shape_predictor(modelPath)
+            self.showLandmarks = showLandmarks
+
+        def getLandmarks(self, image):
+            """Возвращает массив с координатами ключевых точек.
+            Аргументы:
+                image - изображение для поиска ключевых точек
+            """
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            rects = self.detector(gray, 0)
+            shape = None
+            for rect in rects:
+                (bX, bY, bW, bH) = face_utils.rect_to_bb(rect)
+                cv2.rectangle(image, (bX, bY), (bX + bW, bY + bH),
+                            (0, 255, 0), 1)
+                shape = self.predictor(gray, rect)
+                shape = face_utils.shape_to_np(shape)
+                if self.showLandmarks is True:
+                    for (x, y) in shape:
+                        cv2.circle(image, (x, y), 1, (0, 0, 255), -1)
+            return shape
+
+
+    def launchVideo(videoSource, arduinoPort):
+        """Воспроизводит видео, подаёт команды на Arduino. Для завершения программы
+        нажать q.
+        Аргументы:
+            videoSource - источник видеопотока.
+            arduinoPort - COM-порт к которому подключается Arduino"""
+        landDetector = LandmarkDetector()
+        cap = cv2.VideoCapture(videoSource)
+        res = np.array((cap.get(4), cap.get(3)), dtype=int)
+        dc = DriverControl(res)
+        ser = Serial(arduinoPort, 115200, timeout=0)
+        voltageA3 = 0.0
+        while True:
+            # Считываем кадр
+            ret, frame = cap.read()
+            if ret:
+                # Ищем ключевые точки лица
+                shape = landDetector.getLandmarks(frame)
+                if shape is not None:
+                    # Проверяем не выполняется ли одно из условий задачи.
+                    driverOK = dc.checkDriver(shape)
+                    if driverOK is False:
+                        # Если выполняется, шлём на Arduino символ "1"
+                        ser.write(b'1')
+                    else:
+                        ser.write(b'0')
+                # Считываем с Arduino результат оцифровки сигнала с потенциометра
+                pot_val = ser.read()
+                if pot_val != b'':
+                    # Переводим значение АЦП в напряжение
+                    voltageA3 = int.from_bytes(pot_val, 'big') * 5.0 / 255
+                # Выводим напряжение на изображение
+                cv2.putText(frame, 'Value from A3 = {:.2f}'.format(voltageA3),
+                            (20, 20), cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5, (0, 255, 0), 1)
+                cv2.imshow("Output", frame)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+
+        cap.release()
+        ser.close()
+        cv2.destroyAllWindows()
+
+
+    if __name__ == '__main__':
+        launchVideo('test.mp4', 'COM13')
+
+\end{minted}

@@ -1,0 +1,214 @@
+\subsubsection*{Анализ ЭЭГ}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    # Построив график отношения альфа-ритма к бета-ритму в сигнале,
+    # видим корреляцию между состоянием водителя и отношением альфа-
+    # к бета-ритму.
+
+    plt.figure(figsize=(15,10))
+    alphaToBeta = getAlphaToBetaSmooth(traindf.eeg.values)
+    df = pd.DataFrame({'aTob': alphaToBeta,
+                    'target': traindf.target.values[::15*hz]
+                    })
+    plt.plot(df[df.target==1].aTob, 'bx')
+    plt.plot(df[df.target==0].aTob, 'rx')
+\end{minted}
+
+\putImgWOCaption{15cm}{1}
+
+(На графике по оси Х – номер временного отреза, по оси У – отношение уровня альфа- к бета- ритму в сигнале)
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    # Вычисляем уровни альфа- и бета- ритмов в сигнале, сглаживаем их.
+    # Мы видим что уровни альфа- и бета- изменяются с некоторой периодичностью
+
+    albeta = getAlBeta(traindf.eeg.values, chunkSize=hz)
+    plt.figure(figsize=(15,10))
+    alpha = albeta.alpha.values
+    beta = albeta.beta.values
+    plt.plot(compl(alpha[:1000], 0.95))
+    plt.plot(compl(beta[:1000], 0.95))
+\end{minted}
+
+\putImgWOCaption{15cm}{2}
+
+(На графике по оси Х – время в секундах, по оси У – уровень ритма. Оранжевый график – уровень бета-ритма, Синий – уровень альфа-ритма).
+
+\subsubsection*{Анализ КГР}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    # Запишем КГР в отдельный массив
+    gsr = traindf.gsr.values
+
+    # Построим график сигнала, а также графики вторых и первых производных
+    # Мы видим аномальные скачки вторых производных, от которых следует избавиться
+    plt.figure(figsize=(15,10))
+    orig = gsr[:50000]
+    der1 = getDerivative(orig)
+    der2 = getDerivative(der1)
+    plt.subplot(3,1,1)
+    plt.plot(np.linspace(0,50000/250,50000),orig)
+    plt.subplot(3,1,2)
+    plt.plot(np.linspace(0,50000/250,49999),der1)
+    plt.subplot(3,1,3)
+    plt.plot(np.linspace(0,50000/250,49998),der2)
+\end{minted}
+
+\putImgWOCaption{15cm}{3}
+
+(на первом графике: по оси Х — время в секундах, по оси У — значение КГР в Вольтах;
+на втором графике: по оси Х — время в секундах, по оси У — первая производная КГР;
+на третьем графике: по оси Х — время в секундах, по оси У — вторая производная КГР).
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    import scipy.stats as stats
+
+    # Строим график распределения значений вторых производных. Видим что пик
+    # находится в диапазоне [-0.00000025, 0.00000025]
+
+    h = sorted(getDerivative(getDerivative(gsr[:5000000])))
+
+    fit = stats.norm.pdf(h, np.mean(h), np.std(h))
+    plt.figure(figsize=(15,10))
+    plt.xlim([-0.000003,0.000003])
+    plt.ylim([0,200000])
+    plt.plot(h,fit,'-o')
+\end{minted}
+
+\putImgWOCaption{15cm}{4}
+
+(На графике по оси Х – значение второй производной , по оси У – сколько раз встретилось данное значение). 
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    # На участке сигнала находим вторые производные и восстанавливаем
+    # по ним сигнал, отсекая производные превышающие по модулю 0.00000025.
+    # Видим, что восстановленный сигнал имеет чёткие локальные минимумы.
+    plt.figure(figsize=(15,10))
+    orig = gsr[:50000]
+    der1 = getDerivative(orig)
+    der2 = getDerivative(der1)
+    der1 = integrate(der2, thold=0.00000025)
+    orig = integrate(der1, orig[0])
+    plt.subplot(3,1,1)
+    plt.plot(np.linspace(0,50000/250,50000),orig)
+    plt.subplot(3,1,2)
+    plt.plot(np.linspace(0,50000/250,49999),der1)
+    plt.subplot(3,1,3)
+    plt.plot(np.linspace(0,50000/250,49998),der2)
+\end{minted}
+
+\putImgWOCaption{15cm}{5}
+
+(на первом графике: по оси Х – время в секундах, по оси У  - значение КГР в Вольтах;
+на втором графике: по оси Х – время в секундах, по оси У – первая производная КГР;
+на третьем графике: по оси Х – время в секундах, по оси У – вторая производная КГР).
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    # Очищаем весь сигнал так же, как очищали отрезок сигнала
+    plt.figure(figsize=(15,10))
+    der1 = getDerivative(gsr)
+    der2 = getDerivative(der1)
+    der1 = integrate(der2, thold=0.00000025)
+    cleanGSR = integrate(der1, gsr[0])
+    plt.plot(cleanGSR)
+\end{minted}
+
+\putImgWOCaption{15cm}{6}
+
+(На графике: зависимость сигнала КГР (восстановленного после очистки второй производной) от номера отсчета)
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    # Т.к. на очищенном сигнале имеется явный артефакт, выпрямляем сигнал.
+    plt.figure(figsize=(10,6))
+    stabilize(cleanGSR, 1820500, len(cleanGSR)-1)
+    plt.plot(cleanGSR)
+\end{minted}
+
+\putImgWOCaption{15cm}{7}
+
+(На графике: зависимость сигнала КГР от номера отсчета)
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    # Находим индексы локальных максимумов КГР, считаем интервалы между ними
+    # и записываем их в словарь.
+    maxs = getLocalMaxsGSR(cleanGSR)
+    intervalsDict = dict(zip(maxs[1:], getDerivative(maxs)))
+    def getClosestInterval(index, intarvalsDict):
+        """Возвращает ближайший к index временной интервал между
+        локальными максимумами производной сигнала КГР"""
+        closestIndex = min(intarvalsDict.keys(), key=lambda x: abs(x-index))
+        return intervalsDict[closestIndex]
+
+    # Построим график зависимости длительности временного интервала от
+    # его порядкового новера. Красным цветом отметим точки, соответствующие
+    # target==0. Мы видим что интервалы увеличиваются со снижением концентрации.
+    # На графике видны выборосы, которые для большей точности следует убрать вручную.
+    df = pd.DataFrame({'intervals': list(intervalsDict.values()),
+                    'target': [traindf.target.values[i] for i in intervalsDict.keys()]})
+    plt.figure(figsize=(15,10))
+    plt.plot(df.intervals[df.target==1], 'b')
+    plt.plot(df.intervals[df.target==0], 'r')
+\end{minted}
+
+\putImgWOCaption{15cm}{8}
+
+(На графике: зависимость интервала между локальными минимумами КГР (в точках, т.е. чтобы получить время необходимо поделить ее на частоту оцифровки) от порядкового номера интервала).
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    # Тестируем код для очистки КГР от выбросов
+    der1 = getDerivative(traindf.gsr.values)
+    der2 = getDerivative(der1)
+    der1 = integrate(der2, thold=0.00000025)
+    trainGSR = integrate(der1, traindf.gsr.values[0])
+    stabilize(trainGSR, 1820500, len(trainGSR)-1)
+    maxs = getLocalMaxsGSR(trainGSR)
+    der = getDerivative(maxs)
+    for i in range(120,200):
+        if der[i] < 4000:
+            der[i] = der[i-1]
+    for i in range(420,450):
+        if der[i] < 4000:
+            der[i] = der[i-1]
+    for i in range(470,500):
+        if der[i] < 6000:
+            der[i] = der[i-1]
+    for i in range(500, 700):
+        if der[i] < 6000:
+            der[i] = der[i-1]
+    intervalsDict = dict(zip(maxs[1:], der))
+    plt.plot(intervalsDict.values())
+\end{minted}
+
+\putImgWOCaption{15cm}{9}
+
+(На графике: зависимость интервала между локальными минимумами КГР (в точках, т.е. чтобы получить время необходимо поделить ее на частоту оцифровки) от порядкового номера интервала).
+
+\subsubsection*{Анализ ЭКГ}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    # Сохраним сигнал в отдельный массив
+    ecg = traindf['ecg'].values
+    # визуализируем участок сигнала
+    plt.figure(figsize=(15,10))
+    plt.plot(ecg[:500])
+\end{minted}
+
+\putImgWOCaption{15cm}{10}
+
+(На графике: по оси Х – номер отсчета, по оси У – значение сигнала ЭКГ).
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    # Построим график зависимости ЧСС от номера отрезка данных. Участки,
+    # соответствующие состоянию со сниженным уровнем внимания отметим
+    # красным. Как видно, в таки моменты мы наблюдаем наиболее низкую ЧСС.
+
+    hr = pd.DataFrame({'hr': [getHR(ecg[i*15*hz:(i+1)*15*hz]) for i in range(len(ecg)//(15*hz))],
+                    'target': [tar for tar in traindf.target.values[::15*hz]]})
+    plt.figure(figsize=(15,10))
+    plt.plot(hr.hr[hr.target==1])
+    plt.plot(hr.hr[hr.target==0], 'r')
+\end{minted}
+
+\putImgWOCaption{15cm}{11}
+
+(На графике: по оси Х – номер временного отрезка, по оси У – значение частоты сердечных сокращений).

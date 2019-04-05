@@ -1,0 +1,327 @@
+\solutionSection
+
+Данная задача является объединением всех задач 1, 2, 3, 4. Т.к. по отдельным частям данная система уже была проверена в предыдущих задачах, а проверка осуществлялась качественным путем, то за данную задачу ставилось максимум только 5 баллов. 
+
+На скриншоте ниже приведен скриншот программы для работающей системы:
+
+\putImgWOCaption{15cm}{1}
+
+На фото ниже представлена система для регистрации биосигналов и видеопотока (на примере одной из команд-участников).
+
+\putImgWOCaption{15cm}{2}
+
+\subsubsection*{Скетч для платы Arduino (на основе задачи 3)}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+    #include <TimerOne.h>
+    const int buzzerPin = 11;
+
+    void setup() {
+        Serial.begin(115200);
+        Timer1.initialize(4000);
+        Timer1.attachInterrupt(sendData);
+        pinMode(buzzerPin, OUTPUT);
+    }
+
+    void loop() {
+        if (Serial.available()) {
+            int cmd = Serial.read();
+            if (cmd == 49)
+            tone(buzzerPin, 500);
+            if (cmd == 48)
+            noTone(buzzerPin);
+        }
+        delay(1);
+    }
+
+    void sendData() {
+        int val1 = analogRead(0) / 4;
+        int val2 = analogRead(1) / 4;
+        int val3 = analogRead(2) / 4;
+        Serial.write("A0");
+        Serial.write(val1);
+        Serial.write("A1");
+        Serial.write(val2);
+        Serial.write("A2");
+        Serial.write(val3);
+    }
+\end{minted}
+
+\subsubsection*{Программа для анализа видеопотока}
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    import cv2
+    import dlib
+    import numpy as np
+    from numpy.linalg import norm
+    from imutils import face_utils
+    from serial import Serial
+    from collections import deque
+    from struct import unpack
+    import threading
+
+    albeta, gsr, hr = 0, 0, 0
+    runReading = True
+
+
+    class DriverControl:
+        """Класс для определения направления поворота головы. Подробности по адресу
+        www.learnopencv.com/head-pose-estimation-using-opencv-and-dlib/ """
+
+        def __init__(self, size):
+            """ Аргументы:
+            size - разрешение изображения
+            Переменные экземпляра класса:
+            maxFrames - Число последовательных кадров на видео, для которых
+            должны выполняться условия cрабатывания
+            пьезоэлемента, преждем чем его активировать. 
+            earThold -  порог ширины открытия глаз выше ниже которого глаза считаются закрытыми """
+            self.size = size
+            self.model_points = np.array([
+                (0.0, 0.0, 0.0),
+                (0.0, -330.0, -65.0),
+                (-225.0, 170.0, -135.0),
+                (225.0, 170.0, -135.0),
+                (-150.0, -150.0, -125.0),
+                (150.0, -150.0, -125.0)
+            ])
+            self.focal_length = size[1]
+            self.center = (size[1]/2, size[0]/2)
+            self.camera_matrix = np.array([
+                [self.focal_length, 0, self.center[0]],
+                [0, self.focal_length, self.center[1]],
+                [0, 0, 1]
+            ], dtype='double')
+            self.dist_coeffs = np.zeros((4, 1))
+            self.nFrames = 0
+            self.maxFrames = 16
+            self.earThold = 0.3
+
+        def getNosePoint(self, shape):
+            """Вычисляет направление поворота головы.
+            Аргументы:
+                    shape - массив ключевых точек лица
+            Возвращаемые значения:
+                    nosePoint - координаты конца вектора, указывающего направление
+                            головы. Начало вектора - ключевая точка лица
+                            с индексом 30.
+            """
+            if shape is None:
+                return (0, 0)
+            image_points = np.array([
+                shape[30], 	# Nose tip
+                shape[8],  	# Chin
+                shape[45], 	# Left eye left corner
+                shape[36], 	# Right eye right corne
+                shape[54], 	# Left Mouth corner
+                shape[48]  	# Right mouth corner
+            ], dtype="double")
+
+            (success, rotation_vector,
+            translation_vector) = cv2.solvePnP(self.model_points,
+                                                image_points,
+                                                self.camera_matrix,
+                                                self.dist_coeffs,
+                                                flags=cv2.SOLVEPNP_ITERATIVE)
+            (nose_end_point2D, jacobian) = cv2.projectPoints(np.array([(0.0, 0.0,
+                                                                        1000.0)]),
+                                                            rotation_vector,
+                                                            translation_vector,
+                                                            self.camera_matrix,
+                                                            self.dist_coeffs)
+            nosePoint = (int(nose_end_point2D[0][0][0]),
+                        int(nose_end_point2D[0][0][1]))
+            return nosePoint
+
+        def getEAR(self, shape):
+            """Вычисляет ширину открытия глаз.
+            Аргументы:
+                    shape - массив ключевых точек лица
+            """
+            leftH = (norm(shape[37]-shape[41]) + norm(shape[38]-shape[40])) / 2
+            leftW = norm(shape[36]-shape[39])
+            leftEAR = leftH / leftW
+            rightH = (norm(shape[43]-shape[47]) + norm(shape[44]-shape[46])) / 2
+            rightW = norm(shape[42]-shape[45])
+            rightEAR = rightH / rightW
+            EAR = (leftEAR + rightEAR) / 2
+            return EAR
+
+        def checkDriver(self, shape):
+            """Возвращает True если человек дольше чем на maxFrames кадров закрыл
+            глаза, смотрит на свой мобильный, который лежит у него на колене или
+            смотрит на автомагнитолу; иначе - False.
+            Аргументы:
+                shape - массив ключевых точек лица
+            """
+            # Получаем координату конца вектора направления поворота головы
+            nosePoint = self.getNosePoint(shape)
+            # Вычисляем ширину открытия глаз
+            ear = self.getEAR(shape)
+            # Проверяем не ниже ли порога ширина открытия глаз и не опустился ли
+            # конец вектора направления поворота головы ниже верхней губы
+            if ear < self.earThold or nosePoint[1] > shape[62][1]:
+                self.nFrames += 1
+                if self.nFrames >= self.maxFrames:
+                    return False
+            else:
+                self.nFrames = 0
+                return True
+
+
+    class LandmarkDetector:
+        """Класс для поиска ключевых точек лица на изображении"""
+
+        def __init__(self, modelPath='shape_predictor_68_face_landmarks.dat', showLandmarks=False):
+            """Аргументы:
+            modelPath - путь к файлу с предобученной моделью для поиска
+                        ключевых точек.
+            showLandmarks - отмечать ли ключевые точки на лице."""
+            self.detector = dlib.get_frontal_face_detector()
+            self.predictor = dlib.shape_predictor(modelPath)
+            self.showLandmarks = showLandmarks
+
+        def getLandmarks(self, image):
+            """Возвращает массив с координатами ключевых точек.
+            Аргументы:
+                    image - изображение для поиска ключевых точек"""
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            rects = self.detector(gray, 0)
+            shape = None
+
+            for rect in rects:
+                (bX, bY, bW, bH) = face_utils.rect_to_bb(rect)
+                cv2.rectangle(image, (bX, bY), (bX + bW, bY + bH),
+                            (0, 255, 0), 1)
+                shape = self.predictor(gray, rect)
+                shape = face_utils.shape_to_np(shape)
+                if self.showLandmarks is True:
+                    for (x, y) in shape:
+                        cv2.circle(image, (x, y), 1, (0, 0, 255), -1)
+
+            return shape
+
+
+    def launchVideo(videoSource, arduinoPort):
+        """Воспроизводит видео, подаёт команды на Arduino. Для завершения программы
+        нажать q.
+        Аргументы:
+        videoSource - источник видеопотока.
+        arduinoPort - COM-порт к которому подключается Arduino"""
+        landDetector = LandmarkDetector()
+        cap = cv2.VideoCapture(videoSource)
+        res = np.array((cap.get(4), cap.get(3)), dtype=int)
+        dc = DriverControl(res)
+        ser = Serial(arduinoPort, 115200)
+        collector = threading.Thread(target=collectData, args=(ser,))
+        collector.start()
+        while True:
+        # Считываем кадр
+            ret, frame = cap.read()
+            if ret:
+                # Ищем ключевые точки лица
+                shape = landDetector.getLandmarks(frame)
+                if shape is not None:
+                    # Проверяем не выполняется ли одно из условий задачи.
+                    driverOK = dc.checkDriver(shape)
+                if driverOK is False:
+                            # Если выполняется, шлём на Arduino символ "1"
+                    ser.write(b'1')
+                else:
+                    ser.write(b'0')
+                cv2.putText(frame, 'Alpha to Beta = {:.2f}'.format(albeta),
+                            (20, 20), cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5, (0, 255, 0), 1)
+                cv2.putText(frame, 'Heart rate = {:.2f} bpm'.format(hr),
+                            (20, 40), cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5, (0, 255, 0), 1)
+                cv2.putText(frame, 'GSR level = {:.2f} V'.format(gsr),
+                            (20, 60), cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5, (0, 255, 0), 1)
+                cv2.imshow("Output", frame)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+            global runReading
+        runReading = False
+        collector.join()
+        cap.release()
+        ser.close()
+        cv2.destroyAllWindows()
+
+
+    def equalize(ser):
+        """Считывает данные с последовательного порта таким образом, чтобы после
+        завершения работы equalize следующее сообщение начиналось с "A0"
+        """
+        buf = (None, None)
+        a0 = (b'A', b'0')
+        while buf != a0:
+            buf = (buf[1], ser.read(1))
+            ser.read(7)
+
+
+    def getAlBeta(eeg):
+        """Возвращает соотношение суммы амплитуд компонент альфа-ритма к сумме
+        амплитуд компонент бета-ритма. eeg - отрезок сигнала ЭЭГ длительностью 1 с
+        """
+        spectrum = np.abs(np.fft.fft(eeg))
+        albeta = sum(spectrum[8:14]) / sum(spectrum[15:31])
+        return albeta
+
+
+    class Pulse():
+        """Класс для вычисления ЧСС"""
+
+        def __init__(self):
+            """Длину дека data в котором хранятся данные берём из расчёта поместить
+            в него 10 сердечных сокращений при ЧСС 40 ударов в минуту."""
+            self.data = deque(maxlen=15*250)
+
+        def getHR(self, ecg):
+            """ Вычисляет ЧСС"""
+            # Записываем в конец дека последние поступившие данные
+            self.data += ecg
+            # Порог для поиска вершины R-зубца
+            thold = 0.9 * (max(self.data) - min(self.data)) + min(self.data)
+            peaks = 0
+            # В first записываем индекс вершины первого R-пика, в last - десятого
+            last, first = None, None
+            i = len(self.data) - 10
+            # Пики ищем с конца массива, так как нас интересуют последние биения
+            while i > 10:
+                i -= 1
+                if self.data[i] > self.data[i+10] and \
+                        self.data[i] > self.data[i-10] and self.data[i] > thold:
+                        peaks += 1
+                        i -= 80
+                if peaks == 1:
+                    last = i
+                if peaks == 10:
+                    first = i
+            if (last is not None) and (first is not None):
+                dt = (last - first) / 250 / 9
+                hr = 60 / dt
+                return hr
+            return 0
+
+
+    def collectData(ser):
+        """Вычисляет отношение альфа к бета, значение КГР и ЧСС
+        Аргументы:
+        ser - объект класса Serial"""
+        global albeta, gsr, hr
+        pulse = Pulse()
+        equalize(ser)
+        while runReading:
+            chunk = ser.read(250 * 9)
+            albeta = getAlBeta(unpack(b'250B', chunk[5::9]))
+            gsr = chunk[8] * 5 / 255
+            hr = pulse.getHR(unpack(b'250B', chunk[2::9]))
+
+
+    if __name__ == '__main__':
+        launchVideo(0, 'COM10')
+
+\end{minted}
+
+
