@@ -394,3 +394,26 @@
 \hline
 \end{tabular}
 }
+
+\newcommand{\titlePage}[1]{
+  \begin{titlepage}
+    \vspace*{\stretch{1.0}}
+        \begin{wrapfigure}{l}{0.5\linewidth}
+            \vspace{-80pt}
+            \begin{center}
+                \includegraphics[width=3cm]{tasks/NTI_logo_black}
+            \end{center}
+            \vspace{-20pt}
+        \end{wrapfigure}
+        
+        \hspace{-90pt}\fontsize{28}{0}\textbf{Олимпиада НТИ}
+        \vspace{1cm}
+
+        \begin{center}
+            \huge{Профиль: <<#1>>} \\
+        \end{center}
+
+        \noindent\large{5. Материалы заданий олимпиады школьников отборочного и заключительного этапов олимпиады, ответы на заданиия заключительного этапа с указанием выставляемых баллов за каждое задание}
+    \vspace*{\stretch{2.0}}
+  \end{titlepage}
+}
