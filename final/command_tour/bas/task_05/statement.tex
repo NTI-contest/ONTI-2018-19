@@ -1,4 +1,4 @@
-\assignementTitle{}{35}{}
+\assignementTitle{}{10}{}
 
 Напишите программу полета БПЛА на заданную точку. Полет на заданную точку осуществить при помощи регулятора курса, разработанного в задаче 4. Решение задачи проверить в ходе летных испытаний.
 
@@ -16,7 +16,8 @@
         \item	Коэффициент пересчета градусы – ШИМ: 2.
     \end{itemize}
 \end{enumerate}
-Переменные
+
+
 \begin{minted}[fontsize=\footnotesize, linenos]{cpp}
 float presetCoordinates[2] = {56.097714, 35.878395};	// координаты метки
 #define SETPOINT_RADIUS 5	// Окрестность точки, в которой провести съемку
@@ -51,4 +52,4 @@ unsigned long distanceToPreset =
 
 \end{minted}
 
-\includeSolutionIfExistsByPath{}
+\includeSolutionIfExistsByPath{final/command_tour/bas/task_05}
