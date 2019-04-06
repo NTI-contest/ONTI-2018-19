@@ -17,39 +17,4 @@
     \end{itemize}
 \end{enumerate}
 
-
-\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
-float presetCoordinates[2] = {56.097714, 35.878395};	// координаты метки
-#define SETPOINT_RADIUS 5	// Окрестность точки, в которой провести съемку
-#define HEADING_P       4	// Коэффициент П регулятора
-\end{minted}
-Код в цикле
-\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
-// Курс на метку
-double courseToPreset = TinyGPSPlus::courseTo(latitude, longitude, 
-					presetCoordinates[0], presetCoordinates[1]);
-
-// Расстояние до метки
-unsigned long distanceToPreset = 
-	(unsigned long) TinyGPSPlus::distanceBetween(latitude, longitude, 
-		presetCoordinates[0], presetCoordinates[1]);
-		
-	//Выдача сигнала в заданном радиусе до точки
-	if(distanceToPreset <= SETPOINT_RADIUS) digitalWrite(4, 1);
-	else digitalWrite(4, 0);
-
-	// Стабилизатор курса
-	double set_roll = constrain(1500 + 
-		HEADING_P*(courseToPreset - heading), 1350, 1650);
-
-	// Расчет управления на стабилизатор крена
-	double Koeff = 2.0;		// коэффициент перевода градусов в ШИМ
-	pwmAil = constrain(1500 + 
-		Koeff*(map(set_roll, 1000, 2000, -20, 20)), 1350, 1650);
-
-	// Выдача ШИМ
-	AIL.writeMicroseconds(pwmAil);
-
-\end{minted}
-
 \includeSolutionIfExistsByPath{final/command_tour/bas/task_05}
