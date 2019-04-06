@@ -1,48 +1,72 @@
 \solutionSection
 
-\subsubsection*{Спутник}
+\subsubsection*{Интеграция СУПН и спутника}
+
+Интеграция заключается в адаптации написанных ранее решений и сборке устройств в единую сеть.
 
 \begin{enumerate}
-    \item Проверка работоспособности устройств:
+    \item Код для БКУ:
     
-    ДУС:
+    \inputminted[fontsize=\footnotesize, linenos]{python}{final/command_tour/dzz/task_03/source_1.py}
 
-\inputminted[fontsize=\footnotesize, linenos]{python}{final/command_tour/dzz/task_01/source_1.py}
-
-    Магнитометр:
-
-\inputminted[fontsize=\footnotesize, linenos]{python}{final/command_tour/dzz/task_01/source_2.py}
-
-    Маховик:
-
-\inputminted[fontsize=\footnotesize, linenos]{python}{final/command_tour/dzz/task_01/source_3.py}
-
-    \item Стабилизация
-
-    Пример кода для стабилизации:
-
-\inputminted[fontsize=\footnotesize, linenos]{python}{final/command_tour/dzz/task_01/source_4.py}
-
+    \item Код для Arduino можно оставить таким же, как и в предыдущем пункте.
+    \item Пример кода для Raspberry:
+    
+    \inputminted[fontsize=\footnotesize, linenos]{python}{final/command_tour/dzz/task_03/source_2.py}
 \end{enumerate}
 
-\subsubsection*{СУПН}
+Связка из трёх устройств будет работать, если одновременно запустить на исполнение код БКУ и код на Raspberry.
 
-Первоначально подключение Raspberry к ПК осуществляется через патч-корд. Ниже приведен алгоритм действий как можно подключить Raspberry к ПК с GNU/Linux-системой.
+\subsubsection*{Полная интеграция}
 
+На данном этапе остаётся собрать все устройства в единую сеть, осуществить крепление оптической системы к спутнику и произвести юстировку. 
+
+Проектирование группировки
+
+Даны области съёмки:
 \begin{enumerate}
-    \item Можно установить пакет, который поможет осуществить подключение Raspberry к вашему ПК. Например, это может быть dnsmasq. Для этого наберите в терминале:
-    \putImgWOCaption{15cm}{1}
-    \item Далее не лишним будет создать ethernet-соединение, позволяющее подключаться устройствам к вашему ПК, используя диспетчер сети.
-    \item Используя dnsmasq можно определить IP, который имеет Raspberry в локальном подключении:
-    \putImgWOCaption{15cm}{2}    
-    IP вашей Raspberry в данном случае - 10.42.0.90
-    \item Далее подключимся к Raspberry по ssh:
-    \putImgWOCaption{15cm}{3}
+    \item 68-69, 73-74
+    \item 70-71, 73-74
+    \item 73-74, 70-72
+    \item 71-72, 64-65
+    \item 70-71, 57-59
+    \item 70-71, 48-49
+    \item 69-70, 43-44
+    \item 69-70, 37-38
+    \item 68-69, 33-35
 \end{enumerate}
 
-Пароль по умолчанию: raspberry
+И камеры с соответствующими характеристиками:
 
-Если всё прошло успешно имя пользователя сменится на pi@raspberrypi.
+\begin{table}[H]
+    \begin{center}
+        \begin{tabular}{|p{2cm}|p{2cm}|p{3cm}|p{3cm}|p{3cm}|}
+            \hline Тип и диапазон &Диапазон съемки & Ширина полосы при размещении на высоте 500 км, в км & Пространственное разрешение на высоте 500 км, в м & Условная стоимость аппарата с камерой этого типа \\
+            \hline
+            HR1 / ВД & ВД & 44 & 8 & 2 \\
+            \hline
+            HR2 / ВД & ВД & 23 & 4 & 2 \\
+            \hline
+            HR3 / ВД & ВД & 16 & 3 & 3 \\
+            \hline
+            HR4 / ВД & ВД & 88 & 8 & 4 \\
+            \hline
+            HR5 / ВД & ВД & 47 & 4 & 4 \\
+            \hline
+            HR6 / ВД & ВД & 32 & 3 & 6 \\ 
+            \hline
+        \end{tabular}
+    \end{center}
+\end{table}
 
-Теперь у нас есть доступ к терминалу Raspberry, и мы можем ей управлять.
- 
+\textit{Пример решения:}
+
+\putImgWOCaption{13cm}{1}
+
+\putImgWOCaption{13cm}{2}
+
+\putImgWOCaption{13cm}{3}
+
+\putImgWOCaption{13cm}{4}
+
+\putImgWOCaption{13cm}{5}

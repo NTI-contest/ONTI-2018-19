@@ -1,18 +1,16 @@
-def control():
-    num = 1
-    print "Reset magnetometer #%d" % num
-    magnetometer_request_reset(num)
-    sleep(1)
-    print "Enable magnetometer #%d" % num
-    magnetometer_turn_on(num)
-    print "Get RAW data from magnetometer #%d" % num
-    for i in range(0,10):
-        (ret, x, y, z) = magnetometer_request_raw(num)
-        if ret==0:
-            print '[%d] (x, y, z) = %d %d %d' % (i+1, x, y, z)
-        else:
-            print '[%d] Fail!' % (i+1)
-        sleep(1)
-    print "Disable magnetometer #%d" % num
-    magnetometer_turn_off(num)
-    pass
+#!/usr/bin/env python
+
+import serial 
+import time 
+import os
+
+ser=serial.Serial("/dev/ttyACM0",9600) 
+ser.baudrate=9600
+ 
+read_ser=ser.readline() 
+print(read_ser)
+if read_ser!='0':
+    while True:
+        os.system ("sudo curl -s -o /dev/null http://192.168.88.67:8080/0/action/snapshot")
+        time.sleep(0.5)
+        os.system ("sudo scp lastsnap.jpg terfire@192.168.88.156:\ОНТИ/Test1")
