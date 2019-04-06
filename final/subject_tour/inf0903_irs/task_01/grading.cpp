@@ -44,7 +44,8 @@ int main(int argc, char * argv[])
         n++;
 
         if (!compareWords(j, p))
-            quitf(_wa, "%d%s lines differ - expected: '%s', found: '%s'", n, englishEnding(n).c_str(), compress(j).c_str(), compress(p).c_str());
+            quitf(_wa, "%d%s lines differ - expected: '%s', found: '%s'", n, 
+            englishEnding(n).c_str(), compress(j).c_str(), compress(p).c_str());
     }
     
     if (n == 1)
