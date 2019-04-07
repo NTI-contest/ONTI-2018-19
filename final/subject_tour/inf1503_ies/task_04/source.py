@@ -6,6 +6,7 @@ rlrl
 """
 
 import random
+import sys
 
 SEED = 6161
 SUITE_SIZE = 20

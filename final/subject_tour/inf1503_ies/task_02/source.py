@@ -1,4 +1,5 @@
 import random
+import sys
 
 random.seed(6162)
 SUITE_SIZE = 10

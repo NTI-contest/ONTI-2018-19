@@ -1,4 +1,5 @@
 import random
+import sys
 
 SEED = 6161
 NUM_CUBES = 6
