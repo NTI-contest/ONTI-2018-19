@@ -1,0 +1,44 @@
+   {
+	"width":12, 
+	"height":12,
+	"all_points": {
+		"Sherbinina": {
+			"x": 2,
+			"y": 3,
+			"coords": {
+				"latitude": 52.287527,
+				"longitude": 104.291251
+			},
+			"delay_time": 6
+		},
+	…
+}
+	"chosen_points": {
+		"Sherbinina": {
+			"x": 2,
+			"y": 3,
+			"coords": {
+				"latitude": 52.287527,
+				"longitude": 104.291251
+			},
+			"delay_time": 6
+	},
+…
+},
+"graphs": {
+"graph_1": {
+		"edges": [
+				{
+			"from": "Sherbinina",
+			"to": "merchant house",
+			"time":6
+		},
+…
+				]
+			},
+		…
+	},
+"E":36,
+"time":80
+
+}

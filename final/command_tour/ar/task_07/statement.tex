@@ -1,0 +1,35 @@
+\assignementTitle{Проектирование и расчет маршрутов, их визуализация.}{}{}
+
+Проектирование и расчет нескольких моделей маршрутов для мультигрупп с разными вариациями локаций. Возможность отображения маршрута конкретной группы и всех групп на виртуальной карте.
+\begin{enumerate}
+    \item    Для разного кол-ва участвующих в игре групп (для 3, для 4, для 5, для 6, для 7) выберите достопримечательности, которые нужно пройти. Обновите JSON (пример \url{https://drive.google.com/open?id=1cnqAJA9O1woMV3vyQJy0ZMEhu9VDaVEi})
+    \item    Для разного кол-ва участвующих в игре групп (для 3, для 4, для 5, для 6, для 7) с помощью сервиса \url{http://table.nti-ar.ru} составьте граф следования для каждой группы. Выгрузите JSON.
+\end{enumerate}
+
+\markSection
+\begin{itemize}
+    \item 	1 конфигурация графа - 15,625 баллов. Максимально кол-во графов за все конфигурации 125 баллов. Т.е. если каждая разработанная конфигурация 15,625 баллов, то для максимального оценивания достаточно 8 конфигураций. Если же максимальный балл каждую конфигурацию набрать не получается, то увеличением числа конфигураций можно набрать максимальную оценку. 
+    \item Валидно составлен JSON по формату 3 (пример - \url{https://drive.google.com/open?id=13WOLWes08m5z1rJxOwQE9dz-UtUqlm-j}  в приложении) - 10 баллов
+\end{itemize}
+
+\solutionSection
+
+Реализовано 4 конфигурации, каждая из которых примерно оценивается в 10, 720 баллов. (формат 3: \url{https://drive.google.com/open?id=13WOLWes08m5z1rJxOwQE9dz-UtUqlm-j} ). При разработке еще 8 таких же конфигураций можно получить максимальный балл. 
+
+Фрагмент (\url{https://drive.google.com/open?id=1fm3D9w6QDfAB8LcO2xAEBl35qAFxQs4f} ) одной из разработанных конфигураций (входная для отправки на сервер):
+
+\inputminted[fontsize=\footnotesize, linenos]{json}{final/command_tour/ar/task_07/source_1.json}
+
+Фрагмент (\url{https://drive.google.com/open?id=1-GMPWVK7We9NQMHlBFJuSe6L7tKC0K53} ) - конфигурация выходная с сервера:
+
+\inputminted[fontsize=\footnotesize, linenos]{json}{final/command_tour/ar/task_07/source_2.json}
+
+Скриншоты работы в сервисе : 
+
+\putImgWOCaption{12cm}{1}
+
+\textbf{Оценка:}
+\begin{itemize}
+    \item	Одна конфигурация оценивается в 10, 720 баллов. При наличии 14 конфигураций работа получает 125 баллов.
+    \item	Предоставленный JSON валиден, т.е. проходит проверку в JSON-валидаторе(\url{https://jsonlint.com}) и формат совпадает с форматом-3 (\url{https://drive.google.com/open?id=13WOLWes08m5z1rJxOwQE9dz-UtUqlm-j} ) - 10 баллов
+\end{itemize}
