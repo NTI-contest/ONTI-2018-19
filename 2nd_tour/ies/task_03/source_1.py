@@ -1,7 +1,38 @@
 import random
 import copy
+import sys
 
 random.seed(796)
+
+def genLow():
+    result=[]
+    for _ in range(4):
+        a = round(100*random.random())
+        b = round(100*random.random())
+        result.append((a,b))
+    return result
+
+def genHigh():
+    result=[]
+    for _ in range(4):
+        a = random.randrange(8)
+        b = random.randrange(8)
+        result.append((a,b))
+    return result
+
+def genLG():
+    return game(genLow())
+
+def genHG():
+    return game(genHigh())
+
+def genTourStr():
+    l = genLow()
+    h1 = genHigh()
+    h2 = genHigh()
+    h3 = genHigh()
+    h4 = genHigh()
+    return [h4,h3,h2,h1,l]
 
 class game:
     aa = 0
@@ -184,14 +215,61 @@ def ans(tour):
     best = 0
     for x in range(8):
         que = fullTournament(t,x)
+        #print("QUE",x,que)
         if que > best:
             best = que
             result = 1
         elif que == best:
             result += 1
+    #print("-----",best)
     return result
+
+def test():
+    g = dummyLowGame
+    print(simpleGame(g,2,7))
+    print("~~~~~~~~~~")
+    print(scoreGame(g,True,True))
+    print("~~~~~~~~~~")
+    prettyGame(flipGame(dummyLowGame))
+    print("~~~~~~~~~~")
+    prettyGame(foldGame(dummyHighGame1,dummyLowGame))
+    print("FF",simpleGame(foldGame(dummyHighGame4,dummyLowGame),3,0))
+    print("-")
+    prettyGame(foldGame(dummyHighGame2,dummyLowGame))
+    print("-")
+    prettyGame(foldGame(dummyHighGame3,dummyLowGame))
+    print("-")
+    prettyGame(foldGame(dummyHighGame4,dummyLowGame))
+    #print("~~~~~~~~~~")
+    #prettyTour(dummyTour)
+    print("~~~~~~~~~~")
+    test4_2=foldGame(dummyHighGame3,foldGame(dummyHighGame4,dummyLowGame))
+    prettyGame(test4_2)
+    print("~~~~~~~~~~")
+    for x in range(8):
+        for y in range(8):
+            print(x,y,playTournament(dummyTour,x,y))
+    print("~~~~~~~~~~")
+    print(fullTournament(dummyTour,2))
+    #prettyTour(flipTournament(dummyTour))
+    print(ans(dummyTour))
+    print(ans(fromStrTour(strDummyTour)))
+    for x in generate():
+        print(ans(fromStrTour(x)))
+
+def generate():
+    return [ str(genTourStr()) for _ in range(30) ]
 
 def solve(dataset):
     return str(ans(fromStrTour(dataset)))
 
-print(solve(input()))
+def check(reply,clue):
+    their = eval(reply)
+    ours = eval(clue)
+    if their == ours:
+        return True
+    else:
+        return False
+
+
+print(solve(sys.stdin.read()))

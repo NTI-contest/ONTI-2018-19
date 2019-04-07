@@ -1,6 +1,7 @@
 import random
 import copy
 import itertools
+import sys
 
 totalPlayers = 5
 totalFlowers = 3
@@ -14,6 +15,8 @@ rightLim = 2
 
 def patchLim(r):
     return r*(rightLim-leftLim) + leftLim
+
+random.seed(883)
 
 def smoothgen():
     num2 = []
@@ -141,7 +144,80 @@ def solu(values):
     distro = oldDistro
     return result
 
+def testD():
+    global distro
+    oldDistro = copy.deepcopy(distro)
+    distro = testDistMap2
+    val = d(1,1,50)
+    result = val == 8.283601731573895e-3
+    if not result:
+        print(val)
+    distro = oldDistro
+    return result
+
+def testLessThan():
+    global distro
+    oldDistro = copy.deepcopy(distro)
+    distro = testDistMap2
+    val = probLessThanValue(50,0,0)
+    result =  (val == 0.7391552524635776)
+    if not result:
+        print(val)
+    distro = oldDistro
+    return result
+
+def testOutcomeSucc():
+    global distro
+    oldDistro = copy.deepcopy(distro)
+    distro = testDistMap2
+    val = probOutcomeSucc(allP,[1,2],0,50,1)
+    result = val == 5.269109353831852e-7
+    if not result:
+        print(val)
+    distro = oldDistro
+    return result
+
+def testResult():
+    global distro
+    oldDistro = copy.deepcopy(distro)
+    distro = testDistMap2
+    val = answer()
+    result = val == 8.9573356038474e-2
+    if not result:
+        print(val)
+    distro = oldDistro
+    return result
+
+def test():
+    print("testD",testD())
+    print("testLessThan",testLessThan())
+    print("testOutcomeSucc",testOutcomeSucc())
+    print("testResult",testResult())
+
+def generate():
+    return [ str(genDistro())+"\n" for _ in range(10) ]
+
 def solve(dataset):
     return str(solu(eval(dataset)))
 
-solve(input())
+def check(reply,clue):
+    their = eval(reply)
+    our = eval(clue)
+    if abs(our-their) < 1e-10:
+        return True
+    if our > their:
+        feedback = "Слишком мало, можно лучше!"
+    if our < their:
+        feedback = "Слишком много!"
+    if their < 0:
+        feedback = "Как минимум ноль!"
+    return False, feedback
+
+def testStepik():
+    tests = generate()
+    for raw in tests:
+        sol = solve(raw)
+        print(check(sol,solve(raw)))
+
+
+print(solve(sys.stdin.read()))
