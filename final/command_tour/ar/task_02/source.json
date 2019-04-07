@@ -1,0 +1,14 @@
+{
+	"width":12, 
+	"height":12,
+	"all_points": {
+		"Sherbinina": {
+			"x": 2,
+			"y": 3,
+			"coords": {
+				"latitude": 52.287527,
+				"longitude": 104.291251
+			}
+		}
+    }
+}
