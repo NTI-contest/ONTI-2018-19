@@ -43,7 +43,8 @@ def greedilyFindAdjust(net):
     power = p.powerBalance(p.network)
     print('Preparations are complete')
     while True:
-        g = greed(costBalance(power,adj-adjStep),costBalance(power,adj),costBalance(power,adj+adjStep),adjStep)
+        g = greed(costBalance(power,adj-adjStep),costBalance(power,adj),
+                  costBalance(power,adj+adjStep),adjStep)
         if g == 0:
             return adj
         else:

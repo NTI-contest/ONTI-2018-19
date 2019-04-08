@@ -59,7 +59,7 @@ def ctest():
     d1,rx,ry = circum1(ax,ay,bx,by,cx,cy)
     d2,ux,uy = circum2(ax,ay,bx,by,cx,cy)
     if rx == ux and ry == uy:
-        ttest()
+        test()
     else:
         print("1da",dist(ax,ay,rx,ry))
         print("1db",dist(bx,by,rx,ry))

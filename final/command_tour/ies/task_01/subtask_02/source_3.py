@@ -14,7 +14,8 @@ def findCumulativeCost(net1,net2):
     powerBefore = powerBalance(networkBefore)
     powerAfter = powerBalance(networkAfter)
     if net1.solar + net1.wind != net2.solar + net2.wind:
-        return fuzzyop((fuzzyop(after,before,o.sub)),(fuzzyop(powerBefore,powerAfter,o.sub)),o.div)
+        return fuzzyop((fuzzyop(after,before,o.sub)),
+                       (fuzzyop(powerBefore,powerAfter,o.sub)),o.div)
     else:
         return fuzzyop(fuzzyop(after,before,o.sub),[(168,1)],o.div)
  

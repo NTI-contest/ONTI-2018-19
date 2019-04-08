@@ -47,7 +47,7 @@ def circum2(Ax,Ay,Bx,By,Cx,Cy):
     D = 2*(Ax*(By-Cy)+Bx*(Cy-Ay)+Cx*(Ay-By))
     Ux = ((Ax**2+Ay**2)*(By-Cy)+(Bx**2+By**2)*(Cy-Ay)+(Cx**2+Cy**2)*(Ay-By))/D
     Uy = ((Ax**2+Ay**2)*(Cx-Bx)+(Bx**2+By**2)*(Ax-Cx)+(Cx**2+Cy**2)*(Bx-Ax))/D
-    return dist(Ux,Uy,Bx,By),Ux,U
+    return dist(Ux,Uy,Bx,By),Ux,Uy
 
 def ctest():
     ax = random.random()
@@ -59,7 +59,7 @@ def ctest():
     d1,rx,ry = circum1(ax,ay,bx,by,cx,cy)
     d2,ux,uy = circum2(ax,ay,bx,by,cx,cy)
     if rx == ux and ry == uy:
-        ttest()
+        test()
     else:
         print("1da",dist(ax,ay,rx,ry))
         print("1db",dist(bx,by,rx,ry))

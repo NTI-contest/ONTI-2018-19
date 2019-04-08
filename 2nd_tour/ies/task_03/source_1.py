@@ -115,15 +115,20 @@ def fromStrTour(t):
     #print("LEN3",len(result.highs))
     return tour(games)
 
-#dummyHighGame1 = Game {aa = (Eye,Rematch), ab = (Eye2,AllA), ba = (Eye2,AllB), bb = (AllB,Eye)}
+#dummyHighGame1 = Game {aa = (Eye,Rematch), ab = (Eye2,AllA), 
+#                       ba = (Eye2,AllB),   bb = (AllB,Eye)}
 dummyHighGame1 = game([(2,7),(6,0),(6,1),(1,2)])
-#dummyHighGame2 = Game {aa = (Eye2,AllA),       ab = (Eye,Eye),       ba = (Eye,AllA),     bb = (Rematch,Generous)}
+#dummyHighGame2 = Game {aa = (Eye2,AllA),   ab = (Eye,Eye),
+#                       ba = (Eye,AllA),    bb = (Rematch,Generous)}
 dummyHighGame2 = game([(6,0),(2,2),(2,0),(7,5)])
-#dummyHighGame3 = Game {aa = (Generous,Greedy), ab = (MinMax,AllA),   ba = (Eye,Generous), bb = (MinMax,Generous)}
+#dummyHighGame3 = Game {aa = (Generous,Greedy), ab = (MinMax,AllA),   
+#                       ba = (Eye,Generous),    bb = (MinMax,Generous)}
 dummyHighGame3 = game([(5,4),(3,0),(2,5),(3,5)])
-#dummyHighGame4 = Game {aa = (Eye,AllB),        ab = (Generous,AllA), ba = (Greedy,Eye),   bb = (AllA,Generous)}
+#dummyHighGame4 = Game {aa = (Eye,AllB),        ab = (Generous,AllA), 
+#                       ba = (Greedy,Eye),      bb = (AllA,Generous)}
 dummyHighGame4 = game([(2,1),(5,0),(4,2),(0,5)])
-dummyTour = tour([dummyLowGame,dummyHighGame1,dummyHighGame2,dummyHighGame3,dummyHighGame4])
+dummyTour = tour([dummyLowGame,dummyHighGame1,dummyHighGame2,
+                               dummyHighGame3,dummyHighGame4])
 
 def choice(strat,game,history):
     if strat == 0: #All A

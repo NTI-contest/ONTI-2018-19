@@ -5,7 +5,7 @@ import System.IO
 import Data.Ord
 import Data.List
  
-testFile = "/home/user/ips2019/sampleData.txt”
+testFile = "/home/user/ips2019/sampleData.txt"
  
 main :: IO ()
 main = do

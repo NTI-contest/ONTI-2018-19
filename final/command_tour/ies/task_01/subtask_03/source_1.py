@@ -25,7 +25,8 @@ current_consumption = 0  # Текущее производство
 current_production = 0  # Текущее потребление
 panels = 1  # Кол-во панелей
 turbines = 0  # Кол-во турбин
-trade10_koeff = 1  # Какую часть средней разницы энергии отправлять на биржу через 10 ходов
+trade10_koeff = 1  # Какую часть средней разницы энергии 
+#                    отправлять на биржу через 10 ходов
 comments = True  # Включены ли комментарии выполненных скриптом действий
 ips.set_order_trace(True)
 average_estimated_production = [0] * 16
@@ -106,7 +107,8 @@ else:
 for i in range(1, z):
     shortage = average_estimated_consumption[i] - average_estimated_production[i]
     if shortage > 25:
-        print('critical: in', i, 'turns shortage', shortage, 'МВт', 'order already placed for')
+        print('critical: in', i, 'turns shortage', shortage, 'МВт', 
+              'order already placed for')
     elif shortage < -25:
         print('critical: in', i, 'turns overgeneration', -shortage, 'МВт')
     elif shortage > 15:
@@ -127,6 +129,8 @@ for i in range(4):
 for offer in psm.exchange:
     if offer.owner == psm.you:
         if offer.amount > 0:
-            print(offer.amount, 'will be bought in', offer.issued - offer.exchange - turn, 'turn(s)')
+            print(offer.amount, 'will be bought in', 
+                  offer.issued - offer.exchange - turn, 'turn(s)')
         else:
-            print(offer.amount, 'will be sold in', offer.issued - offer.exchange - turn, 'turn(s)')
+            print(offer.amount, 'will be sold in', 
+                  offer.issued - offer.exchange - turn, 'turn(s)')

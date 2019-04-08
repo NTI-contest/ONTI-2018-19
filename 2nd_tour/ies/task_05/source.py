@@ -132,7 +132,8 @@ def clause3(cached,lower,upper):
 def userAcceptableShifts(cached,lower,upper):
     result = []
     for i in range(24):
-        if costsOnShift(cached,lower,upper,i) + clause1Threshold <= currentDaily(cached):
+        if costsOnShift(cached,lower,upper,i) + clause1Threshold \
+                                                <= currentDaily(cached):
             result.append(i)
     return result
 
@@ -143,7 +144,9 @@ def clause2(cached,cachedPeaks,lower,upper):
     return result
 
 def evaluateTariffs(cached,cachedPeaks,lower,upper):
-    return clause1(cached,lower,upper) and clause2(cached,cachedPeaks,lower,upper) and clause3(cached,lower,upper)
+    return clause1(cached,lower,upper) \
+        and clause2(cached,cachedPeaks,lower,upper) \
+        and clause3(cached,lower,upper)
 
 def findTariffs(cached,cachedPeaks):
     result = []
