@@ -1,4 +1,144 @@
-\codeExample
+\solutionSection
 
-\inputPythonSource
-%\inputminted[fontsize=\footnotesize, linenos]{python}{1st_tour/inf/try_1/task_03/source.py}
+Во второй задаче второго блока на записи электроэнцефалограммы требуется определить число участков с увеличенной амплитудой альфа-ритма. Для начала скачаем образец сигнала и начнём работать с ним.
+
+Построим график амплитуды альфа-ритма в сигнале от времени. Для этого скопируем функции get\_spectrum и get\_alpha из предыдущей задачи. Единственное отличие будет заключаться в переменной Fs функции get\_spectrum - в данной задаче частота оцифровки сигнала равна 256 Гц.
+
+Сигнал запишем в массив data. Будем разбивать его на равные отрезкии и для каждого из них будем вычислять амплитуду альфа-ритма. Количество точек в отрезке сигнала возьмём равным 256 и запишем в переменную chunk\_size.
+
+В цикле будем перебирать значения переменной start которая будет являться началом отрезка. Амплитуды альфа-ритма будем вычислять с помощью функции get\_alpha и хранить в списке alphas.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    def get_spectrum(y):
+        Fs = 256.0
+        Ts = 1.0/Fs
+        n = len(y)
+        k = np.arange(n)
+        T = n/Fs
+        frq = k/T
+        frq = frq[range(n//2)]
+        Y = np.fft.fft(y)/n
+        Y = Y[range(n//2)]
+        return frq, abs(Y)
+
+    def get_alpha(y):
+        frq, Y = get_spectrum(y)
+        alpha = 0
+        for freq, ampl in zip(frq, Y):
+            if freq > 8 and freq < 13:
+                alpha += ampl
+        return alpha
+
+    data = np.loadtxt('5.txt')
+    alphas = []
+    chunk_size = 256
+    for start in range(0,len(data)-chunk_size,chunk_size):
+        alphas.append(get_alpha(data[start:start+chunk_size]))
+
+    plt.figure(figsize=(20,15))
+    plt.plot(alphas)
+\end{minted}
+
+Построим график полученных значений.
+
+\putImgWOCaption{13cm}{1}
+
+На графике мы видим 19 участков с увеличенной амплитудой альфа-ритма. Для упрощения их подсчёта попробуем сгладить график с помощью комплементарного фильтра
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    def get_spectrum(y):
+        Fs = 256.0
+        Ts = 1.0/Fs
+        n = len(y)
+        k = np.arange(n)
+        T = n/Fs
+        frq = k/T
+        frq = frq[range(n//2)]
+        Y = np.fft.fft(y)/n
+        Y = Y[range(n//2)]
+        return frq, abs(Y)
+
+    def get_alpha(y):
+        frq, Y = get_spectrum(y)
+        alpha = 0
+        for freq, ampl in zip(frq, Y):
+            if freq > 8 and freq < 13:
+                alpha += ampl
+        return alpha
+
+    data = np.loadtxt('5.txt')
+    alphas = []
+    chunk_size = 256
+    for start in range(0,len(data)-chunk_size,chunk_size):
+        alphas.append(get_alpha(data[start:start+chunk_size]))
+
+    for i in range(1,len(alphas)):
+        alphas[i] = 0.8 * alphas[i-1] + 0.2 * alphas[i]
+
+    plt.figure(figsize=(20,15))
+    plt.plot(alphas)
+\end{minted}
+
+Чем больше коэффициент перед i-1 элементом списка, тем сильнее будут сглажены резкие скачки уровня альфа-ритма.
+
+После применения фильтра сигнал стал чище. Теперь подсчитаем число пиков альфа-ритма.
+
+\putImgWOCaption{13cm}{2}
+
+Введём переменную level [строка 32] равную среднему арифметическому максимального и минимального значений уровня альфа-ритма.
+В переменную peaks [строка 33] запишем число найденных пиков [строки 34-36]. Если из двух последовательных значений уровня альфа-ритма первое меньше значения переменной level а второе больше – будем считать что мы нашли пик [строка 37]. Наконец, выведем полученное число пиков.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    import numpy as np
+
+    def get_spectrum(y):
+        Fs = 256.0
+        Ts = 1.0/Fs
+        n = len(y)
+        k = np.arange(n)
+        T = n/Fs
+        frq = k/T
+        frq = frq[range(n//2)]
+        Y = np.fft.fft(y)/n
+        Y = Y[range(n//2)]
+        return frq, abs(Y)
+
+    def get_alpha(y):
+        frq, Y = get_spectrum(y)
+        alpha = 0
+        for freq, ampl in zip(frq, Y):
+            if freq > 8 and freq < 13:
+                alpha += ampl
+        return alpha
+
+    data = np.loadtxt('5.txt')
+    alphas = []
+    chunk_size = 256
+    for start in range(0,len(data)-chunk_size,chunk_size):
+        alphas.append(get_alpha(data[start:start+chunk_size]))
+
+    for i in range(1,len(alphas)):
+        alphas[i] = 0.8 * alphas[i-1] + 0.2 * alphas[i]
+
+    level = (max(alphas)+min(alphas))/2
+    peaks = 0
+    for i in range(1,len(alphas)):
+        if alphas[i-1]<=level and alphas[i]>level:
+            peaks += 1
+    print(peaks)
+\end{minted}
+
+Для обработки сигнала, полученного через поток ввода, заменим 23 строку на 
+
+\begin{minted}[fontsize=\footnotesize]{python}
+    data = np.array([int(s) for s in input().split()])
+\end{minted}
+
+Для проверки решений используется код на языке Python, представленный в Приложении 2.
+

@@ -1,4 +1,80 @@
-\codeExample
+\solutionSection
 
-\inputPythonSource
-%\inputminted[fontsize=\footnotesize, linenos]{python}{1st_tour/inf/try_1/task_03/source.py}
+Во данной задаче требуется найти из случайного набора фотографии те, на которых ширина открытия глаз максимальная и минимальная.
+
+Сначала вычислим ширину открытия глаз для всех фотографий и запишем эти данные в один текстовый файл. Для этого напишем первую программу.
+
+Импортируем все необходимые библиотеки и загрузим предварительно обученные модели для детекции лиц и ключевых точек. Ширину открытия глаз запишем в файл distances. Названия фотографий будем перебирать в цикле, а загружать изображения будем с помощью функции imread библиотеки OpenCV.
+
+Сделаем изображение чёрно-белым и найдём на нём лица с помощью детектора лиц.
+
+Так как у нас на всех изображениях присутствует только одно лицо, то в массиве rects только один элемент.
+
+Поэтому при поиске ключевых точек мы обращаемся элементу rects с индексом 0. После применения метода из модуля fase\_utils в shape хранятся координаты ключевых точек лица.
+
+Далее мы можем рассчитать ширину открытия глаз. На присутствующем в условии задачи изображении нумерация точек начинается с единицы, т.е. 38й точке о которой шла речь в условии соответствует элемент массива shape с индексом 37. Расстояние между точками мы вычисляем с помощью функции norm модуля linalg библиотеки numpy
+
+Затем мы записываем в файл distances строку содержащую номер изображения и ширину открытия глаз.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    import dlib
+    import cv2
+    from numpy.linalg import norm
+    from imutils import face_utils
+    from dlib import shape_predictor
+
+    detector = dlib.get_frontal_face_detector()
+    predictor = shape_predictor('shape_predictor_68_face_landmarks.dat')
+    with open('distances.txt', 'w') as file:
+        for i in range(1,432):
+            name = 'faces/{}.jpg'.format(i)
+            image = cv2.imread(name)
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            rects = detector(gray, 1)
+            shape = predictor(gray, rects[0])
+            shape = face_utils.shape_to_np(shape)
+            dist_eyes = norm(shape[37] - shape[41]) +\
+                        norm(shape[38] - shape[40]) +\
+                        norm(shape[43] - shape[47]) +\
+                        norm(shape[44] - shape[46])
+            dist_eyes /= norm(shape[8] - shape[27])
+
+            file.write('{}\t{}\n'.format(i,dist_eyes))
+\end{minted}
+
+Теперь у нас есть файл, содержащий всю необходимую для решения задачи информацию. Напишем программу, выдающую номера фотографий с максимальной и минимальной шириной открытия глаз.
+
+Считаем содержимое файла distances в словарь dists. Ключом словаря является номер изображения, значением - ширина открытия глаз.
+
+Строку из 50 чисел, определяющую набор изображений из которых нужно найти фотографии с минимальной и максимальной шириной открытия глаз будем хранить в текстовом файле samples. Считаем строку в список с тем же названием.
+
+В переменной max\_name будем хранить название изображения с максимальной шириной открытия глаз, в переменной max\_val — значение, соответствующее данной фотографии. Аналогично для минимальной ширины введём переменные min\_name и min\_val. По умолчанию мы инициализируем их первым элементом списка samples.
+
+Перебрав значения списка samples найдём требуемые изображения.
+
+В конце выведем ответ.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    with open('distances.txt','r') as file:
+        dists = [(l.split()[0],
+                float(l.split()[1])) for l in file.readlines()]
+        dists = dict(dists)
+
+    with open('samples.txt','r') as file:
+        samples = file.readline().split()
+
+    max_name, max_val  = samples[0], dists[samples[0]]
+    min_name, min_val  = samples[0], dists[samples[0]]
+
+    for sample in samples:
+        if max_val < dists[sample]:
+            max_val = dists[sample]
+            max_name = sample
+        if min_val > dists[sample]:
+            min_val = dists[sample]
+            min_name = sample
+            
+    print(max_name, min_name)
+\end{minted}
+
+Если записать в файл samples строку из примера, наша программа выведет числа 183 и 163, что совпадает с ответом из примера. Убедившись, что программа работает верно, мы можем теперь использовать её на любом другом случайном наборе фотографий.

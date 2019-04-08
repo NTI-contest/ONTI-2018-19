@@ -1,4 +1,51 @@
-\codeExample
+\solutionSection
 
-\inputPythonSource
-%\inputminted[fontsize=\footnotesize, linenos]{python}{1st_tour/inf/try_1/task_03/source.py}
+В первой задаче третьего блока требуется построить три модели для классификации опухолей с помощью библиотеки Scikit-Learn, которые на основании измерений опухоли будут прогнозировать её тип с точностью не менее 90%.
+
+Целью данного задания является познакомить участников с библиотекой машинного обучения Scikit-Learn. Рассмотрим для примера три следующих модели:
+
+\begin{itemize}
+    \item логистическая регрессия,
+    \item метод k-ближайших соседей, 
+    \item случайный лес.        
+\end{itemize}
+
+Все три модели с параметрами по умолчанию [строки 7-9] дают достаточную точность на доступном для участников тестовом коде. Уже в таком виде задание выполнено на максимальный балл:
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.ensemble import RandomForestClassifier
+
+    models=[None,None,None]
+
+    models[0] = LogisticRegression(random_state=0)      # 95.1%
+    models[1] = KNeighborsClassifier()                  # 93.0%
+    models[2] = RandomForestClassifier(random_state=0)  # 95.1%
+\end{minted}
+
+Улучшим точность каждого из классификаторов.
+
+Добавим к логистической регресии и методу k-ближайших соседей MinMaxScaler. Изменим солвер у логистической регрессии. Точность двух классификаторов возрастёт до 97.2\%. Изменение параметра criterion у случайного леса увеличит точность до 95.6\%.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.preprocessing import MinMaxScaler
+    from sklearn.pipeline import Pipeline
+
+    models=[None,None,None]
+    
+    models[0] = Pipeline([('scaler', MinMaxScaler()),   # 97.2%
+                ('logreg', LogisticRegression(solver='newton-cg',
+                                        random_state=0))])
+    models[1] = Pipeline([('scaler', MinMaxScaler()),   # 97.2%
+                        ('estimator',KNeighborsClassifier())])
+    models[2] = RandomForestClassifier(criterion='entropy',
+                                    random_state=0)  # 95.6%
+
+\end{minted}
+
+Вот так, за счёт небольших изменений, мы увеличили точность моделей.
+

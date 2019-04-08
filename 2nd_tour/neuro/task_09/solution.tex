@@ -1,4 +1,118 @@
-\codeExample
+\solutionSection
 
-\inputPythonSource
-%\inputminted[fontsize=\footnotesize, linenos]{python}{1st_tour/inf/try_1/task_03/source.py}
+В данной задаче требуется написать код определяющий улыбается ли человек на изображении.
+
+В решении мы будем использовать координаты ключевых точек лица, получаемые с помощью библиотеки Dlib. Их мы будем подавать в качестве признаков для классификатора опорных векторов или SVC реализованного в библиотеке Scikit-Learn.
+
+Импортируем все необходимые модули.
+
+Напишем класс solver [строка 11], у которого конструктор получает в качестве аргумента путь к директории, содержащей изображения для обучения [строка 12].
+
+И есть метод predict, который выводит выводит False если человек на изображении, путь к которому был передан в качестве аргумента, не улыбается и True если улыбается.
+
+Как и предыдущей задаче, загрузим предобученную модель [строки 13-14].
+
+А затем создадим конвейер, который будет масштабировать данные с помощью MinMaxScaler и классифицировать их используя метод опорных векторов. О том, как мы подобрали параметры классификатора, поговорим позднее.
+
+В список data будем записывать координаты ключевых точек, а в список target - улыбается ли человек на изображении.
+
+В переменной file будут перебираться названия всех файлов, хранящихся в папке, поданной конструктору в качестве аргумента [строка 19].
+
+В список data добавляем результат работы функции get\_shape. Именно в этой функции мы будем считывать изображение и находить координаты ключевых точек.
+
+Изображения, на которых люди не улыбаются содержат в названии букву ‘a’, а те, на которых люди улыбаются букву ‘b’. Последние 4 символа названия изображения - это точка и разрешение jpg, буква ‘a’ или ‘b’ - 5 символ с конца. Добавляем в target 0, если человек на изображении не улыбается и 1 если улыбается [строка 22].
+
+Для подачи обучающих данных в классификатор переводим их в массив numpy. [строки 23-24].
+
+В конце работы конструктора обучаем модель [строка 25].
+
+Теперь рассмотрим функцию get\_shape [строка 27].
+
+Считаем изображение путь, к которому был передан функции в качестве аргумента и найдём координаты ключевых точек лица.
+
+В конце работы функции вернём кординаты точек в виде одномерного массива. Для этого воспользуемся методом flatten.
+
+В функции predict сначала получим координаты ключевых точек для изображения, путь к которому был передан функции в качестве аргумента.
+
+Воспользуемся предобученной моделью для определения типа изображения. Метод predict работает с массивом векторов признаков, поэтому используем метод reshape.
+
+Predict возвращает массив. Мы подавали ему только один пример, поэтому predict\_list содержит всего один элемент, к которому мы и обращаемся. Если этот элемент 0, то он будет приведён к значению булевого типа False, а если 1 - то к True, как того и требует условие задачи.
+
+Данный код выдаст на тестовых данных точность порядка 95\%.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    import os
+    import cv2
+    import dlib
+    import numpy as np
+    from imutils import face_utils
+    from sklearn.svm import SVC
+    from sklearn.preprocessing import MinMaxScaler
+    from sklearn.pipeline import Pipeline
+    from dlib import shape_predictor as sh_p
+
+    class Solver:
+        def __init__(self, path_to_dir):
+            self.predictor = sh_p('shape_predictor_68_face_landmarks.dat')
+            self.detector = dlib.get_frontal_face_detector()
+            self.clf = Pipeline([('scaler', MinMaxScaler()),
+                        ('svm', SVC(C=10, kernel='linear'))])
+            data = []
+            target = []
+            for file in os.listdir(path_to_dir):
+                file_name = os.path.join(path_to_dir,file)
+                data.append(self._get_shape(file_name))
+                target.append(0 if file[-5] == 'a' else 1)
+            data = np.array(data)
+            target = np.array(target)
+            self.clf.fit(data,target)
+            
+        def _get_shape(self, file_name):
+            image = cv2.imread(file_name)
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            rects = self.detector(gray, 1)
+            shape = self.predictor(gray, rects[0])
+            shape = face_utils.shape_to_np(shape)
+            return shape.flatten()
+        
+        def predict(self, file_name):
+            shape = self._get_shape(file_name)
+            predict_list = self.clf.predict(shape.reshape(1,-1))
+            return bool(predict_list[0])
+
+\end{minted}
+
+Теперь рассмотрим, как мы подобрали параметры модели.
+
+Импортируем необходимые модули. Обратите внимание на 4 строку. Здесь мы импортируем класс GridSearchCV который осуществляет решётчатый поиск оптимальных параметров. 
+
+Данные загрузим из текстового файла ML.txt [строка 7]. В это файл мы предварительно записали координаты ключевых точек и классы, к которым относятся фотографии, т.е. человек на изображении с улыбкой или без. 
+
+[строка 8]. В X мы запишем вектора признаков, а в y — классы к которым относятся наши примеры [строки 9-10].
+
+Точность нашей модели мы будем проверять на значениях параметров из списка param\_grid.
+
+С помощью GridSearchCV мы можем сравнить точность нашей модели для разных комбинаций параметров и вывести параметры, с которыми модель показала наибольшую точность.
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+    from sklearn.svm import SVC
+    from sklearn.preprocessing import MinMaxScaler
+    from sklearn.pipeline import Pipeline
+    from sklearn.model_selection import GridSearchCV
+    import numpy as np
+
+    data = np.loadtxt('ML.txt')
+    X,y = data[:,:-1],data[:,-1]
+    model = Pipeline([('scaler', MinMaxScaler()),
+                    ('svm', SVC())])
+    param_grid = [
+    {'svm__C': [1, 10, 100, 1000],
+    'svm__kernel': ['linear']},
+    {'svm__C': [1, 10, 100, 1000],
+    'svm__gamma': [0.001, 0.0001],
+    'svm__kernel': ['rbf']},
+    ]
+    clf = GridSearchCV(model, param_grid, cv=10)
+    clf.fit(X, y)
+    print(clf.best_params_)
+\end{minted}

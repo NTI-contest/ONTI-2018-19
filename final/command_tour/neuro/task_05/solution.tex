@@ -75,7 +75,8 @@
             maxFrames - Число последовательных кадров на видео, для которых
             должны выполняться условия cрабатывания
             пьезоэлемента, преждем чем его активировать. 
-            earThold -  порог ширины открытия глаз выше ниже которого глаза считаются закрытыми """
+            earThold -  порог ширины открытия глаз,
+            выше ниже которого глаза считаются закрытыми """
             self.size = size
             self.model_points = np.array([
                 (0.0, 0.0, 0.0),
@@ -172,7 +173,8 @@
     class LandmarkDetector:
         """Класс для поиска ключевых точек лица на изображении"""
 
-        def __init__(self, modelPath='shape_predictor_68_face_landmarks.dat', showLandmarks=False):
+        def __init__(self, modelPath='shape_predictor_68_face_landmarks.dat', 
+                    showLandmarks=False):
             """Аргументы:
             modelPath - путь к файлу с предобученной моделью для поиска
                         ключевых точек.

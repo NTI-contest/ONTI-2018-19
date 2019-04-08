@@ -60,9 +60,9 @@
         if (Serial.available()) {
             int cmd = Serial.read();
             if (cmd == 49)
-            tone(buzzerPin, 500);
+                tone(buzzerPin, 500);
             if (cmd == 48)
-            noTone(buzzerPin);
+                noTone(buzzerPin);
             int potVal = analogRead(potPin) / 4;
             Serial.write(potVal);
         }
