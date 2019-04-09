@@ -1,0 +1,16 @@
+\solutionSection
+
+С учетом того, что в начальный момент времени все пользователи имеют нулевой баланс, баланс пользователя формируется исключительно из количества полученных и потраченных средств.
+Соответственно, чтобы найти конечный баланс пользователя, нужно из совокупного количества полученных средств вычесть совокупное количество потраченных средств, и далее вставить данное значение в таблицу.
+
+\begin{verbatim}
+INSERT INTO result (res)
+VALUES (
+    (SELECT SUM(val) FROM transactions WHERE  recipient="Frank")
+    - (SELECT SUM(val) FROM transactions WHERE sender="Frank")
+);
+\end{verbatim}
+
+\codeExample
+
+%\inputPythonSource
