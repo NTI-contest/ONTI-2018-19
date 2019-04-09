@@ -1,27 +1,23 @@
-\assignementTitle{Обнаружение состояния элементов лица}{10}{}
+\assignementTitle{Обнаружение состояния элементов лица}{3}
 
-Чтобы еще более усилить алгоритмы распознования настоящего лица человека, можно просить пользователя не только изменять положение головы, но и подмигнуть, открыть и закрыть рот.
+Чтобы еще более усилить алгоритмы распознования настоящего лица человека, можно просить пользователя не только изменять положение головы, но и подмигнуть, открыть и закрыть рот. 
 
-\putImgWOCaption{10cm}{1}
+\putImgWOCaption{8cm}{opened-eyes-and-mouth.jpg}
 
-Если набор таких действий задать друг за другом, - например, "закройте правый глаз, 
-откройте рот, откройте правый глаз, закройте левый глаз, закройте рот", а человек все 
-корректно повторит, то это позволит не только убедиться, что перед нами живой человек, 
-но и новые данные, получаемые в ходе этой процедуры позволят уточнить - правильно ли вообще произолшла идентификация - тот ли человек пытается пройти идентификацию.
+Если набор таких действий задать друг за другом, - например, "закройте правый глаз, откройте рот, откройте правый глаз, закройте левый глаз, закройте рот", а человек все корректно повторит, то это позволит не только убедиться, что перед нами живой человек, но и новые данные, получаемые в ходе этой процедуры позволят уточнить - правильно ли вообще произолшла идентификация - тот ли человек пытается пройти идентификацию.
 
-\putImgWOCaption{10cm}{2}
+\putImgWOCaption{8cm}{closed-eyes-and-mouth.jpg}
 
 Поскольку ограниченные возможности MS Face API уже не могут реализовать подобные проверки, найдите способ, используя библиотеку OpenCV, воплотить проверки открыт-закрыт у человека глаз, открыт или закрыт рот.
 
 \inputfmtSection
 
 В первой строке - одно из четырех возможных словосочетаний, определяющее какое действие будет проверяться от пользователя:
-
 \begin{itemize}
-    \item close right eye - закрыть правый глаз
-    \item close left eye - закрыть левый глаз
-    \item close both eyes - закрыть оба глаза
-    \item open mouth - открыть рот
+  \item \texttt{close right eye} --- закрыть правый глаз  
+  \item \texttt{close left eye} --- закрыть левый глаз
+  \item \texttt{close both eyes} --- закрыть оба глаза
+  \item \texttt{open mouth} --- открыть рот
 \end{itemize}
 
 Следующая строка - ссылка на Google Drive, откуда нужно загрузить архив с фотографиями, которые нужно обработать.
@@ -30,22 +26,39 @@
 
 Выведите в одну строку последовательность из номеров фотографий, в которых человек выполняет заданное действие. Номера фотографий перечислены по возрастанию и разделены одним пробелом.
 
-\begin{myverbbox}[\small]{\vinput} 
-    close both eyes
-    https://drive.google.com/open?id=1vfYapd7kfTqAk3iZ8ragBnnjGFf6QpNR
+\exampleSection
+
+\sampleTitle{1}
+
+\begin{myverbbox}[\small]{\vinput}
+close left eye
+https://drive.google.com/open?id=1nNwt3V9nAzTxu-7MGumDUI0uoqmjqWZZ
 \end{myverbbox}
 \begin{myverbbox}[\small]{\voutput}
-    4 7 13 15 22 45 51 60 66 68 76 83
+9 17 23 31 51 56 72 77 85
 \end{myverbbox}
 \inputoutputTable
 
-\begin{myverbbox}[\small]{\vinput} 
-    open mouth
-    https://drive.google.com/open?id=1MrEQTSJakfnOUbylrgT50YBsl04wBDxj
+\sampleTitle{2}
+
+\begin{myverbbox}[\small]{\vinput}
+close both eyes
+https://drive.google.com/open?id=1vfYapd7kfTqAk3iZ8ragBnnjGFf6QpNR
 \end{myverbbox}
 \begin{myverbbox}[\small]{\voutput}
-    0 2 13 19 22 29 33 35 43 48 54 67 74 75 80 82 86 91
+4 7 13 15 22 45 51 60 66 68 76 83
 \end{myverbbox}
 \inputoutputTable
 
-%\includeSolutionIfExistsByPath{2nd_tour/fintex/task_13}
+\sampleTitle{3}
+
+\begin{myverbbox}[\small]{\vinput}
+open mouth
+https://drive.google.com/open?id=1MrEQTSJakfnOUbylrgT50YBsl04wBDxj
+\end{myverbbox}
+\begin{myverbbox}[\small]{\voutput}
+0 2 13 19 22 29 33 35 43 48 54 67 74 75 80 82 86 91
+\end{myverbbox}
+\inputoutputTable
+
+\includeSolutionIfExistsByPath{2nd_tour/fintex/task_13/solution}

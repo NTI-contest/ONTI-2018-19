@@ -1,115 +1,116 @@
-\assignementTitle{UTXO в смарт-контракте}{15}{}
+\assignementTitle{UTXO в смарт-контракте}{3}
 
-Модель UTXO (Unspent Transaction Output) известна тем, что используется в блокчейн Bitcoin. Все Bitcoin транзакции образуют связные списки: каждая транзакция, которая списывает средства со счета пользователя явно связана с другой транзакцией, в рамках которой эти средства на счете появились. При этом, очевидно, что транзакция начисляющая на счет средства, будет одновременно и транзакцией списывающей с какого-то счета средства. Исключением являются, так называемые, coinbase транзакции - транзакции начисляющие на счет пользователя средства, полученные в качестве вознаграждения за выпуск (майнинг) нового блока.
+Модель UTXO (Unspent Transaction Output) известна тем, что используется в блокчейн Bitcoin. Все Bitcoin транзакции образуют связные списки: каждая транзакция, которая списывает средства со счета пользователя явно связана с другой транзакцией, в рамках которой эти средства на счете появились. При этом, очевидно, что транзакция начисляющая на счет средства, будет одновременно и транзакцией списывающей с какого-то счета средства. Исключением являются, так называемые, coinbase транзакции - транзакции начисляющие на счет пользователя средства, полученные в качестве вознаграждения за выпуск (майнинг) нового блока. 
 
-Поскольку для формирования данных одной транзакции на списание средств используется идентификатор другой транзакции, начислявшей средства, а данные полученной транзакции используются для вычисления хэша транзакции - ее идентификатора, то получается такой связный список, изменение элементов которого задним числом приведет к потере связности. Т.е. помимо связи на уровне блоков в блокчейн Bitcoin имеется связь на уровне транзакций.
+Поскольку для формирования данных одной транзакции на списание средств используется идентификатор другой транзакции, начислявшей средства, а данные полученной транзакции используются для вычисления хэша транзакции - ее идентификатора, то получается такой связный список, изменение элементов которого задним числом приведет к потере связности. Т.е. помимо связи на уровне блоков в блокчейн Bitcoin имеется связь на уровне транзакций. 
 
 Если транзакция, начисляющая средства на счет, еще не была использована для организации связного списка, а иными словами, даныые средства еще не списывались, то такая транзакция называется непотраченная (unspent). А имея в виду то, что внутри одной списывающей транзакции (input) можно начислять средства сразу на несколько счетов (каждое такое начисление - output), то список всех непотраченных начислений называет - непотраченные выходы траназкций (unspent transaction output).
 
-Подробнее об входах и выходах в транзакциях Bitcoin можно почитать в книге ''Mastering Bitcoin'':
+\threeitems{Подробнее об входах и выходах в транзакциях Bitcoin можно почитать в книге ''Mastering Bitcoin''}
+{Основы транзакций в Bitcoin, \url{https://bit.ly/2SKOOHs}}
+{Детальное описание транзакций, \url{https://bit.ly/2QRlIIQ}}
+{Про coinbase транзакции, \url{https://bit.ly/2SKoBJ8}}
 
-\begin{enumerate}
-    \item Основы транзакций в Bitcoin (\url{https://bit.ly/2SKOOHs})
-    \item Детальное описание транзакций (\url{https://bit.ly/2QRlIIQ})
-    \item Про coinbase транзакции (\url{https://bit.ly/2SKoBJ8})
-\end{enumerate}
+\twoitems{Несмотря на сложности в виде необходимости обхода всей цепочки блоков для подсчета баланса счета, у UTXO модели есть ряд преимуществ}
+{Благодаря выстроенным цепочкам можно отслеживать какие средства откуда пришли и куда ушли. Даже не расскрывая принадлежность Bitcoin адресов частным лицам или организациям можно отслеживать и анализировать перемещение средств.}
+{Отдельные непотраченные выходы могут быть помечены, как использующиеся в платежных каналах (Lightening Network), а следовательно можно с одного аккаунта совершать параллельные оффчейн платежи без опасений двойных трат.}
 
-Несмотря на сложности в виде необходимости обхода всей цепочки блоков для подсчета баланса счета, у UTXO модели есть ряд преимуществ:
+Технология, на которой построен блокчейн Ethereum, не подразумевает использование UTXO модели. Вместо этого используется модель состояний, когда перевод средств со счета на счет или изменение данных контракта формируют новое состояние конкретного аккаунта в частности и всего блокчейна в целом.
 
-\begin{itemize}
-    \item Благодаря выстроенным цепочкам можно отслеживать какие средства откуда пришли и куда ушли. Даже не расскрывая принадлежность Bitcoin адресов частным лицам или организациям можно отслеживать и анализировать перемещение средств.
-    \item Отдельные непотраченные выходы могут быть помечены, как использующиеся в платежных каналах (Lightening Network), а следовательно можно с одного аккаунта совершать параллельные оффчейн платежи без опасений двойных трат.
-\end{itemize}
+Тем не менее, UTXO модель можно реализовать в ценностях, которые строятся на основе смарт-контрактов Ethereum, иногда такие ценности называют токенами. Тогда преимущества, перечисленные выше, будет применимы и к таким токенам.
 
-Технология, на которой построен блокчейн Ethereum, не подразумевает использование UTXO модели. Вместо этого используется модель состояний, когда перевод средств со счета на счет или изменение данных контракта формируют новое состояние конкретного аккаунта в частности и всего блокчейна в целом.Тем не менее, UTXO модель можно реализовать в ценностях, которые строятся на основе смарт-контрактов Ethereum, иногда такие ценности называют токенами. Тогда преимущества, перечисленные выше, будет применимы и к таким токенам.Ниже, представлен код на языке Solidity для токена, использующего модель UTXO.
+Ниже, представлен код на языке Solidity для токена, использующего модель UTXO.
 
-\begin{minted}[fontsize=\footnotesize, linenos]{c++}
-    pragma solidity ^0.5.1;
+\begin{minted}[fontsize=\footnotesize]{javascript}
+pragma solidity ^0.5.1;
 
-    contract UTXOBasedToken {
-        event Transfer(bytes32 indexed tx_source, bytes32 indexed tx_address, address indexed recipient, uint256 value, uint256 vout);
-    
-        address owner;
-    
-        struct Transaction {
-            address recipient;
-            uint256 value;
-        }
-    
-        uint256 coinbaseSeq = 0;
-        mapping (bytes32 => Transaction) utxoPool;
-        
-        constructor() public {
-            require(msg.sender != address(0));
-            owner = msg.sender;
-        }
-    
-        function transfer(bytes32 _txHash, uint256 _vout, address[] memory _recipients, uint256[] memory _values) public {
-            require(_recipients.length == _values.length);
-            require(_recipients.length<=20);
-            uint256 total;
-            bytes32 db_key = keccak256(abi.encodePacked(_txHash, _vout));
-            require(utxoPool[db_key].recipient == msg.sender);
-            uint256 utxo_value = utxoPool[db_key].value;
-    
-            bytes32 newTxHash = keccak256(abi.encodePacked(_txHash, _vout, _recipients, _values));
-    
-            for(uint256 vout=0; vout<_recipients.length; vout++) {
-                require(_recipients[vout] != address(0));
-                bytes32 new_db_key = keccak256(abi.encodePacked(newTxHash, vout));
-                utxoPool[new_db_key] = Transaction(_recipients[vout], _values[vout]);
-                require(total < total+_values[vout]);
-                total += _values[vout];
-                emit Transfer(_txHash, newTxHash, _recipients[vout], _values[vout], vout);
-            }
-    
-            require(total == utxo_value);
-            delete utxoPool[db_key];
-        }
-       
-        function() external payable {
-            require(msg.value > 0);
-            bytes32 txHash = keccak256(abi.encodePacked(msg.sender, msg.value, coinbaseSeq));
-            bytes32 db_key = keccak256(abi.encodePacked(txHash, uint256(0)));
-            utxoPool[db_key] = Transaction(msg.sender, msg.value);
-            coinbaseSeq++;
-            emit Transfer(bytes32(0), txHash, msg.sender, msg.value, uint256(0));
-        }
-        
-        function withdraw(uint256 _value) public {
-            require(msg.sender == owner);
-            require(address(this).balance >= _value);
-            msg.sender.transfer(_value);
-        }
+contract UTXOBasedToken {
+    event Transfer(bytes32 indexed tx_source, bytes32 indexed tx_address, 
+                   address indexed recipient, uint256 value, uint256 vout);
+
+    address owner;
+
+    struct Transaction {
+        address recipient;
+        uint256 value;
     }
+
+    uint256 coinbaseSeq = 0;
+    mapping (bytes32 => Transaction) utxoPool;
+    
+    constructor() public {
+        require(msg.sender != address(0));
+        owner = msg.sender;
+    }
+
+    function transfer(bytes32 _txHash, uint256 _vout, address[] memory _recipients, 
+                      uint256[] memory _values) public {
+        require(_recipients.length == _values.length);
+        require(_recipients.length<=20);
+        uint256 total;
+        bytes32 db_key = keccak256(abi.encodePacked(_txHash, _vout));
+        require(utxoPool[db_key].recipient == msg.sender);
+        uint256 utxo_value = utxoPool[db_key].value;
+
+        bytes32 newTxHash = keccak256(abi.encodePacked(_txHash, _vout, _recipients, _values));
+
+        for(uint256 vout=0; vout<_recipients.length; vout++) {
+            require(_recipients[vout] != address(0));
+            bytes32 new_db_key = keccak256(abi.encodePacked(newTxHash, vout));
+            utxoPool[new_db_key] = Transaction(_recipients[vout], _values[vout]);
+            require(total < total+_values[vout]);
+            total += _values[vout];
+            emit Transfer(_txHash, newTxHash, _recipients[vout], _values[vout], vout);
+        }
+
+        require(total == utxo_value);
+        delete utxoPool[db_key];
+    }
+   
+    function() external payable {
+        require(msg.value > 0);
+        bytes32 txHash = keccak256(abi.encodePacked(msg.sender, msg.value, coinbaseSeq));
+        bytes32 db_key = keccak256(abi.encodePacked(txHash, uint256(0)));
+        utxoPool[db_key] = Transaction(msg.sender, msg.value);
+        coinbaseSeq++;
+        emit Transfer(bytes32(0), txHash, msg.sender, msg.value, uint256(0));
+    }
+    
+    function withdraw(uint256 _value) public {
+        require(msg.sender == owner);
+        require(address(this).balance >= _value);
+        msg.sender.transfer(_value);
+    }
+}
 \end{minted}
 
-Если известно, что данный контракт зарегистрирован по адресу\\ 0xe87a3686b0a42d66eee76d48c9a8307c27d14d1c (\url{https://blockscout.com/poa/sokol/address/0xe87a3686b0a42d66eee76d48c9a8307c27d14d1c}) 
-в сети Sokol (тестовая сеть, совместимая с Ethereum Virtual Machine), 
-напишите программу, которая бы позволяла для конкретного пользователя контракта отследить в каких блоках происходила покупка токенов, составляющих текущий баланс данного пользователя.
+Если известно, что данный контракт зарегистрирован по адресу \newline 0xe87a3686b0a42d66eee76d48c9a8307c27d14d1c (может быть найден в браузере блоков \url{https://blockscout.com/poa/sokol/}) в сети Sokol (тестовая сеть, совместимая с Ethereum Virtual Machine), напишите программу, которая бы позволяла для конкретного пользователя контракта отследить в каких блоках происходила покупка токенов, составляющих текущий баланс данного пользователя.  
 
 \inputfmtSection
 
-Одна строка - адрес пользователя контракта - последовательность начинающаяся с 0x, за которыми следует 40 шестнадцатиричных символов.
+Одна строка --- адрес пользователя контракта --- последовательность начинающаяся с \texttt{0x}, за которыми следует 40 шестнадцатиричных символов.
 
 \outputfmtSection
 
-Строка - номера блоков, разделенные пробелом, перечисленные в порядке возрастания.
+Строка --- номера блоков, разделенные пробелом, перечисленные в порядке возрастания.
 
-\subsubsection*{Комментарий}
+\exampleSection
 
+\sampleTitle{1}
+
+\begin{myverbbox}[\small]{\vinput}
+0x2C7Cc50973b57b2b03f569643e4e604977D4F7fC
+\end{myverbbox}
+\begin{myverbbox}[\small]{\voutput}
+6070845 6071386 6071669 6071796
+\end{myverbbox}
+\inputoutputTable
+
+\commentsSection
 Если вам неизвестна концепция токенов, то можете обратиться к задачае ''Получение баланса ERC-20 token'' (\url{https://stepik.org/lesson/62024/step/4}) второго этапа профиля ''Программная инженерия финансовых технологий'' сезона 2016-2017 годов.
 
 Для решения данной задачи необходимо познакомиться с языком написания Ethereum смарт-контрактов Solidity (\url{https://solidity.readthedocs.io}).
 
-Получение информации из тестовой сети Sokol может происходить без необходимости синхронизировать свой собственный узел сети. Вместо этого можно отправлять JSON-RPC запросы на URL: \url{https://sokol.poa.network}.
+Получение информации из тестовой сети Sokol может происходить без необходимости синхронизировать свой собственный узел сети. Вместо этого можно отправлять JSON-RPC запросы на URL: \url{https://sokol.poa.network}. 
 
-\begin{myverbbox}[\small]{\vinput} 
-    0x2C7Cc50973b57b2b03f569643e4e604977D4F7fC
-\end{myverbbox}
-\begin{myverbbox}[\small]{\voutput}
-    6070845 6071386 6071669 6071796
-\end{myverbbox}
-\inputoutputTable
-
-%\includeSolutionIfExistsByPath{2nd_tour/fintex/task_11}
+\includeSolutionIfExistsByPath{2nd_tour/fintex/task_11/solution}
