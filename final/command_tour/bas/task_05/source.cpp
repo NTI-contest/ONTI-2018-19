@@ -166,7 +166,7 @@ void loop()
 	/***********************************************************************/
 	// Курс на метку
 	double courseToPreset = TinyGPSPlus::courseTo(latitude, longitude, 
-								presetCoordinates[0], presetCoordinates[1]);
+				presetCoordinates[0], presetCoordinates[1]);
 
 	// Расстояние до метки
 	unsigned long distanceToPreset = 
@@ -287,9 +287,12 @@ void readMt3333()
       // 1. Заполнение массивов
       shiftArray(latitudes, N_GNSS, gps.location.lat());
       shiftArray(longitudes, N_GNSS, gps.location.lng());
-      shiftArray(altitudesMsl, N_GNSS, gps.altitude.meters() + atof(TGPSC_geoidSeparation.value()));
-      shiftArray(headings, N_GNSS, atof(TGPSC_heading_deg.value()) * DEG2RAD); //для mt3333
-      shiftArray(horizontalVelocities, N_GNSS, atof(TGPSC_horizontalVelocity_kh.value()) * KH2MS);
+      shiftArray(altitudesMsl, N_GNSS, gps.altitude.meters() + 
+                  atof(TGPSC_geoidSeparation.value()));
+      shiftArray(headings, N_GNSS, 
+                  atof(TGPSC_heading_deg.value()) * DEG2RAD); //для mt3333
+      shiftArray(horizontalVelocities, N_GNSS, 
+                  atof(TGPSC_horizontalVelocity_kh.value()) * KH2MS);
 
       //Serial2.println(gps.course.deg());
 
