@@ -1,0 +1,828 @@
+\subsection*{Администрирование сервиса KYC}
+
+
+Управление сервисом соответствий блокчейн аккаунтов и номеров телефонов происходить с использованием отдельной компоненты. Эта компонента позволяет администратору сервиса подтерждать запросы на регистрацию соответствий и запросы на удаление соответствий. 
+
+\begin{myverbbox}{\scriptFile}
+kyc.py <command> [options]
+\end{myverbbox}
+\scriptTitle
+
+
+В зависимости от команды, через RPC узел блокчейн сети будет отправляться либо запрос на информацию, либо транзакция к контракту регистра соответствий. 
+
+%-----------------------------------------------------
+%US-023
+\newuserstory{Получение всех запросов на регистрацию соответствий}
+
+
+Любой пользователь сервиса,  может получить список всех запросов на регистрацию соответствий. 
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ kyc.py --list add
+\end{myverbbox}
+\scriptExample{
+Через RPC узел блокчейн сети отправляется запрос к контракту, адрес которого указан в поле \texttt{registrar} файла \texttt{registrar.json}, на получение всех неотменненных запросов на регистрацию соответствий. Запросы выводятся в формате \texttt{отправитель запроса: номер телефона}
+
+}
+
+% AC-023-01
+\begin{myverbbox}[\small]{\output}
+$ setup.py --deploy
+KYC Registrar: 0x00360d2b7D240Ec0643B6D819ba81A09e40E5bCd
+Payment Handler: 0x95426f2bC716022fCF1dEf006dbC4bB81f5B5164
+$ cat registrar.json
+{"registrar": {"address": "0x00360d2b7D240Ec0643B6D819ba81A09e40E5bCd", "
+startBlock": 123456}, "payments": {"address": "0x95426f2bC716022fCF1dEf00
+6dbC4bB81f5B5164", "startBlock": 123457}}
+$ kyc.py --list add
+No KYC registration requests found
+\end{myverbbox}
+\acceptanceCriteria{Поскольку в контракте, адрес которого указан в файле \texttt{registrar.json}, не было зарегистрировано ни одного запроса регистрации соответствия аккаунта, то выдается соответствующее сообщение. Транзакции в сеть не отправляются.
+}
+
+% AC-023-02
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ kyc.py --list add
+No KYC registration requests found
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xa7f3239715ff731a3d6fc477b18e35b9b0a9e1ede8
+4bca5e91517e8e5bf1cc69
+$ cat person.json
+{"id": "da04e377-47f1-c749-54ca-0fc5a08f0595"}
+$ faceid.py --add 6104 +79220012534
+Registration request sent by 0xc95d677eb6f3fcb55e08274ae0eed1970391e637f1
+062426a3406fd7d4cfcfcb
+$ rm person.json
+$ kyc.py --list add
+0x5bAD5c60781111094C247F81792eDDE9bb38818A: +79220012534
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+\end{myverbbox}
+\acceptanceCriteria{Все два запроса на регистрацию соответствия, отправленные в контракт, адрес которого указан в файле \texttt{registrar.json}, отображены в выводе команды \texttt{kyc.py --list}. Сортировка вывода происходит по номеру телефона. Транзакции этой командой в сеть не отправляются.
+}
+
+% AC-023-03
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ kyc.py --list add
+No KYC registration requests found
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xa7f3239715ff731a3d6fc477b18e35b9b0a9e1ede8
+4bca5e91517e8e5bf1cc69
+$ cat person.json
+{"id": "da04e377-47f1-c749-54ca-0fc5a08f0595"}
+$ faceid.py --add 6104 +79991234567
+Registration request sent by 0xc95d677eb6f3fcb55e08274ae0eed1970391e637f1
+062426a3406fd7d4cfcfcb
+$ rm person.json
+$ kyc.py --list add
+0x5bAD5c60781111094C247F81792eDDE9bb38818A: +79991234567
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+\end{myverbbox}
+\acceptanceCriteria{Два запроса на регистрацию соответствия, отправленные в контракт, адрес которого указан в файле \texttt{registrar.json}, приняты контрактом даже если они - для регистрации одного и того же номера телефона. Оба запроса отображены в выводе команды \texttt{kyc.py --list}. Сортировка вывода происходит сначала по номеру телефона, затем по адресу аккаунта. Транзакции этой командой в сеть не отправляются.
+}
+
+% AC-023-04
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ kyc.py --list add
+No KYC registration requests found
+$ cat person.json
+{"id": "5069b18c-9f6d-42f9-aa5f-a5f6b924d87e"}
+$ faceid.py --add 1096 +79125812224
+Registration request sent by 0x01bef0afddd3ebc79e80c0385bf5e0bfea871b97d9
+37c74462a3221094b44c1c
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xa7f3239715ff731a3d6fc477b18e35b9b0a9e1ede8
+4bca5e91517e8e5bf1cc69
+$ cat person.json
+{"id": "da04e377-47f1-c749-54ca-0fc5a08f0595"}
+$ faceid.py --add 6104 +79220012534
+Registration request sent by 0xc95d677eb6f3fcb55e08274ae0eed1970391e637f1
+062426a3406fd7d4cfcfcb
+$ cat person.json
+{"id": "5069b18c-9f6d-42f9-aa5f-a5f6b924d87e"}
+$ faceid.py --cancel 1096
+Registration canceled by 0x99a7e5f28b653d63b5c0bbddebc91678530ee461e4fa21
+c9ab2f281d28b8da5e
+$ rm person.json
+$ kyc.py --list add
+0x5bAD5c60781111094C247F81792eDDE9bb38818A: +79220012534
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+\end{myverbbox}
+\acceptanceCriteria{Только два запроса на регистрацию соответствия, отправленные в контракт, адрес которого указан в файле \texttt{registrar.json}, отображены в выводе команды \texttt{kyc.py --list}. Отмененный запрос не отображается. Транзакции этой командой в сеть не отправляются.
+}
+
+% AC-023-05
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ kyc.py --list add
+No KYC registration requests found
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xa7f3239715ff731a3d6fc477b18e35b9b0a9e1ede8
+4bca5e91517e8e5bf1cc69
+$ cat person.json
+{"id": "da04e377-47f1-c749-54ca-0fc5a08f0595"}
+$ faceid.py --add 6104 +79220012534
+Registration request sent by 0xc95d677eb6f3fcb55e08274ae0eed1970391e637f1
+062426a3406fd7d4cfcfcb
+$ faceid.py --cancel 6104
+Registration canceled by 0x99a7e5f28b653d63b5c0bbddebc91678530ee461e4fa21
+c9ab2f281d28b8da5e
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --cancel 4590
+Registration canceled by 0xc90366c708b1c1e8462da76682338d5262a785d592918e
+d915e1292ac0d6178a
+$ rm person.json
+$ kyc.py --list add
+No KYC registration requests found
+\end{myverbbox}
+\acceptanceCriteria{Поскольку все запросы на регистрацию соответствий, оптравленные в контракт, адрес которого указан в файле \texttt{registrar.json}, были отменены, то в выводе команды \texttt{kyc.py --list} выдается соответствующее сообщение. Транзакции этой командой в сеть не отправляются.
+}
+
+% AC-023-06
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ kyc.py --list add
+No KYC registration requests found
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xa7f3239715ff731a3d6fc477b18e35b9b0a9e1ede8
+4bca5e91517e8e5bf1cc69
+$ faceid.py --find /path/to/video23.avi
+168f2e61-089f-88a9-53b2-3b3d0c497704 identified
+$ faceid.py --del 5981
+Unregistration request sent by 0xda0e2a124e6d37080b539f1bb0dc4c698b8025b6
+2dcc56d75efc1115d87381aa
+$ rm person.json
+$ kyc.py --list add
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+\end{myverbbox}
+\acceptanceCriteria{Только запросы на регистрацию соответствий, оптравленные в контракт, адрес которого указан в файле \texttt{registrar.json}, отображаются в выводе команды \texttt{kyc.py --list}. Транзакции этой командой в сеть не отправляются.
+}
+
+% AC-023-07
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+cat: registrar.json: No such file or directory
+$ kyc.py --list add
+No contract address
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в текущей директории нет файла \texttt{registrar.json}, содержащего адрес контракта регистра соответствий. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-023-08
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+{"registrar": {"address": "0x340Ec06460d9b2b7D23B40E5bCd0a81A09e06D81", "
+startBlock": 456123}, "payments": {"address": "0x81A09e06D81797AE2b7D23B4
+0E5bCd0a1da01eb0F951x", "startBlock": 456125}}
+$ kyc.py --list add
+Seems that the contract address is not the registrar contract
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в адрес контракта, указанного в файле \texttt{registrar.json}, не принадлежит контракту регистра соответствий.
+}
+
+%-----------------------------------------------------
+%US-024
+\newuserstory{Получение всех запросов на удаление соответствий}
+
+
+Любой пользователь сервиса,  может получить список всех запросов на удаление соответствий. 
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ kyc.py --list del
+\end{myverbbox}
+\scriptExample{
+Через RPC узел блокчейн сети отправляется запрос к контракту, адрес которого указан в поле \texttt{registrar} файла \texttt{registrar.json}, на получение всех неотменненных запросов на удаление соответствий. Запросы выводятся в формате \texttt{отправитель запроса: номер телефона}
+
+}
+
+% AC-024-01
+\begin{myverbbox}[\small]{\output}
+$ setup.py --deploy
+KYC Registrar: 0x00360d2b7D240Ec0643B6D819ba81A09e40E5bCd
+Payment Handler: 0x95426f2bC716022fCF1dEf006dbC4bB81f5B5164
+$ cat registrar.json
+{"registrar": {"address": "0x00360d2b7D240Ec0643B6D819ba81A09e40E5bCd", "
+startBlock": 123456}, "payments": {"address": "0x95426f2bC716022fCF1dEf00
+6dbC4bB81f5B5164", "startBlock": 123457}}
+$ kyc.py --list del
+No KYC unregistration requests found
+\end{myverbbox}
+\acceptanceCriteria{Поскольку в контракте, адрес которого указан в файле \texttt{registrar.json}, не было зарегистрировано ни одного запроса удаления соответствия аккаунта, то выдается соответствующее сообщение. Транзакции в сеть не отправляются.
+}
+
+% AC-024-02
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ kyc.py --list del
+No KYC unregistration requests found
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --del 4590
+Unregistration request sent by 0x64e604787cbf194841e7b68d7cd28786f6c9a0a3
+ab9f8b0a0e87cb4387ab0107
+$ cat person.json
+{"id": "da04e377-47f1-c749-54ca-0fc5a08f0595"}
+$ faceid.py --del 6104
+Unregistration request sent by 0xac09810740600c31fa69f9db79ed6fc3e3281f75
+8a950fe1fb254a3a3ae571b6
+$ rm person.json
+$ kyc.py --list del
+0x5bAD5c60781111094C247F81792eDDE9bb38818A: +79220012534
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+\end{myverbbox}
+\acceptanceCriteria{Все два запроса на удаление соответствия, отправленные в контракт, адрес которого указан в файле \texttt{registrar.json}, отображены в выводе команды \texttt{kyc.py --list}. Сортировка вывода происходит по номеру телефона. Транзакции этой командой в сеть не отправляются.
+}
+
+% AC-024-03
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ kyc.py --list del
+No KYC unregistration requests found
+$ cat person.json
+{"id": "5069b18c-9f6d-42f9-aa5f-a5f6b924d87e"}
+$ faceid.py --del 1096
+Unregistration request sent by 0x631897788617bc63fb0292c44f57a6c3824e4264
+bc88fb4e3c08b910f3f417fc
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --del 4590
+Unregistration request sent by 0x7dbef654fd5c6145f82b72cd5dbbfc6d48fd276b
+8a7a4371a61d55985b9d6d8b
+$ cat person.json
+{"id": "da04e377-47f1-c749-54ca-0fc5a08f0595"}
+$ faceid.py --del 6104
+Unregistration request sent by 0xf65e3ff0de05ca77aa8c820bd528facc139ee4b0
+986f7c350f3198928bd2c72b
+$ cat person.json
+{"id": "5069b18c-9f6d-42f9-aa5f-a5f6b924d87e"}
+$ faceid.py --cancel 1096
+Unregistration canceled by 0x24036ccf201a67256250eabe66d3f9fd72f9c4d022f2
+25a8ee964be060dcb993
+$ rm person.json
+$ kyc.py --list del
+0x5bAD5c60781111094C247F81792eDDE9bb38818A: +79220012534
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+\end{myverbbox}
+\acceptanceCriteria{Только два запроса на удаление соответствия, отправленные в контракт, адрес которого указан в файле \texttt{registrar.json}, отображены в выводе команды \texttt{kyc.py --list}. Отмененный запрос не отображается. Транзакции этой командой в сеть не отправляются.
+}
+
+% AC-024-04
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ kyc.py --list del
+No KYC unregistration requests found
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --del 4590
+Unregistration request sent by 0x535306ee4b42c92aecd0e71fca98572064f049c2
+babb2769faa3bbd87d67ec2d
+$ cat person.json
+{"id": "da04e377-47f1-c749-54ca-0fc5a08f0595"}
+$ faceid.py --del 6104
+Unregistration request sent by 0x425a3d65e6c6cbbf01507814af1ac7512f93cceb
+8411381e1d5fb7adbfd44881
+$ faceid.py --cancel 6104
+Unregistration canceled by 0xd772c1d26a64e4114af99655ec353dc3dba1b12ba483
+c0fc852e01d0432d3aa1
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --cancel 4590
+Unregistration canceled by 0xe7fcf89c34605f23590ff58513f1080dc375dd06cc5e
+256320151057827a258a
+$ rm person.json
+$ kyc.py --list del
+No KYC unregistration requests found
+\end{myverbbox}
+\acceptanceCriteria{Поскольку все запросы на удаление соответствий, оптравленные в контракт, адрес которого указан в файле \texttt{registrar.json}, были отменены, то в выводе команды \texttt{kyc.py --list} выдается соответствующее сообщение. Транзакции этой командой в сеть не отправляются.
+}
+
+% AC-024-05
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ kyc.py --list del
+No KYC unregistration requests found
+$ faceid.py --find /path/to/video23.avi
+168f2e61-089f-88a9-53b2-3b3d0c497704 identified
+$ faceid.py --del 5981
+Unregistration request sent by 0xa413d075ec804ca282f1637fedbe82ecda199209
+7d14e4d900d254e0f5fe523d
+$ faceid.py --find /path/to/video24.avi
+37da04e7-f471-49c7-a54c-a08f05950fc5 identified
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0x2f5ccb30fa919306cd2899a81c7670a9b1be09e8c1
+5a0b78b0fbbc777d15e97b
+$ rm person.json
+$ kyc.py --list del
+0x7F3faAe3f2238439d6ea5A320caB969aC62b68e3: +79870194581
+\end{myverbbox}
+\acceptanceCriteria{Только запросы на удаление соответствий, оптравленные в контракт, адрес которого указан в файле \texttt{registrar.json}, отображаются в выводе команды \texttt{kyc.py --list}. Транзакции этой командой в сеть не отправляются.
+}
+
+% AC-024-06
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+cat: registrar.json: No such file or directory
+$ kyc.py --list del
+No contract address
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в текущей директории нет файла \texttt{registrar.json}, содержащего адрес контракта регистра соответствий. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-024-07
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+{"registrar": {"address": "0x340Ec06460d9b2b7D23B40E5bCd0a81A09e06D81", "
+startBlock": 456123}, "payments": {"address": "0x81A09e06D81797AE2b7D23B4
+0E5bCd0a1da01eb0F951x", "startBlock": 456125}}
+$ kyc.py --list del
+Seems that the contract address is not the registrar contract
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в адрес контракта, указанного в файле \texttt{registrar.json}, не принадлежит контракту регистра соответствий.
+}
+
+%-----------------------------------------------------
+%US-025
+\newuserstory{Подтверждение запросов на регистрацию или удаление соответствий}
+
+
+Только администратор KYC сервиса имеет полномочия подтверждать запросы на регистрацию или удаление соответствий аккаунтов пользователей их телефонным номерам. 
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ kyc.py --confirm <address>
+\end{myverbbox}
+\scriptExample{
+В блокчейн сеть отправляется транзакция к контракту регистра соответствий. Контракт проверяет обладает ли отправитель транзакции полномочиями по подтверждению запросов, после чего происходит изменение статуса запроса:
+\begin{itemize}
+  \item если запрос был на регистрацию соответствия между аккаунтом и телефонным номером, то это соответствие становится доступным для других пользователей;
+  \item если запрос был на удаление соответствия, то соответствие перестает существовать - по номеру телефона, который указывался в соответствии, больше нельзя будет получить адрес аккаунта.
+\end{itemize}
+
+}
+
+% AC-025-01
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep privKey 
+    "privKey": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045
+d85a470",
+$ setup.py --owner registrar
+Admin account: 0x9cce34F7aB185c7ABA1b7C8140d620B4BDA941d6
+$ kyc.py --list add
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+$ kyc.py --confirm 0xFCE1151f31065913F124917E0F2Ba5a6e29D6426
+Confirmed by 0x9960ed3041b9945289da338fa273462c820f58427408d57789c0e1400a
+d5c9bb
+$ kyc.py --list add
+No KYC registration requests found
+\end{myverbbox}
+\acceptanceCriteria{Поскольку аккаунт, чей приватный ключ указан в \texttt{network.json}, обладает полномочиями на подтверждение запросов на регистрацию соответствий, посланная транзакция включается в блок со статусом успешного исполнения. Статус можно подтвердить для данной транзакции в браузере блоков.
+
+При подтверждении контракт производит событие (\texttt{event}) \texttt{RegistrationConfirmed}, в с указанием аккаунта, отправившего запрос:
+
+\texttt{event RegistrationConfirmed(address indexed sender);}
+
+
+Для проведения транзакции выбрана цена из значения \texttt{fast}, возвращенного сервисом \texttt{https://gasprice.poa.network}.
+}
+
+% AC-025-02
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep privKey 
+    "privKey": "6fadbaf86d2aa9c9e34a85df385a2c9afa9509e09756634e72bbcf94a
+5ceb213",
+$ setup.py --owner registrar
+Admin account: 0x5e4d710a4995bFA3F6560effcad36C10ebac998C
+$ kyc.py --list add
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+$ kyc.py --confirm 0xFCE1151f31065913F124917E0F2Ba5a6e29D6426
+Failed but included in 0x9960ed3041b9945289da338fa273462c820f58427408d577
+89c0e1400ad5c9bb
+$ kyc.py --list add
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+\end{myverbbox}
+\acceptanceCriteria{Поскольку аккаунт, чей приватный ключ указан в \texttt{network.json}, не обладает полномочиями на подтверждение запросов на регистрацию соответствий, посланная транзакция включается в блок, но статус ее исполнения - ошибка. Статус можно подтвердить для данной транзакции в браузере блоков.
+}
+
+% AC-025-03
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep privKey 
+    "privKey": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045
+d85a470",
+$ setup.py --owner registrar
+Admin account: 0x9cce34F7aB185c7ABA1b7C8140d620B4BDA941d6
+$ kyc.py --list del
+0x32276b955E7dCBeA1C97fe8f06053E760E739e8d: +79010451275
+$ kyc.py --confirm 0x32276b955E7dCBeA1C97fe8f06053E760E739e8d
+Confirmed by 0xbdf07588e6652aaee28b29156c2ae266c9ba46e253ddd99b466cce31f7
+7c51a3
+$ kyc.py --list del
+No KYC unregistration requests found
+\end{myverbbox}
+\acceptanceCriteria{Поскольку аккаунт, чей приватный ключ указан в \texttt{network.json}, обладает полномочиями на подтверждение запросов на удаление соответствий, посланная транзакция включается в блок со статусом успешного исполнения. Статус можно подтвердить для данной транзакции в браузере блоков.
+
+При подтверждении контракт производит событие (\texttt{event}) \texttt{UnregistrationConfirmed}, в с указанием аккаунта, отправившего запрос:
+
+\texttt{event UnregistrationConfirmed(address indexed sender);}
+
+
+Для проведения транзакции выбрана цена из значения \texttt{fast}, возвращенного сервисом \texttt{https://gasprice.poa.network}.
+}
+
+% AC-025-04
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep privKey 
+    "privKey": "6fadbaf86d2aa9c9e34a85df385a2c9afa9509e09756634e72bbcf94a
+5ceb213",
+$ setup.py --owner registrar
+Admin account: 0x5e4d710a4995bFA3F6560effcad36C10ebac998C
+$ kyc.py --list del
+0x32276b955E7dCBeA1C97fe8f06053E760E739e8d: +79010451275
+$ kyc.py --confirm 0x32276b955E7dCBeA1C97fe8f06053E760E739e8d
+Failed but included in 0x360f73c63c063fae5d1e9ead454a4836ec470b54de0960f0
+5909b7f8c7c140ba
+$ kyc.py --list del
+0x32276b955E7dCBeA1C97fe8f06053E760E739e8d: +79010451275
+\end{myverbbox}
+\acceptanceCriteria{Поскольку аккаунт, чей приватный ключ указан в \texttt{network.json}, не обладает полномочиями на подтверждение запросов на удаление соответствий, посланная транзакция включается в блок, но статус ее исполнения - ошибка. Статус можно подтвердить для данной транзакции в браузере блоков.
+}
+
+% AC-025-05
+\begin{myverbbox}[\small]{\output}
+$ kyc.py --list add
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+$ faceid.py --cancel 6104
+Registration canceled by 0x26a975632f70533c9512e57b565b8ce8e2befee6b08dfb
+c27c4a897a20e2c1d6
+$ kyc.py --list add
+No KYC registration requests found
+$ kyc.py --confirm 0xFCE1151f31065913F124917E0F2Ba5a6e29D6426
+Failed but included in 0xd534ca6cd7b201fa32702a1b5b6a38881f8a63e70f9d3e1a
+8a953d61c6524405
+\end{myverbbox}
+\acceptanceCriteria{Транзакция, посланная в блокчейн сеть, на подвтерждение запроса регистрации соответствия включается в блок со статусом успешного исполнения. Статус можно подтвердить для данной транзакции в браузере блоков. Поскольку успешного подтверждения запрос теряет актуальность, то его нельзя в дальнейшем отменить.
+}
+
+% AC-025-07
+\begin{myverbbox}[\small]{\output}
+$ kyc.py --list del
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+$ faceid.py --cancel 6104
+Unregistration canceled by 0xcfe93e00cbaaf37bad5f0b2ff3ab98072b4f3a2656e1
+48b3bcccb553f2fa678f
+$ kyc.py --list del
+No KYC unregistration requests found
+$ kyc.py --confirm 0xFCE1151f31065913F124917E0F2Ba5a6e29D6426
+Failed but included in 0x890f693d9ea1b595bb4a33efee4a21d60a63ffd2ec40c378
+83b92f82fc5da52b
+\end{myverbbox}
+\acceptanceCriteria{Аккаунт, чей приватный ключ указан в \texttt{network.json}, обладает полномочиями на подтверждение запросов на удаление соответствий. А поскольку запрос на удаление соответствия был отменен, посланная транзакция на подтерждение удаления включается в блок, но статус ее исполнения - ошибка. Статус можно подтвердить для данной транзакции в браузере блоков.
+}
+
+% AC-025-08
+\begin{myverbbox}[\small]{\output}
+$ kyc.py --list del
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+$ kyc.py --confirm 0xFCE1151f31065913F124917E0F2Ba5a6e29D6426
+Confirmed by 0x7b0ac78d4efde931c083b037c1c7f91b4cc8f27a159c1264ae53aa473f
+3e4e6a
+$ faceid.py --cancel 6104
+No requests found
+\end{myverbbox}
+\acceptanceCriteria{Транзакция, посланная в блокчейн сеть, на подвтерждение запроса удаления соответствия включается в блок со статусом успешного исполнения. Статус можно подтвердить для данной транзакции в браузере блоков. Поскольку успешного подтверждения запрос теряет актуальность, то его нельзя в дальнейшем отменить.
+}
+
+% AC-025-09
+\begin{myverbbox}[\small]{\output}
+$ kyc.py --list add
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+$ kyc.py --confirm 0xFCE1151f31065913F124917E0F2Ba5a6e29D6426
+Confirmed by 0x2b2a51e6e75ece6beb4c5ed9d51d381a6766e4929f34c8c545b0c0f22a
+890e3d
+$ faceid.py --del 6104
+Unregistration request sent by 0x5a10742dc65b7a28255fe7b4d2b9f290786892e1
+e437654e2ccb53bed1bfe01a
+\end{myverbbox}
+\acceptanceCriteria{Транзакция, посланная в блокчейн сеть, на подвтерждение запроса регистрации соответствия включается в блок со статусом успешного исполнения. Статус можно подтвердить для данной транзакции в браузере блоков. Теперь для установленного соответствия есть возможность отправить запрос на его удаление.
+}
+
+% AC-025-10
+\begin{myverbbox}[\small]{\output}
+$ kyc.py --list del
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+$ kyc.py --confirm 0xFCE1151f31065913F124917E0F2Ba5a6e29D6426
+Confirmed by 0xe3cb0ca89f217511efd4af6caea80048f9921bac3b9063844e65469cf5
+15f138
+$ faceid.py --add 6104 +79991234567
+Registration request sent by 0x41c2cc0c9e11501a3eec0956812949b1b9b2d14d9d
+c7118df2ef1aac71f18767
+\end{myverbbox}
+\acceptanceCriteria{Транзакция, посланная в блокчейн сеть, на подвтерждение запроса удаления соответствия включается в блок со статусом успешного исполнения. Статус можно подтвердить для данной транзакции в браузере блоков. Поскольку у данного аккаунта больше нет актуального соответствия, то есть возможность отправить запрос на создание нового соответствия.
+}
+
+% AC-025-11
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xb004fbd84afb38927636fa378c0a62a86a02b00862
+b6ff80fef4d6e948c0571d
+$ kyc.py --confirm 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+Confirmed by 0x06a79e67d636d828aa58884bc7fed897698bb40922db4eadf708235cd9
+c2de2c
+$ cat person.json
+{"id": "da04e377-47f1-c749-54ca-0fc5a08f0595"}
+$ faceid.py --add 6104 +79991234567
+Such phone number already registered
+\end{myverbbox}
+\acceptanceCriteria{При запросе на регистрацию соответствия выводится сообщение об ошибке, поскольку такой номер телефона уже зарегистрирован в системе. Транзакция в блокчейн не отправляется.
+}
+
+% AC-025-12
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xb004fbd84afb38927636fa378c0a62a86a02b00862
+b6ff80fef4d6e948c0571d
+$ kyc.py --confirm 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+Confirmed by 0x06a79e67d636d828aa58884bc7fed897698bb40922db4eadf708235cd9
+c2de2c
+\end{myverbbox}
+\acceptanceCriteria{Если из транзакции c идентификатором \texttt{0xb004fbd84afb38927636fa378c0a62a86a02b00862b6ff80fef4d6e948c0571d} извлечь поле \texttt{input} и отправить его в поле \texttt{input} новой транзакции с аккаунта, который отличется от аккаунта, отправившего эту транзакцию, на адрес контракта регистра соответствий, то эта транзакция будет включена в блок, но статус ее исполнения будет - ошибка, поскольку запрашиваемый в данных телефонный номер уже зарегистрирован в системе. Статус можно подтвердить для данной транзакции в браузере блоков.
+}
+
+% AC-025-13
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xb004fbd84afb38927636fa378c0a62a86a02b00862
+b6ff80fef4d6e948c0571d
+$ cat person.json
+{"id": "229b3307-fe57-4ddc-b7e7-ac9f1de7abda"}
+$ faceid.py --add 3928 +79991234567
+Registration request sent by 0x0330c0d84464f890f3c81afbba7a3a05e0e864ec2e
+31676dedcb075b2bf855a0
+$ kyc.py --confirm 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+Confirmed by 0x06a79e67d636d828aa58884bc7fed897698bb40922db4eadf708235cd9
+c2de2c
+\end{myverbbox}
+\acceptanceCriteria{Если из транзакции, которая была отправлена в результате команды \texttt{kyc.py --confirm}, извлечь поле \texttt{input} и отправить его в новой транзакции снова в поле \texttt{input} на адрес контракта регистра соответствий, то эта транзакция будет включена в блок, но статус ее исполнения будет - ошибка по причине того, что такое соответствие уже подтверждено. Статус можно подтвердить для данной транзакции в браузере блоков.
+}
+
+% AC-025-14
+\begin{myverbbox}[\small]{\output}
+$ kyc.py --list add
+0xFf8E5C14d240d76EAe66aEF1A3a99895e08a0c3F: +79271173070
+0xa898240Ba2D5C0C2537BC187CaC5B70843EAC8dD: +79397411449
+0x60861DE06626f60d89f5795AD950B502CE00A8B0: +79017422129
+$ kyc.py --list del
+0x5bAD5c60781111094C247F81792eDDE9bb38818A: +79220012534
+0xFCE1151f31065913F124917E0F2Ba5a6e29D6426: +79991234567
+$ kyc.py --confirm 0x60861DE06626f60d89f5795AD950B502CE00A8B1
+Failed but included in 0x18e28784ed3043bccd713a5f99352b74c3ebc4ca469216a6
+86040f025571a184
+\end{myverbbox}
+\acceptanceCriteria{Поскольку запрос, который пытается подтвердиться, не существует, то посланная транзакция включается в блок, но статус ее исполнения - ошибка. Статус можно подтвердить для данной транзакции в браузере блоков.
+}
+
+% AC-025-15
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "da04e377-47f1-c749-54ca-0fc5a08f0595"}
+$ faceid.py --add 6104 +79220012534
+Registration request sent by 0xa65d03add95baf22e482ebcd3423aa9bf9d8b0ec3f
+ca2831960080b84536d360
+$ kyc.py --confirm 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+Confirmed by 0x05dee4192aaad4acb149f9615e8a72a761fc8cdb1d8b4e9c00fe66665f
+5a8184
+$ faceid.py --del 6104
+Unregistration request sent by 0x1b6edb65b6c2611a7285cc668f4110f574a7bc3b
+0d28690b40a16f141eada39a
+$ kyc.py --confirm 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+Confirmed by 0x1c6c2dd4b412e3c82ad1f10cef9a1a4112bc1a128dc4d12242d781aa03
+ccbf2c
+\end{myverbbox}
+\acceptanceCriteria{Если из транзакции с идентификатором \texttt{0x1b6edb65b6c2611a7285cc668f4110f574a7bc3b0d28690b40a16f141eada39a}, извлечь поле \texttt{input} и отправить его в новой транзакции снова в поле \texttt{input} на адрес контракта регистра соответствий, то эта транзакция будет включена в блок, но статус ее исполнения будет - ошибка поскольку данный аккаунт больше не зарегистрирован в регистре соответствий. Статус можно подтвердить для данной транзакции в браузере блоков.
+}
+
+% AC-025-16
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+cat: registrar.json: No such file or directory
+$ kyc.py --confirm 0x60861DE06626f60d89f5795AD950B502CE00A8B0
+No contract address
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в текущей директории нет файла \texttt{registrar.json}, содержащего адрес контракта регистра соответствий. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-025-17
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+{"registrar": {"address": "0x340Ec06460d9b2b7D23B40E5bCd0a81A09e06D81", "
+startBlock": 456123}, "payments": {"address": "0x81A09e06D81797AE2b7D23B4
+0E5bCd0a1da01eb0F951x", "startBlock": 456125}}
+$ kyc.py --confirm 0x60861DE06626f60d89f5795AD950B502CE00A8B0
+Seems that the contract address is not the registrar contract
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в адрес контракта, указанного в файле \texttt{registrar.json}, не принадлежит контракту регистра соответствий.
+}
+
+% AC-025-18
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ kyc.py --confirm 0x60861DE06626f60d89f5795AD950B502CE00A8B0
+No admin account found
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в \texttt{network.json} нет приватного ключа аккаунта, от имени которого выполнялось бы подтверждение.
+}
+
+%-----------------------------------------------------
+%US-026
+\newuserstory{Получение аккаунта по номеру телефона}
+
+
+Любой пользователь по номеру телефона может получить аккаунт соответствующий номеру телефона, если такое соответствие было зарегистрировано.
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ kyc.py --get <phone number>
+\end{myverbbox}
+\scriptExample{
+Через RPC узел блокчейн сети отправляется запрос к контракту, адрес которого указан в поле \texttt{registrar} файла \texttt{registrar.json}, на получение соответствия. Если соответствие не зарегистрировано, контракт возвращает \texttt{0x000000000000000000000000000000000000000}.
+
+}
+
+% AC-026-01
+\begin{myverbbox}[\small]{\output}
+$ setup.py --deploy
+KYC Registrar: 0x23B40E5bCd06D819ba81A09e0340Ec06460d2b7D
+Payment Handler: 0xE797A1da01eb0F951E0E400f9343De9d17A06bac
+$ kyc.py --get +79017422129
+Correspondence not found
+\end{myverbbox}
+\acceptanceCriteria{Поскольку в контракте не было зарегистированных соответствий, то соответствующее сообщение выводится на экран.
+}
+
+% AC-026-02
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xb004fbd84afb38927636fa378c0a62a86a02b00862
+b6ff80fef4d6e948c0571d
+$ kyc.py --confirm 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+Confirmed by 0x06a79e67d636d828aa58884bc7fed897698bb40922db4eadf708235cd9
+c2de2c
+$ cat person.json
+{"id": "229b3307-fe57-4ddc-b7e7-ac9f1de7abda"}
+$ faceid.py --add 3928 +79418552734
+Registration request sent by 0x0330c0d84464f890f3c81afbba7a3a05e0e864ec2e
+31676dedcb075b2bf855a0
+$ kyc.py --confirm 0xdCaBFD5c76D3717567568710a735717bf0C792De
+Confirmed by 0x840881693295f1213bc621234bc18aa1727c90c9e1416799df22e18f9c
+7c029b
+$ rm person.rm
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ kyc.py --get +79991234567
+Registered correspondence: 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+\end{myverbbox}
+\acceptanceCriteria{Для одно из зарегистированных соответствий выводится аккаунт, с которым связан указанных номер телефона. Транзакция в сеть не отправляется.
+}
+
+% AC-026-03
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xb004fbd84afb38927636fa378c0a62a86a02b00862
+b6ff80fef4d6e948c0571d
+$ kyc.py --confirm 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+Confirmed by 0x06a79e67d636d828aa58884bc7fed897698bb40922db4eadf708235cd9
+c2de2c
+$ kyc.py --get +79991234567
+Registered correspondence: 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+$ faceid.py --del 4590
+Unregistration request sent by 0xc7d00ca82740de2eef417cfa47c2970dbdec49b2
+a6d15c64e85f83cf97939ca5
+$ kyc.py --confirm 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+Confirmed by 0x0697183ae8eedd43b56f90cfa450ea6e3ac27fb69f1056ee33ccc5a958
+7bcd2a
+$ kyc.py --get +79991234567
+Correspondence not found
+\end{myverbbox}
+\acceptanceCriteria{В первом случае, соответствие зарегистрировано и поэтому вызов команды позволяет получить аккаунт по номеру телефона. К моменты вызова команды второй раз, соответствие удалено, поэтому выводится сообщение об ошибке.
+}
+
+% AC-026-04
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xb004fbd84afb38927636fa378c0a62a86a02b00862
+b6ff80fef4d6e948c0571d
+$ kyc.py --get +79991234567
+Correspondence not found
+\end{myverbbox}
+\acceptanceCriteria{Хотя регистрация соответствия только была запрошена, оно не было подтверждено, поэтому выводится сообщение об ошибке.
+}
+
+% AC-026-05
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xb004fbd84afb38927636fa378c0a62a86a02b00862
+b6ff80fef4d6e948c0571d
+$ kyc.py --confirm 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+Confirmed by 0x06a79e67d636d828aa58884bc7fed897698bb40922db4eadf708235cd9
+c2de2c
+$ faceid.py --del 4590
+Unregistration request sent by 0xc7d00ca82740de2eef417cfa47c2970dbdec49b2
+a6d15c64e85f83cf97939ca5
+$ kyc.py --get +79991234567
+Registered correspondence: 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+\end{myverbbox}
+\acceptanceCriteria{Поскольку удаление соответствия не было было подтверждено, поэтому выводится информация об аккаунте.
+}
+
+% AC-026-06
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xb004fbd84afb38927636fa378c0a62a86a02b00862
+b6ff80fef4d6e948c0571d
+$ cat person.json
+{"id": "229b3307-fe57-4ddc-b7e7-ac9f1de7abda"}
+$ faceid.py --add 3928 +79991234567
+Registration request sent by 0x0330c0d84464f890f3c81afbba7a3a05e0e864ec2e
+31676dedcb075b2bf855a0
+$ kyc.py --confirm 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+Confirmed by 0x06a79e67d636d828aa58884bc7fed897698bb40922db4eadf708235cd9
+c2de2c
+$ kyc.py --get +79991234567
+Registered correspondence: 0x5bAD5c60781111094C247F81792eDDE9bb38818A
+\end{myverbbox}
+\acceptanceCriteria{Регистрация соответствия первого аккаунта была подтверждена, регистрация второго аккаунта не была подтверждена, поэтому выводится информация об аккаунте, отправившем первый запрос на регистрацию.
+}
+
+% AC-026-07
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+cat: registrar.json: No such file or directory
+$ kyc.py --get +79991234567
+No contract address
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в текущей директории нет файла \texttt{registrar.json}, содержащего адрес контракта регистра соответствий. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-026-08
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+{"registrar": {"address": "0x340Ec06460d9b2b7D23B40E5bCd0a81A09e06D81", "
+startBlock": 456123}, "payments": {"address": "0x81A09e06D81797AE2b7D23B4
+0E5bCd0a1da01eb0F951x", "startBlock": 456125}}
+$ kyc.py --get +79991234567
+Seems that the contract address is not the registrar contract
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в адрес контракта, указанного в файле \texttt{registrar.json}, не принадлежит контракту регистра соответствий.
+}
