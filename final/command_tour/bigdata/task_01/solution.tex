@@ -66,13 +66,8 @@
     sudo docker exec -it nti\_rl\_1 bash -c "cd ~/code/nti/gymfc/examples/controllers/; python3.6 run\_baseline.py --env=AttFC\_GyroErr-MotorVel\_M4\_Ep-v0 --play"
     
     docker exec -it nti\_rl\_1 bash -c "
-
-    
-
     
 \end{enumerate}
-
-
 
 \subsubsection*{Полезные ссылки про докер }
 
@@ -93,11 +88,10 @@
     import numpy as np
     import matplotlib
 
-    matplotlib.use('Agg')
+    matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     import gym
     import math
-
 
     def train(num_timesteps, seed, model_path=None, env_id=None):
         from baselines.ppo1 import mlp_policy, pposgd_simple
@@ -122,7 +116,7 @@
                                 optim_batchsize=64,
                                 gamma=0.99,
                                 lam=0.95,
-                                schedule='linear',
+                                schedule="linear",
                                 )
         env.close()
         if model_path:
@@ -138,7 +132,6 @@
         def reward(self, r):
             return r * self.scale
 
-
     def plot_step_response(desired, actual,
                         end=1., title=None,
                         step_size=0.001, threshold_percent=0.1):
@@ -146,7 +139,6 @@
             Args:
                 threshold (float): Percent of the start error
         """
-
         # actual = actual[:,:end,:]
         end_time = len(desired) * step_size
         t = np.arange(0, end_time, step_size)
@@ -190,7 +182,6 @@
         ax[0].grid(True)
 
         """ PITCH """
-
         ax[1].axhline(0, color="#AAAAAA")
         ax[1].plot(t, desired[:, 1], reflinestyle)
         ax[1].plot(t, desired[:, 1] - threshold[:, 1], error_linestyle, alpha=0.5)
@@ -210,17 +201,16 @@
 
         plt.savefig("gymfc-ppo-step-response.pdf")
 
-
     def main():
         parser = argparse.ArgumentParser()
         logger.configure()
-        parser.add_argument('--env', type=str, help="The Gym environement ID",
+        parser.add_argument("--env", type=str, help="The Gym environement ID",
                             default="AttFC_GyroErr-MotorVel_M4_Con-v0")
-        parser.add_argument('--seed', help='RNG seed', type=int, default=0)
-        parser.add_argument('--model-path', default=os.path.join('/root/code/nti/
-                                                    gymfc/humanoid_policy', 'hum'))
-        parser.add_argument('--play', action="store_true", default=False)
-        parser.add_argument('--num-timesteps', type=int, default=2*1e6)
+        parser.add_argument("--seed", help="RNG seed", type=int, default=0)
+        parser.add_argument("--model-path", default=os.path.join("/root/code/nti/
+                                                    gymfc/humanoid_policy", "hum"))
+        parser.add_argument("--play", action="store_true", default=False)
+        parser.add_argument("--num-timesteps", type=int, default=2*1e6)
 
         current_dir = os.path.dirname(__file__)
             config_path = os.path.join(current_dir,
@@ -258,8 +248,7 @@
                 print(np.array(actuals))
                 plot_step_response(np.array(desireds), np.array(actuals))
 
-
-    if __name__ == '__main__':
+    if __name__ == "__main__":
         main()
 
 
