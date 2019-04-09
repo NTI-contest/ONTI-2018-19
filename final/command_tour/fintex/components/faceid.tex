@@ -1,0 +1,1600 @@
+\subsection*{Взаимодействие с пользователем}
+
+
+%-----------------------------------------------------
+%US-010
+\newuserstory{Идентификация пользователя}
+
+
+Для идентификации пользователя, компонента использует кадры с лицом из видео-потока и отправляет их в сервис \textit{Microsoft Face API}. 
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ faceid.py --find <path to video file>
+\end{myverbbox}
+\scriptExample{
+В случае, когда в текущей директории нет файла \texttt{actions.json}, то запускается простой (небезопасный) способ аутентификации. При этом из видео-потока извлекается 5 кадров с изображением лица человека. Подразумевается, что все кадры в видео приндалежат одному и тому же человеку. Идентификация человека происходит успешно, если кадры из видео указывают на одного и того же человека с высокой степенью (не менее 50\%) уверенности определения.
+
+Если в видео-потоке недостаточно кадров с изображением человека или на изображении невозможно определить лицо, то обработка такого видео должно приводить к ошибке. 
+
+После успешной идентификации в текущей директории создается (если файл уже существовал, то он пересоздается) файл \texttt{person.json}, в котором указывается идентификатор, возвращенный сервисом \textit{Microsoft Face API}. Пример файла:
+\texttt{\string{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"\string}}
+
+}
+
+% AC-010-01
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --simple-add /path/to/video1.avi
+5 frames extracted
+PersonId: 37da04e7-f471-49c7-a54c-a08f05950fc5
+FaceIds
+=======
+1d499868-3d01-487c-8bab-626dc562e4e8
+27dadf08-bc60-4a29-82a7-7d21ea7f40af
+b8cf9c2f-a606-4f21-851d-26e0a0dc8a74
+bf4806de-8c4b-4a12-8495-002f43dba797
+ff79486f-15ac-43be-9c6c-b2840f8c8d22
+$ face-management.py --train
+Training successfully started
+$ cat person.json
+cat: person.json: No such file or directory
+$ faceid.py --find /path/to/video21.avi
+37da04e7-f471-49c7-a54c-a08f05950fc5 identified
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+\end{myverbbox}
+\acceptanceCriteria{Первое и второе видео содержат кадры лица одного и того же человека. Идентификация человека на втором видео происходит успешно, поскольку пять разных кадров из видео указывают на одного и того же человека с высокой степенью (не менее 50\%) уверенности определения. В текущей директории создан файл \texttt{person.json}
+}
+
+% AC-010-02
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --simple-add /path/to/video1.avi
+5 frames extracted
+PersonId: 37da04e7-f471-49c7-a54c-a08f05950fc5
+FaceIds
+=======
+1d499868-3d01-487c-8bab-626dc562e4e8
+27dadf08-bc60-4a29-82a7-7d21ea7f40af
+b8cf9c2f-a606-4f21-851d-26e0a0dc8a74
+bf4806de-8c4b-4a12-8495-002f43dba797
+ff79486f-15ac-43be-9c6c-b2840f8c8d22
+$ face-management.py --train
+Training successfully started
+$ face-management.py --simple-add /path/to/video2.avi
+5 frames extracted
+PersonId: d9e01953-7bc1-4079-96af-3f3a26cf4b1d
+FaceIds
+=======
+3c8195bb-49e7-4b45-b7ae-d44e60310599
+d01523ce-cd83-4605-8298-afd4bb8d9e81
+c0facdb1-704f-44f2-b76f-4e7298c476be
+dcfa8e7b-f8d4-4567-80c5-55f3c5e13d85
+a6872fc7-e45b-467f-b9a7-e18935d057da
+$ cat person.json
+{"id": "33fc4c4a-911a-4ab0-9535-f588d47c3a60"}
+$ faceid.py --find /path/to/video21.avi
+The service is not ready
+$ cat person.json
+cat: person.json: No such file or directory
+\end{myverbbox}
+\acceptanceCriteria{Первое и третье видео содержат кадры лица одного и того же человека. Но поскольку после добавления нового пользователя не происходило повторное обучение сервиса, идентификация человека невозможна. Существовавший в текущей директории файл \texttt{person.json} удаляется.
+}
+
+% AC-010-03
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups/fintech-01
+" -H "Content-Type: application/json" -H "Ocp-Apim-Subscription-Key: 0000
+00000000000000000000000000000" 
+{"error":{"code":"PersonGroupNotFound","message":"Person group is not fou
+nd.\r\nParameter name: personGroupId"}}
+$ faceid.py --find /path/to/video21.avi
+The service is not ready
+$ cat person.json
+cat: person.json: No such file or directory
+\end{myverbbox}
+\acceptanceCriteria{Поскольку не существует группы на момент запуска команды идентификации пользователя, то идентификация человека невозможна. Файл \texttt{person.json} не создается.
+}
+
+% AC-010-04
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video1.avi /path/to/video2.avi /path/
+to/video3.avi /path/to/video4.avi /path/to/video5.avi
+18 frames extracted
+PersonId: 5d5d6e92-f8f0-47cf-8e9b-b4455092603e
+FaceIds
+=======
+0e5edd8e-7756-470e-a26c-f54ab70a5524
+73b4caea-c85c-4594-9153-198351937d94
+2ae3c850-190a-4cd0-afd2-8efa341767ba
+adb7744e-b2fb-4a58-b3a8-f22c3143a8cd
+7e0f87d6-14ad-4ec6-971f-e4c2771cc267
+47c8c307-1f90-473c-b48c-792d5b5a1241
+33e35a22-358a-4847-bcdd-4a5bdfd5eb69
+2c7b951b-126a-4eec-9e22-1d9d65ece9e3
+bcaf7f6a-1c44-476e-a51f-9dde2744ade0
+1c9c0134-ada0-47c2-848c-d4424b232f04
+b79945e1-de47-4011-98f2-e7e8f0d9f3ef
+f972b6ac-078b-4e3d-a779-4cde8ea28f36
+fbeb7aa1-f66e-4412-ad07-b61103e8af0b
+9c762e64-075b-4fa4-8e39-0d83df86428b
+9794e349-e4e4-44ad-951c-610b4890b16e
+2e93da04-8f31-4a27-bd9e-5768335447a5
+b9227512-dfa8-4a17-94e2-be520b8975a9
+b67c1f86-2e3d-45a2-a7fb-57bbbff9cd8c
+$ face-management.py --train
+Training successfully started
+$ faceid.py --find /path/to/video22.avi
+The person was not found
+$ cat person.json
+cat: person.json: No such file or directory
+\end{myverbbox}
+\acceptanceCriteria{Видео, использовавшееся при добавлении человека, и видео, использующееся при распознавании, содержат кадры лица разных людей. Человек, чье лицо изображено на видео, использующееся при распозновании, не был добавлен до этого в сервис \textit{Microsoft Face API}. Кадры лица человека из второго видео не добавляются в сервис \textit{Microsoft Face API}. Файл \texttt{person.json} не создается.
+}
+
+% AC-010-05
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups/fintech-01
+" -H "Content-Type: application/json" -H "Ocp-Apim-Subscription-Key: 0000
+00000000000000000000000000000" 
+{"error":{"code":"PersonGroupNotFound","message":"Person group is not fou
+nd.\r\nParameter name: personGroupId"}}
+$ faceid.py --find /path/to/video100.avi
+The video does not follow requirements
+$ cat person.json
+cat: person.json: No such file or directory
+$ face-management.py --simple-add /path/to/video1.avi
+5 frames extracted
+PersonId: 37da04e7-f471-49c7-a54c-a08f05950fc5
+FaceIds
+=======
+1d499868-3d01-487c-8bab-626dc562e4e8
+27dadf08-bc60-4a29-82a7-7d21ea7f40af
+b8cf9c2f-a606-4f21-851d-26e0a0dc8a74
+bf4806de-8c4b-4a12-8495-002f43dba797
+ff79486f-15ac-43be-9c6c-b2840f8c8d22
+$ face-management.py --train
+Training successfully started
+$ faceid.py --find /path/to/video100.avi
+The video does not follow requirements
+$ cat person.json
+cat: person.json: No such file or directory
+\end{myverbbox}
+\acceptanceCriteria{Видео, использующееся при распознавании, либо содержит меньше 5 кадров, либо не содержит кадров с лицом пользователя. Файл \texttt{person.json} не создается.
+}
+
+% AC-010-06
+\begin{myverbbox}[\small]{\output}
+$ faceid.py --find /path/to/video101.avi
+The person was not found
+$ cat person.json
+cat: person.json: No such file or directory
+\end{myverbbox}
+\acceptanceCriteria{На видео, использующееся при распознавании, как минимум один из пяти разных кадров указывает на человека, отличающегося от человека в других кадрах. Степень уверенности определения не менее 50\%. Файл \texttt{person.json} не создается.
+}
+
+%-----------------------------------------------------
+%US-011
+\newuserstory{Запроса действий на безопасную идентификацию пользователя}
+
+
+Для обеспечения безопасной идентфикации сервис может сформировать запрос к пользователю на выполнение определенных действий. Совершив данные действия пользователь продемонстрирует, что является живым человеком. Таким образом достигается дополнительная безопасность.
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ faceid.py --actions
+\end{myverbbox}
+\scriptExample{
+Команда генерирует JSON \texttt{actions.json}, содержащий описание набора действий, которые должен совершить пользователь.
+
+Действия выбираются из следующего списка:
+\begin{itemize}
+  \item YawRight - поворот головы направо на 15 градусов
+  \item YawLeft - поворот головы налево на 15 градусов
+  \item RollRight - наклон головы вправо на 20 градусов
+  \item RollLeft - наклон головы влево на 20 градусов
+  \item CloseRightEye - прищурить правый глаз на 2 секунды
+  \item CloseLeftEye - прищурить левый глаз на 2 секунды
+  \item OpenMouth - открыть широко рот
+\end{itemize}
+
+В сформированных действиях не должно быть 2 поворота и/или наклона. Всего действий должно быть 3 или 4.
+
+}
+
+% AC-011-01
+\begin{myverbbox}[\small]{\output}
+$ faceid.py --actions
+$ cat actions.json
+{"actions": ["OpenMouth", "YawLeft", "CloseLeftEye"]}
+\end{myverbbox}
+\acceptanceCriteria{Сформирован файл \texttt{actions.json} c тремя действиями. В сформированных действиях - один запрос на открытие рта, один запрос на закрытие глаза, один запрос на изменение положения головы.
+}
+
+% AC-011-02
+\begin{myverbbox}[\small]{\output}
+$ faceid.py --actions
+$ cat actions.json
+{"actions": ["CloseRightEye", "RollRight", "OpenMouth", "CloseLeftEye"]}
+\end{myverbbox}
+\acceptanceCriteria{Сформирован файл \texttt{actions.json} c тремя действиями. В сформированных действиях - один запрос на открытие рта, два запроса (разные глаза) на закрытие глаза, один запрос на изменение положения головы.
+}
+
+% AC-011-03
+\begin{myverbbox}[\small]{\output}
+$ faceid.py --actions
+$ cat actions.json
+{"actions": ["CloseLeftEye", "CloseRightEye", "RollRight"]}
+\end{myverbbox}
+\acceptanceCriteria{Сформирован файл \texttt{actions.json} c тремя действиями. В сформированных действиях - два запроса на закрытие глаз (разные глаза), один запрос на изменение положения головы.
+}
+
+%-----------------------------------------------------
+%US-012
+\newuserstory{Безопасная идентификация пользователя}
+
+
+Должен быть action JSON, сохраняет PersonId в person JSON.
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ faceid.py --find /path/to/video.avi
+\end{myverbbox}
+\scriptExample{
+
+
+}
+
+%-----------------------------------------------------
+%US-013
+\newuserstory{Получение баланса идентифицированного пользователя}
+
+
+После идентификации пользователь может получить баланс на соответствующем данному пользователю аккаунте в сети блокчейн.
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ faceid.py <PIN code>
+\end{myverbbox}
+\scriptExample{
+Используя идентификатор, содержащийся в \texttt{person.json}, и PIN-код скрипт генерирует приватный ключ пользователя. В блокчейн сеть отправляется запрос на баланс аккаунта, полученного из приватного ключа.
+
+Приватный ключ генерируется по правилу:
+
+$$K = keccak256(keccak256(keccak256(keccak256(keccak256(''), I, P_1), I, P_2), I, P_3), I, P_4)$$
+
+где $''$ - 'пустая' последовательность байт, $I$ - это идентификатор, который возвращает система распознавания по лицу, приведенный к длине в 16 байт, а ($P_1$, $P_2$, $P_3$, $P_4$) - четыре цифры PIN-кода, где каждая цифра представлена целым числом длиной 1 байт, $P_1$ - цифра самого старшего разряда в PIN-коде (первая цифра), а $P_4$ - цифра самого младшего разряда в PIN-коде (последняя цифра).
+
+Например, идентификатору \texttt{37da04e7-f471-49c7-a54c-a08f05950fc5} при применении PIN-кода \texttt{1234} соответствует приватный ключ \texttt{6be7217f318a6409ba8e87e42ce600e14153647a816f7f2d43d244d1a00ed3df}.
+
+При выводе баланса должно быть автомтическое масштабирование суммы - нормализация к одному из возможных значений: \textit{poa}, \textit{finney}, \textit{szabo}, \textit{gwei}, \textit{mwei}, \textit{kwei}, \textit{wei}. Происходит следующим образом:
+\begin{itemize}
+  \item Используется минимально возможное нормализованное значение, чья целая часть больше ноля;
+  \item Дробная часть записывается с округлением до $10^{-6}$;
+  \item Завершающие нули в дробной части, полученные полсе округления, не записываются (например, 1.3, но не 1.300000).
+\end{itemize}
+
+}
+
+% AC-013-01
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance 4590
+Your balance is 2.5 poa
+\end{myverbbox}
+\acceptanceCriteria{Баланс пользователя получен от узла блокчейн сети, доступ к которому получен через JSON RPC.
+}
+
+% AC-013-02
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "a9d0f1d5-1359-43ca-bcc3-cc7c1e314b86"}
+$ faceid.py --balance 1864
+Your balance is 84.000138 szabo
+\end{myverbbox}
+\acceptanceCriteria{Баланс пользователя получен от узла блокчейн сети, доступ к которому получен через JSON RPC.
+}
+
+% AC-013-03
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance 6879
+Your balance is 0 poa
+\end{myverbbox}
+\acceptanceCriteria{Неправильно задан PIN-код, поэтому баланс запрашивается у несуществующего аккаунта.
+}
+
+% AC-013-04
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+cat: person.json: No such file or directory
+$ faceid.py --balance 6879
+ID is not found
+\end{myverbbox}
+\acceptanceCriteria{Выдается ошибка, если в текущей директории не существует файл \texttt{person.json}.
+}
+
+%-----------------------------------------------------
+%US-014
+\newuserstory{Отправка запроса на регистрацию соответствия}
+
+
+После идентификации пользователь может отправить запрос на регистрацию соответствия между телефоном и своим аккаунтом.
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ faceid.py --add <pin code> <phone number>
+\end{myverbbox}
+\scriptExample{
+Используя идентификатор, содержащийся в \texttt{person.json}, и PIN-код скрипт генерирует приватный ключ пользователя. В блокчейн сеть отправляется транзакция к контракту регистра соответствий с запросом регистрации. В терминал выводится хэш транзакции, в рамках которой в контракт добавлен запрос регистрации.
+
+}
+
+% AC-014-01
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xa7f3239715ff731a3d6fc477b18e35b9b0a9e1ede8
+4bca5e91517e8e5bf1cc69
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция с запросом регистрации соответствия аккаунта, ассоциированного с аккаунтом, указанным в файле \texttt{person.json} и номером телефона, указанным в параметре командной строки. При обработке запроса, контракт производить событие (\texttt{event}) \texttt{RegistrationRequest}, в с указанием аккаунта, отправившего запрос:
+
+\texttt{event RegistrationRequest(address indexed sender);}
+
+
+Для проведения транзакции выбрана цена из значения \texttt{fast}, возвращенного сервисом \texttt{https://gasprice.poa.network}.
+}
+
+% AC-014-02
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xa7f3239715ff731a3d6fc477b18e35b9b0a9e1ede8
+4bca5e91517e8e5bf1cc69
+$ faceid.py --add 4590 +79991234567
+Registration request already sent
+$ faceid.py --add 4590 +79991239812
+Registration request already sent
+\end{myverbbox}
+\acceptanceCriteria{Повторный запрос на регистрацию соответствия аккаунта не отправляется в блокчейн сеть, поскольку данный аккаунт уже посылал запрос на регистрацию соответствий. Первичный запрос еще не был обработан. В терминал выводится сообщение об ошибке. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-014-03
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+cat: person.json: No such file or directory
+$ faceid.py --add 4590 +79991234567
+ID is not found
+\end{myverbbox}
+\acceptanceCriteria{Выдается ошибка, если в текущей директории не существует файл \texttt{person.json}. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-014-04
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 1234 +79991234567
+No funds to send the request
+\end{myverbbox}
+\acceptanceCriteria{Поскольку ситуация, когда неправильный приватный ключ сформирован из-за некорретного PIN-кода, неотличима от ситуации, когда на аккаунте нет средств для оплаты комиссии на обработку транзакции, в терминал выводится сообщение об ошибке. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-014-05
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+cat: registrar.json: No such file or directory
+$ faceid.py --add 4590 +79122229016
+No contract address
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в текущей директории нет файла \texttt{registrar.json}, содержащего адрес контракта регистра соответствий. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-014-06
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+{"registrar": {"address": "0x340Ec06460d9b2b7D23B40E5bCd0a81A09e06D81", "
+startBlock": 456123}, "payments": {"address": "0x81A09e06D81797AE2b7D23B4
+0E5bCd0a1da01eb0F951x", "startBlock": 456125}}
+$ faceid.py --add 4590 +79122229016
+Seems that the contract address is not the registrar contract
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в адрес контракта, указанного в файле \texttt{registrar.json}, не принадлежит контракту регистра соответствий.
+}
+
+% AC-014-07
+\begin{myverbbox}[\small]{\output}
+$ faceid.py --add 4590 +79122
+Incorrect phone number
+$ faceid.py --add 4590 adad
+Incorrect phone number
+$ faceid.py --add 4590 +73431231543543534653
+Incorrect phone number
+$ faceid.py --add 4590
+Incorrect phone number
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если номер телефона указан некорректно. Корректный номер содержит 11 цифр и начинается со знака +.
+}
+
+% AC-014-08
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xa7f3239715ff731a3d6fc477b18e35b9b0a9e1ede8
+4bca5e91517e8e5bf1cc69
+$ faceid.py --find /path/to/video23.avi
+168f2e61-089f-88a9-53b2-3b3d0c497704 identified
+$ faceid.py --add 5981 +79037518950
+Registration request sent by 0x6a8a46c4e005b9e8bea97aa58c5839787b5689e9e8
+785ea9e38330395582f78f
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция с запросом регистрации соответствия аккаунта даже если в контракте регистра уже учтены запросы на регистрацию соответствий других аккаунтов. При обработке запроса, контракт производит событие (\texttt{event}) \texttt{RegistrationRequest}.
+}
+
+% AC-014-09
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ curl https://gasprice.poa.network/
+curl: (6) Could not resolve host: gasprice.poa.network
+$ faceid.py --add 5981 +79037518950
+Registration request sent by 0x6a8a46c4e005b9e8bea97aa58c5839787b5689e9e8
+785ea9e38330395582f78f
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция c запросом регистрации соответствия аккаунта. Транзакция успешно верифицирована и включена в блок. Для проведения транзакции выбрана цена из значения \texttt{defaultGasPrice} из файла \texttt{network.json}.
+}
+
+% AC-014-10
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0x73aad4ff595a8813cc7d440d244545017c77098528
+f010a7caaa7d74c382f6c5
+\end{myverbbox}
+\acceptanceCriteria{Если из транзакции c идентификатором \texttt{0x73aad4ff595a8813cc7d440d244545017c77098528f010a7caaa7d74c382f6c5} извлечь поле \texttt{input} и отправить его в новой транзакции с того же аккаунта снова в поле \texttt{input} на адрес контракта регистра соответствий, то эта транзакция будет включена в блок, но статус ее исполнения будет - ошибка, поскольку такой запрос регистрации соответствия уже был послан в контракт. Статус можно подтвердить для данной транзакции в браузере блоков.
+}
+
+% AC-014-11
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xa7f3239715ff731a3d6fc477b18e35b9b0a9e1ede8
+4bca5e91517e8e5bf1cc69
+\end{myverbbox}
+\acceptanceCriteria{Если из транзакции с идентификатором \texttt{0xa7f3239715ff731a3d6fc477b18e35b9b0a9e1ede84bca5e91517e8e5bf1cc69} извлечь поле \texttt{input}, изменить в нем те байты, которые кодируют номер телефона так, чтобы передаваемый номер телефона содержал количество цифр отличное от 11, либо содержал буквы, и отправить получившийся набор байт в новой транзакции с того же аккаунта снова в поле \texttt{input} на адрес контракта регистра соответствий, то эта транзакция будет включена в блок, но статус ее исполнения будет - ошибка, поскольку такой номер телефона некорректный. Статус можно подтвердить для данной транзакции в браузере блоков.
+}
+
+% AC-014-12
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0x73aad4ff595a8813cc7d440d244545017c77098528
+f010a7caaa7d74c382f6c5
+\end{myverbbox}
+\acceptanceCriteria{Если из транзакции c идентификатором \texttt{0x73aad4ff595a8813cc7d440d244545017c77098528f010a7caaa7d74c382f6c5} извлечь поле \texttt{input} и отправить его в новой транзакции с аккаунта, отличающегося от \texttt{from} в упомянутой выше транзакции, на адрес контракта регистра соответствий, то эта транзакция будет включена в блок, но статус ее исполнения будет - успешно, поскольку такой изначальный запрос регистрации соответствия еще не был подтвержден. Статус транзакции можно подтвердить для данной транзакции в браузере блоков.
+}
+
+%-----------------------------------------------------
+%US-015
+\newuserstory{Отправка запроса на удаление соответствия}
+
+
+После идентификации пользователь может отправить запрос на удаление соответствия между телефоном и своим аккаунтом.
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ faceid.py --del <pin code>
+\end{myverbbox}
+\scriptExample{
+Используя идентификатор, содержащийся в \texttt{person.json}, и PIN-код скрипт генерирует приватный ключ пользователя. В блокчейн сеть отправляется транзакция к контракту регистра соответствий с запросом удаления. В терминал выводится хэш транзакции, в рамках которой в контракт добавлен запрос удаления.
+
+}
+
+% AC-015-01
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --del 4590
+Unregistration request sent by 0x58aff6987a78c9109ff3b99b0e1cf333faba313b
+c8002d4b333653be45d7e1d8
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция с запросом удаления ранее зарегистрированного соответствия аккаунта, ассоциированного с аккаунтом, указанным в файле \texttt{person.json} и номера телефона. При обработке запроса, контракт производить событие (\texttt{event}) \texttt{UnregistrationRequest}, в с указанием аккаунта, отправившего запрос:
+
+\texttt{event UnregistrationRequest(address indexed sender);}
+
+
+Для проведения транзакции выбрана цена из значения \texttt{fast}, возвращенного сервисом \texttt{https://gasprice.poa.network}.
+}
+
+% AC-015-02
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --del 4590
+Unregistration request sent by 0x58aff6987a78c9109ff3b99b0e1cf333faba313b
+c8002d4b333653be45d7e1d8
+$ faceid.py --del 4590
+Unregistration request already sent
+\end{myverbbox}
+\acceptanceCriteria{Повторный запрос на удаление соответствия аккаунта не отправляется в блокчейн сеть, поскольку данный аккаунт уже посылал запрос на удаление соответствий. Первичный запрос еще не был обработан. В терминал выводится сообщение об ошибке. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-015-03
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "da04e377-47f1-c749-54ca-0fc5a08f0595"}
+$ faceid.py --add 6104 +79220012534
+Registration request sent by 0xc95d677eb6f3fcb55e08274ae0eed1970391e637f1
+062426a3406fd7d4cfcfcb
+$ faceid.py --del 6104
+Account is not registered yet
+\end{myverbbox}
+\acceptanceCriteria{Запрос на удаление соответствия аккаунта не отправляется в блокчейн сеть, поскольку данный аккаунт не зарегистрирован в регистре соответствий. В терминал выводится сообщение об ошибке. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-015-04
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+cat: person.json: No such file or directory
+$ faceid.py --del 4590
+ID is not found
+\end{myverbbox}
+\acceptanceCriteria{Выдается ошибка, если в текущей директории не существует файл \texttt{person.json}. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-015-05
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --del 1234
+No funds to send the request
+\end{myverbbox}
+\acceptanceCriteria{Поскольку ситуация, когда неправильный приватный ключ сформирован из-за некорретного PIN-кода, неотличима от ситуации, когда на аккаунте нет средств для оплаты комиссии на обработку транзакции, в терминал выводится сообщение об ошибке. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-015-06
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+cat: registrar.json: No such file or directory
+$ faceid.py --del 4590
+No contract address
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в текущей директории нет файла \texttt{registrar.json}, содержащего адрес контракта регистра соответствий. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-015-07
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+{"registrar": {"address": "0x340Ec06460d9b2b7D23B40E5bCd0a81A09e06D81", "
+startBlock": 456123}, "payments": {"address": "0x81A09e06D81797AE2b7D23B4
+0E5bCd0a1da01eb0F951x", "startBlock": 456125}}
+$ faceid.py --del 4590
+Seems that the contract address is not the registrar contract.
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в адрес контракта, указанного в файле \texttt{registrar.json}, не принадлежит контракту регистра соответствий.
+}
+
+% AC-015-08
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --del 4590
+Unregistration request sent by 0x58aff6987a78c9109ff3b99b0e1cf333faba313b
+c8002d4b333653be45d7e1d8
+$ faceid.py --find /path/to/video23.avi
+168f2e61-089f-88a9-53b2-3b3d0c497704 identified
+$ faceid.py --del 5981
+Unregistration request sent by 0xda0e2a124e6d37080b539f1bb0dc4c698b8025b6
+2dcc56d75efc1115d87381aa
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция с запросом удаления ранее зарегистрированного соответствия аккаунта даже если в контракте регистра уже учтены запросы на удаление соответствий других аккаунтов. При обработке запроса, контракт производить событие (\texttt{event}) \texttt{UnregistrationRequest}.
+}
+
+% AC-015-09
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ curl https://gasprice.poa.network/
+curl: (6) Could not resolve host: gasprice.poa.network
+$ faceid.py --del 5981
+Unregistration request sent by 0xda0e2a124e6d37080b539f1bb0dc4c698b8025b6
+2dcc56d75efc1115d87381aa
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция c запросом удаления соответствия аккаунта. Транзакция успешно верифицирована и включена в блок. Для проведения транзакции выбрана цена из значения \texttt{defaultGasPrice} из файла \texttt{network.json}.
+}
+
+% AC-015-10
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --del 4590
+Unregistration request sent by 0x58aff6987a78c9109ff3b99b0e1cf333faba313b
+c8002d4b333653be45d7e1d8
+\end{myverbbox}
+\acceptanceCriteria{Если из транзакции с идентификатором \texttt{0x58aff6987a78c9109ff3b99b0e1cf333faba313bc8002d4b333653be45d7e1d8} извлечь поле \texttt{input} и отправить его в новой транзакции с того же аккаунта снова в поле \texttt{input} на адрес контракта регистра соответствий, то эта транзакция будет включена в блок, но статус ее исполнения будет - ошибка, поскольку такой запрос удаления соответствия уже был послан в контракт. Статус можно подтвердить для данной транзакции в браузере блоков.
+}
+
+%-----------------------------------------------------
+%US-016
+\newuserstory{Отмена запроса на регистрацию или удаление соответствия}
+
+
+После идентификации пользователь может отправить отмену для запроса на добавление или удаление соответствия между телефоном и своим аккаунтом.
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ faceid.py --cancel <pin code>
+\end{myverbbox}
+\scriptExample{
+Используя идентификатор, содержащийся в \texttt{person.json}, и PIN-код скрипт генерирует приватный ключ пользователя. В блокчейн сеть отправляется транзакция к контракту регистра соответствий на отмену запроса добавления или удаления соответствия. В терминал выводится хэш транзакции, в рамках которой просиходит отмена.
+
+}
+
+% AC-016-01
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xa7f3239715ff731a3d6fc477b18e35b9b0a9e1ede8
+4bca5e91517e8e5bf1cc69
+$ faceid.py --cancel 4590
+Registration canceled by 0x99a7e5f28b653d63b5c0bbddebc91678530ee461e4fa21
+c9ab2f281d28b8da5e
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция с отменой запроса регистрации соответствия аккаунта, ассоциированного с аккаунтом, указанным в файле \texttt{person.json}. При обработке запроса, контракт производить событие (\texttt{event}) \texttt{RegistrationСanceled}, в с указанием аккаунта, отправившего запрос:
+
+\texttt{event RegistrationСanceled(address indexed sender);}
+
+
+Для проведения транзакции выбрана цена из значения \texttt{fast}, возвращенного сервисом \texttt{https://gasprice.poa.network}.
+}
+
+% AC-016-02
+\begin{myverbbox}[\small]{\output}
+$ cat network.json
+{"rpcUrl": "https://sokol.poa.network", "gasPriceUrl": "https://gasprice.
+poa.network/", "defaultGasPrice": 2000000000}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0x20d2ac2a28641786ba03eff53facea687b35e08e68
+0a1b71922c6fc1ed1f2735
+$ faceid.py --cancel 4590
+Registration canceled by 0x566674f71911cd3b7cbc2fd66353711d31aaa96f269440
+d186374a017f53f324
+\end{myverbbox}
+\acceptanceCriteria{
+}
+
+% AC-016-03
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --del 4590
+Unregistration request sent by 0x58aff6987a78c9109ff3b99b0e1cf333faba313b
+c8002d4b333653be45d7e1d8
+$ faceid.py --cancel 4590
+Unregistration canceled by 0x84a9548edfa9ce5d05bb7c88702873196f7537e06061
+9d4238e7f23ba8dfe3bd
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция с отменой запроса удаления ранее зарегистрированного соответствия аккаунта, ассоциированного с аккаунтом, указанным в файле \texttt{person.json}. При обработке запроса, контракт производить событие (\texttt{event}) \texttt{UnregistrationCanceled}, в с указанием аккаунта, отправившего запрос:
+
+\texttt{event UnregistrationCanceled(address indexed sender);}
+}
+
+% AC-016-04
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --del 4590
+Unregistration request sent by 0xbf08d8a2d7c7780024ba6e6dbe12d3d5a5a747ea
+3071fca63d8a2ede50d3472a
+$ faceid.py --cancel 4590
+Registration canceled by 0x2946d6e84f7bc52619746d71da01ef04a31855a8deb6db
+ea29310ab3b0f6201e
+\end{myverbbox}
+\acceptanceCriteria{
+}
+
+% AC-016-05
+\begin{myverbbox}[\small]{\output}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0xa7f3239715ff731a3d6fc477b18e35b9b0a9e1ede8
+4bca5e91517e8e5bf1cc69
+$ faceid.py --cancel 4590
+Registration canceled by 0x99a7e5f28b653d63b5c0bbddebc91678530ee461e4fa21
+c9ab2f281d28b8da5e
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0x4ae610dabaaddd16fe0097641e0e78b5423f891083
+bb81266b228a49db54e2ff
+\end{myverbbox}
+\acceptanceCriteria{После отмены запроса регистрации соответствия, в блокчейн сеть снова можно отправить запрос на регистрацию соответствия для того же аккаунта.
+}
+
+% AC-016-06
+\begin{myverbbox}[\small]{\output}
+$ faceid.py --del 4590
+Unregistration request sent by 0x58aff6987a78c9109ff3b99b0e1cf333faba313b
+c8002d4b333653be45d7e1d8
+$ faceid.py --cancel 4590
+Unregistration canceled by 0x84a9548edfa9ce5d05bb7c88702873196f7537e06061
+9d4238e7f23ba8dfe3bd
+$ faceid.py --del 4590
+Unregistration request sent by 0x03a8233da62730a9e5ac69d78c3fc3cf02b04ecb
+995f5a9f9eb3b17c01692824
+\end{myverbbox}
+\acceptanceCriteria{После отмены запроса на удаление соответствия, в блокчейн сеть снова можно отправить отмену запроса удаления ранее зарегистрированного соответствия аккаунта.
+}
+
+% AC-016-07
+\begin{myverbbox}[\small]{\output}
+$ faceid.py --add 4590 +79991234567
+Registration request sent by 0x4ae610dabaaddd16fe0097641e0e78b5423f891083
+bb81266b228a49db54e2ff
+$ faceid.py --cancel 4590
+Registration canceled by 0x3d61f45ffa5ac772fc53d36fcc89bacaee425152d65c7f
+d9a506ba40aa0ed6e1
+$ faceid.py --cancel 4590
+No requests found
+\end{myverbbox}
+\acceptanceCriteria{Выдается ошибка, если нет активных запросов на регистрацию или удаления соответствия.
+}
+
+% AC-016-08
+\begin{myverbbox}[\small]{\output}
+$ faceid.py --del 4590
+Unregistration request sent by 0x03a8233da62730a9e5ac69d78c3fc3cf02b04ecb
+995f5a9f9eb3b17c01692824
+$ faceid.py --cancel 4590
+Unregistration canceled by 0x41c2cd6cce43fddcd3c1489e1b2f40ad13b635bb0fce
+22f2ea66a97f15b6c84b
+$ faceid.py --cancel 4590
+No requests found
+\end{myverbbox}
+\acceptanceCriteria{Выдается ошибка, если нет активных запросов на регистрацию или удаления соответствия.
+}
+
+% AC-016-09
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --cancel 4590
+Registration canceled by 0x41c2cd6cce43fddcd3c1489e1b2f40ad13b635bb0fce22
+f2ea66a97f15b6c84b
+$ faceid.py --find /path/to/video23.avi
+168f2e61-089f-88a9-53b2-3b3d0c497704 identified
+$ faceid.py --cancel 5981
+No requests found
+\end{myverbbox}
+\acceptanceCriteria{Выдается ошибка, если нет активных запросов на регистрацию или удаления соответствия.
+}
+
+% AC-016-10
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+cat: person.json: No such file or directory
+$ faceid.py --cancel 4590
+ID is not found
+\end{myverbbox}
+\acceptanceCriteria{Выдается ошибка, если в текущей директории не существует файл \texttt{person.json}. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-016-11
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --cancel 1234
+No funds to send the request
+\end{myverbbox}
+\acceptanceCriteria{Поскольку ситуация, когда неправильный приватный ключ сформирован из-за некорретного PIN-кода, неотличима от ситуации, когда на аккаунте нет средств для оплаты комиссии на обработку транзакции, в терминал выводится сообщение об ошибке. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-016-12
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+cat: registrar.json: No such file or directory
+$ faceid.py --cancel 4590
+No contract address
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в текущей директории нет файла \texttt{registrar.json}, содержащего адрес контракта регистра соответствий. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-016-13
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+{"registrar": {"address": "0x340Ec06460d9b2b7D23B40E5bCd0a81A09e06D81", "
+startBlock": 456123}, "payments": {"address": "0x81A09e06D81797AE2b7D23B4
+0E5bCd0a1da01eb0F951x", "startBlock": 456125}}
+$ faceid.py --cancel 4590
+Seems that the contract address is not the registrar contract.
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в адрес контракта, указанного в файле \texttt{registrar.json}, не принадлежит контракту регистра соответствий.
+}
+
+% AC-016-14
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ curl https://gasprice.poa.network/
+curl: (6) Could not resolve host: gasprice.poa.network
+$ faceid.py --cancel 4590
+Registration canceled by 0x41c2cd6cce43fddcd3c1489e1b2f40ad13b635bb0fce22
+f2ea66a97f15b6c84b
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция c отменой запросом регистрации или удаления соответствия аккаунта. Транзакция успешно верифицирована и включена в блок. Для проведения транзакции выбрана цена из значения \texttt{defaultGasPrice} из файла \texttt{network.json}.
+}
+
+%-----------------------------------------------------
+%US-017
+\newuserstory{Отправка средств }
+
+
+После идентификации пользователь может отправить часть средств, которые числятся на его балансе другому пользователю системы, указав его номер телефона.
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ faceid.py --send <pin code> <phone number> <value>
+\end{myverbbox}
+\scriptExample{
+Через RPC узел блокчейн сети происходит обращение к контракту регистрации соответствий на получение аккаунта соответствующего данному номеру телефона. После этого используя идентификатор, содержащийся в \texttt{person.json}, и PIN-код скрипт генерирует приватный ключ пользователя, в блокчейн сеть отправляется транзакция на перевод средств с баланса пользователя на аккаунт пользователя, ассоциированного с номером телефона.
+
+}
+
+% AC-017-01
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance 1234
+Your balance is 500 finney
+$ faceid.py --send 1234 +79873344556 10000000000000000
+Payment of 10 finney to +79873344556 scheduled
+Transaction Hash: 0x27c9181caeb55d37e1105fa1a8648db7fe50f79064b98e56b8e85
+4e3abb43728
+$ faceid.py --balance 1234
+Your balance is 489.860605 finney
+\end{myverbbox}
+\acceptanceCriteria{Средства успешно доставлены.
+}
+
+% AC-017-02
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance 1234
+Your balance is 90 finney
+$ faceid.py --send 1234 +79873344556 10000000000000000
+No funds to send the payment
+$ faceid.py --balance 1234
+Your balance is 90 finney
+\end{myverbbox}
+\acceptanceCriteria{Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-017-03
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --send 1234 +79873312356 10000000000000000
+No account with the phone number +79873312356
+\end{myverbbox}
+\acceptanceCriteria{Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-017-04
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --send 1114 +79873312356 10000000000000000
+No funds to send the payment
+\end{myverbbox}
+\acceptanceCriteria{Поскольку ситуация, когда неправильный приватный ключ сформирован из-за некорретного PIN-кода, неотличима от ситуации, когда на аккаунте нет средств для перевода, в терминал выводится сообщение об ошибке. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-017-05
+\begin{myverbbox}[\small]{\output}
+$ faceid.py --send 1234 +79122 10000000000000000
+Incorrect phone number
+$ faceid.py --send 1234 adad 10000000000000000
+Incorrect phone number
+$ faceid.py --send 1234 +73431231543543534653 10000000000000000
+Incorrect phone number
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если номер телефона указан некорректно. Корректный номер содержит 11 цифр и начинается со знака +.
+}
+
+%-----------------------------------------------------
+%US-018
+\newuserstory{Генерация сертификата на получение средств}
+
+
+После идентификации пользователь может отправить запрос на создание сертификата на получение определенного количества средств. Созданный сертификат впоследствии может быть использован любым пользователем до истечения срока действия. Сертификат имеет следующий формат: первые 32 байта - цифровой идентификатор сертификата, следующие 65 байт - цифровая подпись цифрового идентификатора (\texttt{r}, \texttt{s}, \texttt{v}).
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ faceid.py --gift <pin code> <value> <expire date>
+\end{myverbbox}
+\scriptExample{
+Используя идентификатор, содержащийся в \texttt{person.json}, и PIN-код скрипт генерирует приватный ключ пользователя, в блокчейн сеть отправляется транзакция к контракту управления сертификатами на создание нового сертификата на указанную сумму в \texttt{wei}, действующий до указанной даты в формате \texttt{HH:MM DD.MM.YYYY}. В терминал выводится созданный цифровой сертификат.
+
+}
+
+% AC-018-01
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance
+Your balance is 500 finney
+$ faceid.py --gift 4590 10000000000000000 "15:40 08.03.2019"
+aee79c36a8aff107f836a382d175b2e7cd86c34dae48a3288eb38b72da955d609e1c1f49a
+a566e305bf444120af2f65923315026b0a03bcde4b139571752c0421a368cc1dc7171c6e8
+08ba1fcb4cd7f3c034c64853dbd9a91bfc12ef9eece1e21c
+$ faceid.py --balance
+Your balance is 489.860605 finney
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция на создание сертификата. При обработке запроса, контракт производит событие (\texttt{event}) \texttt{CertificateCreated} c указанием идентификатора сертификата внутри контракта:
+
+\texttt{event CertificateCreated(bytes32 indexed id);}
+
+
+Для проведения транзакции выбрана цена из значения \texttt{fast}, возвращенного сервисом \texttt{https://gasprice.poa.network}. Баланс отправителя уменьшился на сумму указанную в сертификате.
+}
+
+% AC-018-02
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance
+Your balance is 90 finney
+$ faceid.py --gift 4590 100000000000000000 "15:40 08.03.2019"
+No funds to create a certificate
+$ faceid.py --balance
+Your balance is 90 finney
+\end{myverbbox}
+\acceptanceCriteria{На балансе пользователя недостаточно средств чтобы создать сертификат с указанной суммой. Транзакция в блокчейн сеть не отправляется. Баланс пользователя не уменьшается. В терминал выводится сообщение об ошибке.
+}
+
+% AC-018-03
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ date
+Wed Oct  21 07:28:00 MSK 2015
+$ faceid.py --gift 4590 1000 "09:00 26.10.1985"
+Expiration date is invalid
+\end{myverbbox}
+\acceptanceCriteria{Указанная дата годности сертификата уже истекла. Транзакция в блокчейн сеть не отправляется. Баланс пользователя не уменьшается. В терминал выводится сообщение об ошибке.
+}
+
+% AC-018-04
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+cat: person.json: No such file or directory
+$ faceid.py --gift 1234 1000 "15:40 08.03.2019"
+ID is not found
+\end{myverbbox}
+\acceptanceCriteria{Выдается ошибка, если в текущей директории не существует файл \texttt{person.json}. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-018-05
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --gift 1234 1000 "15:40 08.03.2019"
+No funds to create a certificate
+\end{myverbbox}
+\acceptanceCriteria{Указан неверный пинкод. Поскольку ситуация, когда неправильный приватный ключ сформирован из-за некорретного PIN-кода, неотличима от ситуации, когда на аккаунте нет средств для оплаты транзакции, в терминал выводится сообщение об ошибке. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-018-06
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance
+Your balance is 485.992209 finney
+$ faceid.py --gift 4590 10000000000000000 "15:40 08.03.2019"
+e4473f3c3e3f3803f5c640a93b44b9a35968df4e7d4a907cab99926f4af694a7053ac2253
+149e7a5212f816cd367a471acc97c67cf38b7b3cf0d59ff8fbcf6d86a8d179e6e74d103f9
+e7e423630454b06ffe5dd2806e3bc0551971675619b31a1b
+$ faceid.py --balance
+Your balance is 475.852814 poa
+$ faceid.py --gift 4590 10000000000000000 "15:40 08.03.2019"
+73bd8c3b60a59a3ccb37764f87e62dafab374d3c4885edd21192f060b83a47e616dcc4fd2
+2eac78fdc3e023fa60ac7863a4111f245556b3966b2d960b104c53f5d7a2c67b787abdd86
+2826708737d425a5d0e774d055a996cc853591113afc881c
+$ faceid.py --balance
+Your balance is 465.713419 poa
+$ cat person.json
+{"id": "da04e377-47f1-c749-54ca-0fc5a08f0595"}
+$ faceid.py --balance
+Your balance is 1.5 poa
+$ faceid.py --gift 6104 10000000000000000 "15:40 08.03.2019"
+b6f4176f9fe77211717fb3f7f41995b29cc04bd888d24eaa8d398fd57b8fc2153c352e75a
+dbbb101570a58056ae00a0c6fb4c176f7e91f3489ae4bc1104f857e551bd96f1f7223ad9e
+735f1544cc0eb89f2ed703dc4243cd1a2d96a47b91d0f41c
+$ faceid.py --balance
+Your balance is 1.48983 poa
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется несколько транзакции на создание сертификатов c нескольких аккаунтов. Для проведения транзакции выбрана цена из значения \texttt{fast}, возвращенного сервисом \texttt{https://gasprice.poa.network}. Баланс отправителей уменьшился на суммы указанные в сертификатах.
+}
+
+% AC-018-07
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ curl https://gasprice.poa.network/
+curl: (6) Could not resolve host: gasprice.poa.network
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance
+Your balance is 500 finney
+$ faceid.py --gift 4590 10000000000000000 "15:40 08.03.2019"
+c265d15e7a89cab7a9e30a3287d0be6d8b2ab3e635ede29129514002b5bf4cdf7f880a32d
+623da84c78d89b7814d5a0d41fc249d55902c7835c0cd2fa978cd077b4483d7d828a63d1c
+bec57e5ebc65fb262c7d3c2fc3f3c7afc0b599fee1371b1c
+$ faceid.py --balance
+Your balance is 489.860605 finney
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция на создание сертификата. Транзакция успешно верифицирована и включена в блок. Для проведения транзакции выбрана цена из значения \texttt{defaultGasPrice} из файла \texttt{network.json}.
+}
+
+% AC-018-08
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+cat: registrar.json: No such file or directory
+$ faceid.py --gift 4590 10000000000000000 "15:40 08.03.2019"
+No contract address
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в текущей директории нет файла \texttt{registrar.json}, содержащего адрес контракта управления сертификатами. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-018-09
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+{"registrar": {"address": "0x340Ec06460d9b2b7D23B40E5bCd0a81A09e06D81", "
+startBlock": 456123}, "payments": {"address": "0x81A09e06D81797AE2b7D23B4
+0E5bCd0a1da01eb0F951x", "startBlock": 456125}}
+$ faceid.py --gift 4590 10000000000000000 "15:40 08.03.2019"
+Seems that the contract address is not the certificates contract.
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в адрес контракта, указанного в файле \texttt{registrar.json}, не принадлежит контракту управления сертификатами.
+}
+
+%-----------------------------------------------------
+%US-019
+\newuserstory{Использование сертификата на получение средств }
+
+
+После идентификации пользователь может отправить запрос на получение средств с уже созданного сертификата. Сертификат может быть использован только один раз и только до истечения указанного при создании срока годности.
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ faceid.py --receive <pin code> <certificate>
+\end{myverbbox}
+\scriptExample{
+Используя идентификатор, содержащийся в \texttt{person.json}, и PIN-код скрипт генерирует приватный ключ пользователя. В блокчейн сеть отправляется транзакция к контракту управления сертификатами на получение средств c сертификата.
+
+}
+
+% AC-019-01
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance
+Your balance is 500 finney
+$ faceid.py --receive 4590 aee79c36a8aff107f836a382d175b2e7cd86c34dae48a3
+288eb38b72da955d609e1c1f49aa566e305bf444120af2f65923315026b0a03bcde4b1395
+71752c0421a368cc1dc7171c6e808ba1fcb4cd7f3c034c64853dbd9a91bfc12ef9eece1e2
+1c
+Received funds from the certificate
+$ faceid.py --balance
+Your balance is 510 finney
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция на получение средств. При обработке запроса, контракт производит событие (\texttt{event}) \texttt{CertificateUsed} с указанием идентификатора сертификата внутри контракта:
+
+\texttt{event CertificateUsed(bytes32 indexed id);}
+
+
+Для проведения транзакции выбрана цена из значения \texttt{fast}, возвращенного сервисом \texttt{https://gasprice.poa.network}. Баланс отправителя увеличился на сумму указанную в сертификате.
+}
+
+% AC-019-02
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance
+Your balance is 510 finney
+$ faceid.py --receive 4590 aee79c36a8aff107f836a382d175b2e7cd86c34dae48a3
+288eb38b72da955d609e1c1f49aa566e305bf444120af2f65923315026b0a03bcde4b1395
+71752c0421a368cc1dc7171c6e808ba1fcb4cd7f3c034c64853dbd9a91bfc12ef9eece1e2
+1c
+Cannot receive funds from the certificate
+$ faceid.py --balance
+Your balance is 510 finney
+\end{myverbbox}
+\acceptanceCriteria{Нельзя использовать сертификат, так как он уже был использован ранее. Транзакция в блокчейн сеть не отправляется. Баланс пользователя не изменяется. В терминал выводится сообщение об ошибке.
+}
+
+% AC-019-03
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --receive 4590 e4473f3c3e3f3803f5c640a93b44b9a35968df4e7d4a90
+7cab99926f4af694a7053ac2253149e7a5212f816cd367a471acc97c67cf38b7b3cf0d59f
+f8fbcf6d86a8d179e6e74d103f9e7e423630454b06ffe5dd2806e3bc0551971675619b31a
+1b
+Cannot receive funds from the certificate
+\end{myverbbox}
+\acceptanceCriteria{Нельзя использовать сертификат, так как указанная дата годности сертификата уже истекла. Транзакция в блокчейн сеть не отправляется. Баланс пользователя не изменяется. В терминал выводится сообщение об ошибке.
+}
+
+% AC-019-04
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+cat: person.json: No such file or directory
+$ faceid.py --receive 1234 e4473f3c3e3f3803f5c640a93b44b9a35968df4e7d4a90
+7cab99926f4af694a7053ac2253149e7a5212f816cd367a471acc97c67cf38b7b3cf0d59f
+f8fbcf6d86a8d179e6e74d103f9e7e423630454b06ffe5dd2806e3bc0551971675619b31a
+1b
+ID is not found
+\end{myverbbox}
+\acceptanceCriteria{Выдается ошибка, если в текущей директории не существует файл \texttt{person.json}. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-019-05
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --receive 4590 0123456789abcdef0123456789abcdef0123456789abcd
+ef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456
+789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+01
+Cannot receive funds from the certificate
+\end{myverbbox}
+\acceptanceCriteria{Указан несуществующий сертификат, который невозможно использовать. Транзакция в блокчейн сеть не отправляется. Баланс пользователя не изменяется. В терминал выводится сообщение об ошибке.
+}
+
+% AC-019-06
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --gift 4590 1000000000000000 "15:40 08.03.2019"
+e4473f3c3e3f3803f5c640a93b44b9a35968df4e7d4a907cab99926f4af694a7053ac2253
+149e7a5212f816cd367a471acc97c67cf38b7b3cf0d59ff8fbcf6d86a8d179e6e74d103f9
+e7e423630454b06ffe5dd2806e3bc0551971675619b31a1b
+$ faceid.py --gift 4590 10000000000000000 "15:40 08.03.2019"
+73bd8c3b60a59a3ccb37764f87e62dafab374d3c4885edd21192f060b83a47e616dcc4fd2
+2eac78fdc3e023fa60ac7863a4111f245556b3966b2d960b104c53f5d7a2c67b787abdd86
+2826708737d425a5d0e774d055a996cc853591113afc881c
+$ faceid.py --balance
+Your balance is 465.713419 poa
+$ faceid.py --receive 4590 73bd8c3b60a59a3ccb37764f87e62dafab374d3c4885ed
+d21192f060b83a47e616dcc4fd22eac78fdc3e023fa60ac7863a4111f245556b3966b2d96
+0b104c53f5d7a2c67b787abdd862826708737d425a5d0e774d055a996cc853591113afc88
+1c
+Received funds from the certificate
+$ faceid.py --balance
+Your balance is 475.713419 poa
+$ faceid.py --receive 4590 e4473f3c3e3f3803f5c640a93b44b9a35968df4e7d4a90
+7cab99926f4af694a7053ac2253149e7a5212f816cd367a471acc97c67cf38b7b3cf0d59f
+f8fbcf6d86a8d179e6e74d103f9e7e423630454b06ffe5dd2806e3bc0551971675619b31a
+1b
+Received funds from the certificate
+$ faceid.py --balance
+Your balance is 476.713419 poa
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется несколько транзакции на создание сертификатов c нескольких аккаунтов, а затем несколько транзакций на получение средств. Для проведения транзакций выбрана цена из значения \texttt{fast}, возвращенного сервисом \texttt{https://gasprice.poa.network}. Баланс отправителей корректно изменяется на суммы указанные в сертификатах.
+}
+
+% AC-019-07
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ curl https://gasprice.poa.network/
+curl: (6) Could not resolve host: gasprice.poa.network
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance
+Your balance is 489.860605 finney
+$ faceid.py --receive 4590 c265d15e7a89cab7a9e30a3287d0be6d8b2ab3e635ede2
+9129514002b5bf4cdf7f880a32d623da84c78d89b7814d5a0d41fc249d55902c7835c0cd2
+fa978cd077b4483d7d828a63d1cbec57e5ebc65fb262c7d3c2fc3f3c7afc0b599fee1371b
+1c
+Received funds from the certificate
+$ faceid.py --balance
+Your balance is 499.860605 finney
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция на получение средств с сертификата. Транзакция успешно верифицирована и включена в блок. Для проведения транзакции выбрана цена из значения \texttt{defaultGasPrice} из файла \texttt{network.json}.
+}
+
+% AC-019-08
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+cat: registrar.json: No such file or directory
+$ faceid.py --receive 4590 c265d15e7a89cab7a9e30a3287d0be6d8b2ab3e635ede2
+9129514002b5bf4cdf7f880a32d623da84c78d89b7814d5a0d41fc249d55902c7835c0cd2
+fa978cd077b4483d7d828a63d1cbec57e5ebc65fb262c7d3c2fc3f3c7afc0b599fee1371b
+1c
+No contract address
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в текущей директории нет файла \texttt{registrar.json}, содержащего адрес контракта управления контрактами. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-019-09
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+{"registrar": {"address": "0x340Ec06460d9b2b7D23B40E5bCd0a81A09e06D81", "
+startBlock": 456123}, "payments": {"address": "0x81A09e06D81797AE2b7D23B4
+0E5bCd0a1da01eb0F951x", "startBlock": 456125}}
+$ faceid.py --receive 4590 c265d15e7a89cab7a9e30a3287d0be6d8b2ab3e635ede2
+9129514002b5bf4cdf7f880a32d623da84c78d89b7814d5a0d41fc249d55902c7835c0cd2
+fa978cd077b4483d7d828a63d1cbec57e5ebc65fb262c7d3c2fc3f3c7afc0b599fee1371b
+1c
+Seems that the contract address is not the certificates contract.
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в адрес контракта, указанного в файле \texttt{registrar.json}, не принадлежит контракту управления сертификатами.
+}
+
+% AC-019-10
+\begin{myverbbox}[\small]{\output}
+$ faceid.py --balance
+Your balance is 500 finney
+$ faceid.py --receive 4590 aee79c36a8aff107f836a382d175b2e7cd86c34dae48a3
+288eb38b72da955d609e1c1f49aa566e305bf444120af2f65923315026b0a03bcde4b1395
+71752c0421a368cc1dc7171c6e808ba1fcb4cd7f3c034c64853dbd9a91bfc12ef9eece1e2
+1c
+Received funds from the certificate
+$ faceid.py --balance
+Your balance is 510 finney
+\end{myverbbox}
+\acceptanceCriteria{Если из транзакции, которая была отправлена в результате команды \texttt{faceid.py --receive}, извлечь поле input и отправить его в новой транзакции снова в поле input на адрес контракта управления сертификатами, то эта транзакция будет включена в блок, но статус ее исполнения будет - ошибка по причине того, что сертификат уже был использован ранее. Следовательно, повторно сертификат не должен быть использован.
+}
+
+%-----------------------------------------------------
+%US-020
+\newuserstory{Вернуть средства из неиспользованных сертификатов }
+
+
+После идентификации пользователь может отправить запрос на возврат средств с уже созданного сертификата после истечения срока годности. Возврат может быть осуществлен только один раз и только с аккаунта создателя сертификата. 
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ faceid.py --withdraw <pin code>
+\end{myverbbox}
+\scriptExample{
+Используя идентификатор, содержащийся в \texttt{person.json}, и PIN-код скрипт генерирует приватный ключ пользователя. В блокчейн сеть отправляется транзакция к контракту управления сертификатами на возврат средств c сертификата.
+
+}
+
+% AC-020-01
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance
+Your balance is 500 finney
+$ faceid.py --withdraw 4590
+Withdrew funds from the certificate
+$ faceid.py --balance
+Your balance is 510 finney
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция на возврат средств. При обработке запроса, контракт производит событие (\texttt{event}) \texttt{CertificateWithdrew} с указанием идентификатора сертификата внутри контракта:
+
+\texttt{event CertificateWithdrew(bytes32 indexed id);}
+
+
+Для проведения транзакции выбрана цена из значения \texttt{fast}, возвращенного сервисом \texttt{https://gasprice.poa.network}. Баланс отправителя увеличился на сумму указанную в сертификате.
+}
+
+% AC-020-02
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance
+Your balance is 510 finney
+$ faceid.py --withdraw 4590
+Cannot withdraw funds from the certificate
+$ faceid.py --balance
+Your balance is 510 finney
+\end{myverbbox}
+\acceptanceCriteria{Нельзя вернуть средства, так как аналогичный запрос уже был выполнен. Транзакция в блокчейн сеть не отправляется. Баланс пользователя не изменяется. В терминал выводится сообщение об ошибке.
+}
+
+% AC-020-03
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --withdraw 4590
+Cannot withdraw funds from the certificate
+\end{myverbbox}
+\acceptanceCriteria{Нельзя вернуть средства, так как указанная дата годности сертификата еще не истекла. Транзакция в блокчейн сеть не отправляется. Баланс пользователя не изменяется. В терминал выводится сообщение об ошибке.
+}
+
+% AC-020-04
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+cat: person.json: No such file or directory
+$ faceid.py --withdraw 1234
+ID is not found
+\end{myverbbox}
+\acceptanceCriteria{Выдается ошибка, если в текущей директории не существует файл \texttt{person.json}. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-020-05
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --withdraw 4590
+Cannot withdraw funds from the certificate
+\end{myverbbox}
+\acceptanceCriteria{Указан несуществующий сертификат, который невозможно использовать. Транзакция в блокчейн сеть не отправляется. Баланс пользователя не изменяется. В терминал выводится сообщение об ошибке.
+}
+
+% AC-020-06
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --gift 4590 1000000000000000 "15:40 08.03.2019"
+e4473f3c3e3f3803f5c640a93b44b9a35968df4e7d4a907cab99926f4af694a7053ac2253
+149e7a5212f816cd367a471acc97c67cf38b7b3cf0d59ff8fbcf6d86a8d179e6e74d103f9
+e7e423630454b06ffe5dd2806e3bc0551971675619b31a1b
+$ faceid.py --gift 4590 10000000000000000 "15:40 08.03.2019"
+73bd8c3b60a59a3ccb37764f87e62dafab374d3c4885edd21192f060b83a47e616dcc4fd2
+2eac78fdc3e023fa60ac7863a4111f245556b3966b2d960b104c53f5d7a2c67b787abdd86
+2826708737d425a5d0e774d055a996cc853591113afc881c
+$ faceid.py --balance
+Your balance is 465.713419 poa
+$ faceid.py --withdraw 4590
+Withdrew funds from the certificate
+$ faceid.py --balance
+Your balance is 476.713419 poa
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется несколько транзакции на создание сертификатов c нескольких аккаунтов, а затем транзакция на возврат средств. Для проведения транзакций выбрана цена из значения \texttt{fast}, возвращенного сервисом \texttt{https://gasprice.poa.network}. Баланс отправителей корректно изменяется на суммы указанные в сертификатах.
+}
+
+% AC-020-07
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ curl https://gasprice.poa.network/
+curl: (6) Could not resolve host: gasprice.poa.network
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --balance
+Your balance is 489.860605 finney
+$ faceid.py --withdraw 4590
+Withdrew funds from the certificate
+$ faceid.py --balance
+Your balance is 499.860605 finney
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция на получение средств с сертификата. Транзакция успешно верифицирована и включена в блок. Для проведения транзакции выбрана цена из значения \texttt{defaultGasPrice} из файла \texttt{network.json}.
+}
+
+% AC-020-08
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+cat: registrar.json: No such file or directory
+$ faceid.py --withdrew 4590
+No contract address
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в текущей директории нет файла \texttt{registrar.json}, содержащего адрес контракта управления контрактами. Транзакция в блокчейн сеть не отправляется.
+}
+
+% AC-020-09
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+{"registrar": {"address": "0x340Ec06460d9b2b7D23B40E5bCd0a81A09e06D81", "
+startBlock": 456123}, "payments": {"address": "0x81A09e06D81797AE2b7D23B4
+0E5bCd0a1da01eb0F951x", "startBlock": 456125}}
+$ faceid.py --withdrew 4590
+Seems that the contract address is not the certificates contract.
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в адрес контракта, указанного в файле \texttt{registrar.json}, не принадлежит контракту управления сертификатами.
+}
+
+% AC-020-10
+\begin{myverbbox}[\small]{\output}
+$ faceid.py --balance
+Your balance is 500 finney
+$ faceid.py --withdrew 4590
+Withdrew funds from the certificate
+$ faceid.py --balance
+Your balance is 510 finney
+\end{myverbbox}
+\acceptanceCriteria{Если из транзакции, которая была отправлена в результате команды \texttt{faceid.py --receive}, извлечь поле input и отправить его в новой транзакции снова в поле input на адрес контракта управления сертификатами, то эта транзакция будет включена в блок, но статус ее исполнения будет - ошибка по причине того, что возврат средств уже был осуществлен ранее. Следовательно, повторно возврат не должен быть произведен.
+}
+
+%-----------------------------------------------------
+%US-021
+\newuserstory{Получение истории платежей }
+
+
+После индентификации пользователь может получить список платежей, связанных с аккаунтом данного пользователя.
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ faceid.py --ops 1234
+\end{myverbbox}
+\scriptExample{
+Используя идентификатор, содержащийся в \texttt{person.json}, и PIN-код скрипт генерирует приватный ключ пользователя. В блокчейн сеть отправляется запрос на баланс аккаунта, полученного из приватного ключа.
+
+История платежей отображается с момента первого подтверждения регистрации соответствия аккаунта, для которого отображаются платежи. В истории 
+
+Сумма в каждой строчке, обозначающей платеж, всегда отображается в poa c точностью до 6 знака.
+
+}
+
+% AC-021-01
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --ops 1234
+Operations:
+13:01:42 04.03.2019 FROM: +79418552734 2.5 poa
+18:31:52 08.03.2019 FROM: +79019594479 0.5 poa
+18:32:02 08.03.2019   TO: +79418552734 0.15 poa
+18:33:37 08.03.2019 FROM: +79114505724 0.3 poa
+18:34:17 08.03.2019   TO: +79286975842 1.3 poa
+$ faceid.py --balance 1234
+Your balance is 2.349641 poa
+\end{myverbbox}
+\acceptanceCriteria{Поскольку на данном аккаунте был ненулевой баланс до подтверждения, поэтому итоговый баланс аккаунта больше суммы всех входящих платежей за вычетом всех исходящих платежей.
+}
+
+% AC-021-02
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "81e1dbe6-e0e0-4cf6-af4f-ff8341833b55"}
+$ faceid.py --ops 6801
+No operations found
+$ faceid.py --balance 1234
+Your balance is 598458 finney
+\end{myverbbox}
+\acceptanceCriteria{Поскольку на данном аккаунте не было операций, то выводится сообщение об ошибке.
+}
+
+% AC-021-03
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --ops 1234
+Operations:
+13:01:42 04.03.2019 FROM: +79010451275 2.5 poa
+18:31:52 08.03.2019 FROM: +79019594479 0.5 poa
+18:32:02 08.03.2019   TO: +79010451275 0.15 poa
+18:33:37 08.03.2019 FROM: +79114505724 0.3 poa
+18:34:17 08.03.2019   TO: +79286975842 1.3 poa
+$ kyc.py --list del
+0x32276b955E7dCBeA1C97fe8f06053E760E739e8d: +79010451275
+$ kyc.py --confirm 0x32276b955E7dCBeA1C97fe8f06053E760E739e8d
+Confirmed by 0xbdf07588e6652aaee28b29156c2ae266c9ba46e253ddd99b466cce31f7
+7c51a3
+$ faceid.py --ops 1234
+Operations:
+13:01:42 04.03.2019 FROM: +79010451275 2.5 poa
+18:31:52 08.03.2019 FROM: +79019594479 0.5 poa
+18:32:02 08.03.2019   TO: +79010451275 0.15 poa
+18:33:37 08.03.2019 FROM: +79114505724 0.3 poa
+18:34:17 08.03.2019   TO: +79286975842 1.3 poa
+\end{myverbbox}
+\acceptanceCriteria{Несмотря на то, что соответствие между аккаунтом и телефонным номером было удалено, в списке платежей выводится номер телефона, соответствовавший аккаунту в момент проведения конкретных платежей.
+}
+
+% AC-021-04
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --ops 1234
+Operations:
+13:01:42 04.03.2019 FROM: +79010451275 2.5 poa
+18:31:52 08.03.2019 FROM: +79019594479 0.5 poa
+18:32:02 08.03.2019   TO: +79010451275 0.15 poa
+18:33:37 08.03.2019 FROM: +79114505724 0.3 poa
+18:34:17 08.03.2019   TO: +79286975842 1.3 poa
+$ kyc.py --list del
+0xEF8eedf35C2D212bf70389ecA193622e833C3652: +79010451275
+$ kyc.py --confirm 0xEF8eedf35C2D212bf70389ecA193622e833C3652
+Confirmed by 0xbdf07588e6652aaee28b29156c2ae266c9ba46e253ddd99b466cce31f7
+7c51a3
+$ cat person.json
+{"id": "81e1dbe6-e0e0-4cf6-af4f-ff8341833b55"}
+$ faceid.py --add 6801 +79991234567
+Registration request sent by 0xa7f3239715ff731a3d6fc477b18e35b9b0a9e1ede8
+4bca5e91517e8e5bf1cc69
+$ kyc.py --confirm 0xEF8eedf35C2D212bf70389ecA193622e833C3652
+Confirmed by 0xbdf07588e6652aaee28b29156c2ae266c9ba46e253ddd99b466cce31f7
+7c51a3
+$ faceid.py --send 6801 +79873344556 15026871000000000000
+Payment of 10 finney to +79873344556 scheduled
+Transaction Hash: 0x27c9181caeb55d37e1105fa1a8648db7fe50f79064b98e56b8e85
+4e3abb43728
+$ cat person.json
+{"id": "37da04e7-f471-49c7-a54c-a08f05950fc5"}
+$ faceid.py --ops 1234
+Operations:
+13:01:42 04.03.2019 FROM: +79010451275 2.5 poa
+18:31:52 08.03.2019 FROM: +79019594479 0.5 poa
+18:32:02 08.03.2019   TO: +79010451275 0.15 poa
+18:33:37 08.03.2019 FROM: +79114505724 0.3 poa
+18:34:17 08.03.2019   TO: +79286975842 1.3 poa
+18:39:34 08.03.2019 FROM: +79991234567 1.502687 poa
+\end{myverbbox}
+\acceptanceCriteria{Несмотря на то, что соответствие между аккаунтом и телефонным номером было изменено, в списке платежей выводятся оба номера телефона, соответствовавшие аккаунту в момент проведения конкретных платежей.
+}
+
+% AC-021-05
+\begin{myverbbox}[\small]{\output}
+$ cat person.json
+{"id": "81e1dbe6-e0e0-4cf6-af4f-ff8341833b55"}
+$ faceid.py --ops 1010
+No operations found
+\end{myverbbox}
+\acceptanceCriteria{Поскольку ситуация, когда неправильный приватный ключ сформирован из-за некорретного PIN-кода, неотличима от ситуации, когда нет операций ассоциированных с аккаунтом, в терминал выводится сообщение об ошибке.
+}
+
+% AC-021-05
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+cat: registrar.json: No such file or directory
+$ faceid.py --ops 6801
+No contract address
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в текущей директории нет файла registrar.json, содержащего адрес контракта регистра соответствий.
+}
+
+% AC-021-06
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+{"registrar": {"address": "0x340Ec06460d9b2b7D23B40E5bCd0a81A09e06D81", "
+startBlock": 456123}, "payments": {"address": "0x81A09e06D81797AE2b7D23B4
+0E5bCd0a1da01eb0F951x", "startBlock": 456125}}
+$ faceid.py --ops 6801
+Seems that the contract address is not the certificates contract.
+\end{myverbbox}
+\acceptanceCriteria{Выдается сообщение об ошибке, если в адрес контракта, указанного в файле registrar.json, не принадлежит контракту регистра соответствий.
+}
+
+%-----------------------------------------------------
+%US-022
+\newuserstory{Получение истории платежей, включая использование сертификатов}
+
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ faceid.py --opsall 1234
+\end{myverbbox}
+\scriptExample{
+
+
+}

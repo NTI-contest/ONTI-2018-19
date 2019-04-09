@@ -1,0 +1,121 @@
+Решение представляет из себя набор python скриптов (компонент), каждый
+из который ответственен за определенный функционал. 
+
+Управление скриптами происходит через параметры командной строки и
+через конфигурационные файлы. Параметры командной строки описываются 
+тдельно в разделах, где описывается функциональность каждого скрипта.
+
+\twoitems{Конфигурационные файлы - файлы в формате JSON, должны читаться
+из текущей директории, где происходит вызов скрипта и могут быть двух типов}
+{конфигурационный файл с настройками для работы с \textit{Microsoft Face API}}
+{конфигурационный файл с настройками для работы с Ethereum узлом}
+
+\subsubsection*{Конфигурационный файл с настройками для MS Face API}
+
+Имя: \texttt{faceapi.json}
+
+\threeitems{Содержит следующую информацию}
+{\texttt{key} --- ключ подписки для использования сервиса}
+{\texttt{serviceUrl} --- URL для доступа к сервису}
+{\texttt{groupId} -- группа пользователей (в терминах \textit{MS Face API}),
+с которой работает в данный момент скрипт}
+
+Пример файла:
+\begin{minted}[fontsize=\footnotesize]{json}
+{"key": "563879b61984550e40cbbe8d3039523c",
+ "serviceUrl": "https://westeurope.api.cognitive.microsoft.com/face/v1.0/",
+ "groupId": "fintech-01"}
+\end{minted}
+
+\subsubsection*{Конфигурационный файл с настройками для работы с узлом Ethereum}
+
+Имя: \texttt{network.json}
+
+Содержит следующую информацию:
+\begin{itemize}
+  \item \texttt{rpcUrl} --- URL для доступа к узлу по JSON RPC;
+  
+  \item \texttt{privKey} --- приватный ключ аккаунта для подписи транзакций,
+  отправляемых на узел Ethereum, и для локальных вызовов;
+  
+  \item \texttt{gasPriceUrl} --- URL для доступа к сервису, предоставляющему
+  цену за газ. Данный сервис возвращает JSON, из которого нужно взять
+  значение (в \textit{gwei}) из поля \texttt{fast}:
+    \begin{minted}[fontsize=\footnotesize]{json}
+{"block_time":19.91, "fast":10.0, "instant":25.0, "block_number":7240426,
+ "standard":5.0, "health":true, "slow":3.0}
+    \end{minted}
+  
+  \item \texttt{defaultGasPrice} --- цена за газ в wei, использующаяся,
+  если нельзя получить цену за газ из сервиса.
+
+\end{itemize}
+
+Пример файла:
+\begin{minted}[fontsize=\footnotesize]{json}
+{"rpcUrl": "https://sokol.poa.network", 
+ "privKey": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470", 
+ "gasPriceUrl": "https://gasprice.poa.network/", 
+ "defaultGasPrice": 2000000000}
+\end{minted}
+
+Если это явно не прописано в описании функционала соответствующей компоненты,
+она не должна оставлять после себя никаких файлов-данных. Аналогично с
+получением данных - чтение данных из файла должно происходить только в
+нескольких случаях:
+\begin{itemize}
+  \item для получения настроек для работы с \textit{MS Face API};
+  
+  \item для получения видеопотока, эмулирующего камеру;
+  
+  \item для получения настроек для работы с Ethereum узлом;
+  
+  \item для получения Application Binary Interface контракта или его байткода;
+  
+  \item или если это явно указано в описании компоненты.
+
+\end{itemize}
+в остальных случаях данные должны быть получены из сервиса
+\textit{MS Face API} или блокчейн сети. 
+
+Все компоненты, работающие с сервисом \textit{MS Face API},
+должны уметь обрабатывать ситуации, когда:
+\begin{itemize}
+  \item недоступно подключение к сервису (сообщение об ошибке
+  \texttt{''No connection to MS Face API provider''});
+
+  \item используется некорректный ключ подписки (сообщение об
+  ошибке \texttt{''Incorrect subscription key''}).
+
+\end{itemize}
+
+Компоненты, отправляющие транзакции в блокчейн, должны уметь обрабатывать
+ситуации, когда:
+\begin{itemize}
+  \item недоступно подключение к узлу Ethereum (сообщение об ошибке
+  \texttt{''No connection to node''});
+
+  \item на счету аккаунта, от чьего имени выполняется транзакция,
+  недостаточно средств, чтобы покрыть все затраты по использованному
+  газу (сообщение об ошибке \texttt{''No enough funds to send transaction''});
+
+  \item транзакция может не включаться в блок продолжительное время в
+  зависимости от нагрузки на сеть (сообщение об ошибке
+  \texttt{''Transaction is not validated too long''}).
+
+\end{itemize}
+
+При возникновении данных событий в терминал должно выдаваться сообщение
+понятное пользователю, а не stack trace.
+
+Возможны также другие конфигурационные файлы, необходимые для работы
+тех или иных подсистем решения. Данные файлы будут отдельно описываться
+в соответствующих разделах. 
+
+\input{final/command_tour/fintex/components/setup.tex}
+
+\input{final/command_tour/fintex/components/face-management.tex}
+
+\input{final/command_tour/fintex/components/faceid.tex}
+
+\input{final/command_tour/fintex/components/kyc.tex}

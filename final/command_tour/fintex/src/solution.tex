@@ -1,0 +1,1720 @@
+\textit{\textbf{./api.py}}
+\begin{minted}[fontsize=\footnotesize]{python}
+from config import get
+import cognitive_face as cf
+from detector_util import FileLike, image_to_jpeg
+from output_util import handle_error, print_error
+
+KEY = get('faceapi.key')
+cf.Key.set(KEY)
+
+BASE_URL = get('faceapi.serviceUrl')
+cf.BaseUrl.set(BASE_URL)
+
+CONFIDENCE_THRESHOLD = 0.5
+
+GROUP_ID = get('faceapi.groupId')
+
+
+def create_group_if_not_exists():
+    try:
+        cf.person_group.create(GROUP_ID)
+    except cf.CognitiveFaceException:
+        pass
+
+
+def list_groups():
+    return handle_error(cf.person_group.lists())
+
+
+def list_people_ids():
+    try:
+        return list(map(lambda person: person['personId'], cf.person.lists(GROUP_ID)))
+    except cf.CognitiveFaceException as err:
+        if err.code == 'PersonGroupNotFound':
+            print_error('The group does not exist')
+
+
+def is_group_up_to_date():
+    try:
+        response1 = cf.person_group.get_status(GROUP_ID)
+        response2 = cf.person_group.get(GROUP_ID)
+
+        return response1['status'] == 'succeeded' and response2['userData'] == 'ok'
+    except cf.CognitiveFaceException:
+        return False
+
+
+def check_same_person(face_id):
+    try:
+        response = cf.face.identify([face_id], person_group_id=GROUP_ID, threshold=CONFIDENCE_THRESHOLD)
+        candidates = response[0]['candidates']
+
+        return len(candidates) != 0
+    except cf.CognitiveFaceException:
+        return False
+
+
+def identify_person_id(faces_ids):
+    if not is_group_up_to_date():
+        print_error('The service is not ready')
+
+    responses = cf.face.identify(faces_ids, person_group_id=GROUP_ID, threshold=CONFIDENCE_THRESHOLD)
+    person_id = ''
+    for response in responses:
+        candidates = response['candidates']
+        if len(candidates) != 1 or person_id not in ['', candidates[0]['personId']]:
+            return None
+        person_id = candidates[0]['personId']
+    return person_id
+
+
+def identify_person_id_old(image):
+    response = cf.face.detect(FileLike(image_to_jpeg(image)), True, False)
+    if len(response) != 1:
+        print_error('There should be exactly 1 person on image')
+    face_id = response[0]['faceId']
+    response = cf.face.identify([face_id], person_group_id=GROUP_ID, threshold=CONFIDENCE_THRESHOLD)
+    candidates = response[0]['candidates']
+
+    print(candidates)
+
+    if len(candidates) == 0:
+        print_error('Cannot identify face')
+
+    return candidates[0]['personId']
+
+
+# Return face if there is exactly one face on the image
+def detect(image):
+    faces = cf.face.detect(FileLike(image_to_jpeg(image)), True, True, 'headPose')
+    if len(faces) == 1:
+        return faces[0]
+
+    return None
+
+
+def mark_group(status):
+    cf.person_group.update(GROUP_ID, user_data=status)
+
+
+def create_person(name, data=None):
+    try:
+        response = cf.person.create(GROUP_ID, name, data)
+        mark_group('dirty')
+        return response['personId']
+    except cf.CognitiveFaceException as err:
+        if err.code == 'PersonGroupNotFound':
+            print_error('The group does not exist')
+
+
+def delete_person(person_id):
+    try:
+        cf.person.delete(GROUP_ID, person_id)
+        mark_group('dirty')
+    except cf.CognitiveFaceException as err:
+        if err.code == 'PersonGroupNotFound':
+            print_error('The group does not exist')
+        if err.code == 'PersonNotFound':
+            print_error('The person does not exist')
+
+
+def add_face(image, person_id):
+    return cf.person.add_face(FileLike(image_to_jpeg(image)), GROUP_ID, person_id)['persistedFaceId']
+
+
+def update_person_data(person_id, name, address):
+    cf.person.update(GROUP_ID, person_id, name, address)
+    print('Updated person %s data, name %s, address %s' % (person_id, name, address))
+
+
+def get_person_address(person_id):
+    response = cf.person.get(GROUP_ID, person_id)
+    return response['userData']
+
+
+def train():
+    try:
+        if is_group_up_to_date():
+            print_error('Already trained')
+        if len(cf.person.lists(GROUP_ID)) == 0:
+            print_error('There is nothing to train')
+        cf.person_group.train(GROUP_ID)
+        mark_group('ok')
+    except cf.CognitiveFaceException as err:
+        if err.code == 'PersonGroupNotFound':
+            print_error('There is nothing to train')
+
+
+# Returns 0 <= confidence <= 1
+def verify_person(person_id, face_id):
+    response = cf.face.verify(face_id, person_group_id=GROUP_ID, person_id=person_id)
+    return response['confidence']
+\end{minted}
+
+\textit{\textbf{./blockchain.py}}
+\begin{minted}[fontsize=\footnotesize]{python}
+import requests
+
+from time import sleep
+from ethereum.utils import privtoaddr
+from checkers import check_pin_code
+from config import get
+from subprocess import check_output
+import re
+from web3 import Web3
+
+from output_util import print_error
+
+RPC_URL = get('network.rpcUrl')
+
+web3 = Web3(Web3.HTTPProvider(RPC_URL))
+
+try:
+    PRIVATE_KEY = bytes.fromhex(get('network.privKey'))
+except:
+    PRIVATE_KEY = bytes(1)
+
+DEFAULT_GAS = 100000
+
+EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+try:
+    GAS_PRICE = int(1000000000 * requests.get(get('network.gasPriceUrl')).json()['fast'])
+except requests.exceptions.RequestException:
+    GAS_PRICE = get('network.defaultGasPrice')
+
+REGISTRAR_ADDRESS = get('registrar.registrar.address')
+CERTIFICATES_ADDRESS = get('registrar.payments.address')
+
+compiled_registrar = check_output(["solc", "--optimize", "--bin", "--abi", "./Registrar.sol"]).decode()
+compiled_registrar_abi = re.findall("ABI \\n(.*?)\\n", compiled_registrar)[0]
+compiled_registrar_bytecode = re.findall("Binary: \\n(.*?)\\n", compiled_registrar)[0]
+
+compiled_certificates = check_output(["solc", "--optimize", "--bin", "--abi", "Certificates.sol"]).decode()
+compiled_certificates_abi = re.findall("ABI \\n(.*?)\\n", compiled_certificates)[0]
+compiled_certificates_bytecode = re.findall("Binary: \\n(.*?)\\n", compiled_certificates)[0]
+
+registrar = web3.eth.contract(address=REGISTRAR_ADDRESS,
+                              abi=compiled_registrar_abi)
+certificates = web3.eth.contract(address=CERTIFICATES_ADDRESS,
+                                 abi=compiled_certificates_abi)
+
+
+def check_registrar():
+    if REGISTRAR_ADDRESS is None:
+        print_error('No contract address')
+
+    b1 = web3.eth.getCode(REGISTRAR_ADDRESS).hex()[2:]
+    b2 = compiled_registrar_bytecode
+    if b1 != b2[-len(b1):]:
+        print_error('Seems that the contract address is not the registrar contract')
+
+
+def check_certificates():
+    if CERTIFICATES_ADDRESS is None:
+        print_error('No contract address')
+
+    b1 = web3.eth.getCode(CERTIFICATES_ADDRESS).hex()[2:]
+    b2 = compiled_certificates_bytecode
+    if b1 != b2[-len(b1):]:
+        print_error('Seems that the contract address is not the certificates contract')
+
+
+def private_key_to_address(private_key):
+    return web3.toChecksumAddress(privtoaddr(private_key).hex())
+
+
+def build_and_send_tx(private_key, to='', data='', value=0, nonce=None, gas_estimation=True, message=None):
+    address = private_key_to_address(private_key)
+    if nonce is None:
+        nonce = web3.eth.getTransactionCount(address)
+    tx = {
+        'from': address,
+        'to': to,
+        'nonce': nonce,
+        'data': data,
+        'value': value,
+        'gasPrice': GAS_PRICE
+    }
+
+    tx['gas'] = web3.eth.estimateGas(tx) if gas_estimation else DEFAULT_GAS
+
+    signed = web3.eth.account.signTransaction(tx, private_key)
+
+    tx_hash = web3.eth.sendRawTransaction(signed.rawTransaction)
+
+    if message is not None:
+        print(message)
+
+    return wait_tx_receipt(tx_hash)
+
+
+def encode_int(x, base=10):
+    if type(x) == str:
+        x = int(x, base)
+    return x.to_bytes(32, byteorder='big')
+
+
+# Waits until transaction is mined
+def wait_tx_receipt(tx_hash, sleep_interval=0.5):
+    while True:
+        tx_receipt = web3.eth.getTransactionReceipt(tx_hash)
+        if tx_receipt:
+            return tx_receipt
+        sleep(sleep_interval)
+
+
+def get_owner_nonce():
+    return web3.eth.getTransactionCount(private_key_to_address(PRIVATE_KEY))
+
+
+# Deploys compiled contract, returns its address
+def deploy_contract(contract_name, nonce):
+    bytecode = ''
+    if contract_name == 'registrar':
+        bytecode = compiled_registrar_bytecode
+    elif contract_name == 'certificates':
+        bytecode = compiled_certificates_bytecode
+
+    tx_receipt = build_and_send_tx(PRIVATE_KEY, data=bytecode, nonce=nonce)
+
+    return {"address": tx_receipt['contractAddress'], "startBlock": tx_receipt['blockNumber']}
+
+
+def get_owner():
+    return registrar.functions.owner().call()
+
+
+def get_requests(filter_type):
+    requests = []
+
+    head_addr = registrar.functions.headAddr().call()
+    tail_addr = registrar.functions.tailAddr().call()
+    node = registrar.functions.requests(head_addr).call()
+    while node[1] != tail_addr:
+        address = node[1]
+        node = registrar.functions.requests(address).call()
+        if filter_type == node[2]:
+            requests += [(node[3], address)]
+    return requests
+
+
+def get_reg_requests():
+    return get_requests(3)
+
+
+def get_del_requests():
+    return get_requests(4)
+
+
+def change_owner(new_owner):
+    if get_owner() != private_key_to_address(PRIVATE_KEY):
+        print_error('Request cannot be executed')
+
+    build_and_send_tx(PRIVATE_KEY, REGISTRAR_ADDRESS,
+                      web3.keccak(text='transferOwnership(address)')[:4] + encode_int(new_owner[2:], 16))
+
+
+def get_request_type(address):
+    return registrar.functions.requests(address).call()[2]
+
+
+def register_request(user_private_key, phone_number):
+    try:
+        tx_receipt = build_and_send_tx(user_private_key, REGISTRAR_ADDRESS,
+                                       web3.keccak(text='registerRequest(uint256)')[:4] + encode_int(phone_number))
+
+        return tx_receipt['transactionHash'].hex()
+    except ValueError as err:
+        if err.args[0]['code'] == -32016:
+            request_type = get_request_type(private_key_to_address(user_private_key))
+            if request_type == 3:
+                print_error('Registration request already sent')
+            else:
+                print_error('Such phone number already registered')
+        if err.args[0]['code'] == -32010:
+            print_error('No funds to send the request')
+
+
+def delete_request(user_private_key):
+    request_type = get_request_type(private_key_to_address(user_private_key))
+    try:
+        tx_receipt = build_and_send_tx(user_private_key, REGISTRAR_ADDRESS, web3.keccak(text='deleteRequest()')[:4])
+
+        return tx_receipt['transactionHash'].hex()
+    except ValueError as err:
+        if err.args[0]['code'] == -32016:
+            if request_type == 4:
+                print_error('Unregistration request already sent')
+            else:
+                print_error('Account is not registered yet')
+        if err.args[0]['code'] == -32010:
+            print_error('No funds to send the request')
+
+
+def cancel_request(user_private_key):
+    request_type = get_request_type(private_key_to_address(user_private_key))
+    try:
+        tx_receipt = build_and_send_tx(user_private_key, REGISTRAR_ADDRESS, web3.keccak(text='cancelRequest()')[:4])
+
+        return request_type, tx_receipt['transactionHash'].hex()
+    except ValueError as err:
+        if err.args[0]['code'] == -32016:
+            if request_type == 0:
+                print_error('No requests found')
+        if err.args[0]['code'] == -32010:
+            print_error('No funds to send the request')
+
+
+def confirm(address):
+    if get('network.privKey') is None:
+        print_error('No admin account found')
+
+    try:
+
+        tx_receipt = build_and_send_tx(PRIVATE_KEY,
+                                       REGISTRAR_ADDRESS,
+                                       web3.keccak(text='confirm(address)')[:4] + encode_int(address[2:], 16),
+                                       gas_estimation=False)
+
+        return tx_receipt['status'], tx_receipt['transactionHash'].hex()
+    except ValueError as err:
+        if err.args[0]['code'] == -32010:
+            print_error('No funds to confirm the request')
+
+
+def create_approval(user_private_key, value, time_to_expire):
+    try:
+        tx_receipt = build_and_send_tx(user_private_key, CERTIFICATES_ADDRESS,
+                                       web3.keccak(text='approve(uint256)')[:4] + encode_int(time_to_expire),
+                                       value)
+
+        id_hex = tx_receipt['logs'][0]['topics'][1]
+
+        message = web3.eth.account.signHash(id_hex, user_private_key)
+
+        return id_hex.hex()[2:] + message['signature'].hex()[2:]
+    except ValueError as err:
+        if err.args[0]['code'] == -32010:
+            print_error('No funds to create a certificate')
+
+
+def use_approval(user_private_key, message):
+    id = message[:64]
+    r = message[64:128]
+    s = message[128:192]
+    v = message[192:]
+
+    build_and_send_tx(user_private_key, CERTIFICATES_ADDRESS,
+                      web3.keccak(text='useApproval(bytes32,uint8,bytes32,bytes32)')[:4]
+                      + bytes.fromhex(id)
+                      + encode_int(v, 16)
+                      + bytes.fromhex(r)
+                      + bytes.fromhex(s))
+
+    return id
+
+
+def cancel_approvals(user_private_key):
+    build_and_send_tx(user_private_key, CERTIFICATES_ADDRESS,
+                      web3.keccak(text='cancel()')[:4])
+
+
+def send_transaction(user_private_key, to, value):
+    try:
+        addr = phone_to_address(to)
+        if addr is None:
+            print_error('No account with the phone number +%s' % to)
+        tx_receipt = build_and_send_tx(user_private_key, to=addr, value=value,
+                                       message='Payment of %s to +%s scheduled' % (normalize_value(value), to))
+        return tx_receipt['transactionHash'].hex()
+    except ValueError as err:
+        if err.args[0]['code'] == -32010:
+            print_error('No funds to send the payment')
+
+
+def pin_code_to_private_key(pin_code):
+    pin_code = check_pin_code(pin_code)
+    person_id = get('person.id')
+    if person_id is None:
+        print_error('ID is not found')
+    return get_private_key(person_id, pin_code)
+
+
+# Evaluate private key by id and pin_code
+def get_private_key(person_id, pin_code):
+    id = bytes.fromhex(person_id.replace('-', ''))
+
+    a = web3.keccak(bytes(0))
+    b = web3.keccak(a + id + bytes([int(pin_code[0])]))
+    c = web3.keccak(b + id + bytes([int(pin_code[1])]))
+    d = web3.keccak(c + id + bytes([int(pin_code[2])]))
+    return web3.keccak(d + id + bytes([int(pin_code[3])]))
+
+
+def normalize_value(value, custom_currency=None):
+    if custom_currency is not None:
+        return ('%.6f' % web3.fromWei(value, custom_currency)).rstrip('0').rstrip('.') \
+               + ' %s' % (custom_currency if custom_currency != 'ether' else 'poa')
+
+    for currency in ['ether', 'finney', 'szabo', 'gwei', 'mwei', 'kwei', 'wei']:
+        if web3.fromWei(value, currency) >= 1:
+            return ('%.6f' % web3.fromWei(value, currency)).rstrip('0').rstrip('.') \
+                   + ' %s' % (currency if currency != 'ether' else 'poa')
+    return '0 poa'
+
+
+def phone_to_address(phone):
+    address = registrar.functions.db(int(phone)).call()
+    if address == EMPTY_ADDRESS:
+        return None
+    return address
+
+
+def address_to_phone(address, block='latest'):
+    phone = registrar.functions.db_rev(web3.toChecksumAddress(address)).call(block_identifier=block)
+
+    if phone == 0:
+        return 'UNKNOWN'
+    return '+%d' % phone
+
+
+def get_balance(address):
+    return web3.eth.getBalance(address)
+
+
+def check_address(address):
+    if not web3.isChecksumAddress(address):
+        print_error('Wrong address format')
+    return address
+
+
+def get_tx_list(address):
+    return requests.get(
+        'https://blockscout.com/poa/sokol/api?module=account&action=txlist&address=%s&startblock=%s' % (
+            address, get('registrar.registrar.startBlock'))
+    ).json()['result']
+\end{minted}
+
+\textit{\textbf{./checkers.py}}
+\begin{minted}[fontsize=\footnotesize]{python}
+from output_util import print_error
+from datetime import datetime as dt
+
+
+def check_pin_code(pin_code):
+    if len(pin_code) != 4 or not pin_code.isdecimal():
+        print_error('Pin code should have length 4 and contain only digits')
+    return pin_code
+
+
+def check_name(name):
+    if len(name) > 128 or not name.isalpha():
+        print_error('Name should have length at most 128 and contain only letters')
+    return name
+
+
+def check_phone_number(phone_number):
+    if len(phone_number) != 12 or not phone_number[1:].isdecimal() or phone_number[0] != '+':
+        print_error('Incorrect phone number')
+    return phone_number[1:]
+
+
+def check_date(date_str):
+    try:
+        date = dt.strptime(date_str, '%H:%M %d.%m.%Y')
+    except ValueError:
+        print_error('Expiration date is invalid')
+
+    delta = int((date - dt.now()).total_seconds())
+    if delta <= 0:
+        print_error('Expiration date is invalid')
+    return delta
+
+
+def check_ticket(ticket):
+    return ticket
+
+
+def check_message(message):
+    if len(message) != 140:
+        print_error('Message should have length 140')
+    return message
+\end{minted}
+
+\textit{\textbf{./config.py}}
+\begin{minted}[fontsize=\footnotesize]{python}
+import json
+
+# key format a.b.c => ./a.json -> "b" -> "c"
+import os
+
+
+def get(key):
+    try:
+        keys = key.split('.')
+        config = json.load(open('./%s.json' % keys[0]))
+        cur = config
+        for k in keys[1:]:
+            cur = cur[k]
+
+        return cur
+    except (IOError, json.JSONDecodeError, KeyError):
+        return None
+
+
+def set(key, value):
+    keys = key.split('.')
+    try:
+        config = json.load(open('./%s.json' % keys[0]))
+    except (IOError, json.JSONDecodeError, KeyError):
+        config = dict()
+
+    cur = config
+    for k in keys[1:-1]:
+        cur = cur[k]
+    cur[keys[-1]] = value
+    open('./%s.json' % keys[0], 'w+').write(json.dumps(config))
+
+
+def clear(key):
+    try:
+        os.remove('./%s.json' % key)
+    except OSError:
+        pass
+\end{minted}
+
+\textit{\textbf{./contracts/Certificates.sol}}
+\begin{minted}[fontsize=\footnotesize]{javascript}
+pragma solidity ^0.5.2;
+
+
+contract Certificates {
+    event CertificateCreated(bytes32 indexed id);
+    event CertificateUsed(bytes32 indexed id);
+    event CertificateWithdrew(bytes32 indexed id);
+
+    struct Approval {
+        address sender;
+        uint value;
+        uint expire_time;
+        bytes32 prev;
+        bytes32 next;
+    }
+
+    mapping(address => uint) public lastN;
+
+    // sha(sender, id) => approval
+    mapping(bytes32 => Approval) public approvals;
+
+    // address => last approval ticket
+    mapping(address => bytes32) public lastTicket;
+
+    function approve(uint time) public payable {
+        require(msg.value > 0);
+
+        bytes32 prevId = lastTicket[msg.sender];
+        if (prevId == bytes32(0))
+            prevId = keccak256(abi.encodePacked(msg.sender, uint(0)));
+
+        uint n = ++lastN[msg.sender];
+
+        bytes32 id = keccak256(abi.encodePacked(msg.sender, n));
+        lastTicket[msg.sender] = id;
+
+        approvals[prevId].next = id;
+        approvals[id] = Approval(msg.sender, msg.value, now + time, prevId, bytes32(0));
+
+        emit CertificateCreated(id);
+    }
+
+    function cancel() public {
+        bytes32 id = keccak256(abi.encodePacked(msg.sender, uint(0)));
+        while (approvals[id].next != bytes32(0)) {
+            id = approvals[id].next;
+            if (now > approvals[id].expire_time)
+                cancelApproval(id);
+        }
+    }
+
+    function cancelApproval(bytes32 ticket) public {
+        require(approvals[ticket].value > 0);
+        require(approvals[ticket].sender == msg.sender);
+        require(now > approvals[ticket].expire_time);
+
+        approvals[approvals[ticket].prev].next = approvals[ticket].next;
+        if (approvals[ticket].next != bytes32(0))
+            approvals[approvals[ticket].next].prev = approvals[ticket].prev;
+        else
+            lastTicket[msg.sender] = approvals[ticket].prev;
+
+        msg.sender.transfer(approvals[ticket].value);
+
+        delete approvals[ticket];
+
+        emit CertificateWithdrew(ticket);
+    }
+
+    function useApproval(bytes32 ticket, uint8 v, bytes32 r, bytes32 s) public {
+        require(approvals[ticket].value > 0);
+        require(ecrecover(ticket, v, r, s) == approvals[ticket].sender);
+        require(now <= approvals[ticket].expire_time);
+
+        approvals[approvals[ticket].prev].next = approvals[ticket].next;
+        if (approvals[ticket].next != bytes32(0))
+            approvals[approvals[ticket].next].prev = approvals[ticket].prev;
+        else
+            lastTicket[msg.sender] = approvals[ticket].prev;
+
+        msg.sender.transfer(approvals[ticket].value);
+
+        delete approvals[ticket];
+
+        emit CertificateUsed(ticket);
+    }
+}
+\end{minted}
+
+\textit{\textbf{./contracts/Registrar.sol}}
+\begin{minted}[fontsize=\footnotesize]{javascript}
+pragma solidity ^0.5.2;
+
+
+contract Registrar {
+    event Register(uint indexed phone_number, address addr);
+    event Unregister(uint indexed phone_number);
+    event RegistrationRequest(address indexed sender);
+    event UnregistrationRequest(address indexed sender);
+    event RegistrationCanceled(address indexed sender);
+    event UnregistrationCanceled(address indexed sender);
+    event RegistrationConfirmed(address indexed sender);
+    event UnregistrationConfirmed(address indexed sender);
+
+    struct Account {
+        uint phone;
+        address addr;
+    }
+
+    enum NodeType {
+        NONE, HEAD, TAIL, REG, DEL
+    }
+
+    struct Node {
+        address prev;
+        address next;
+        NodeType t;
+        uint data;
+    }
+
+    // Double linked list
+    address public headAddr = address(0);
+    address public tailAddr = address(2 ** 160 - 1);
+    // Sender => Request node
+    mapping(address => Node) public requests;
+
+    address public owner;
+
+    // Phone number => Address
+    mapping(uint => address) public db;
+
+    // Address => Phone number
+    mapping(address => uint) public db_rev;
+
+    constructor() public {
+        owner = msg.sender;
+        // head
+        requests[headAddr] = Node(headAddr, tailAddr, NodeType.HEAD, 0);
+        // tail
+        requests[tailAddr] = Node(headAddr, tailAddr, NodeType.TAIL, 0);
+    }
+
+    // Only contract owner can call these methods
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+
+    function transferOwnership(address _owner) onlyOwner public {
+        owner = _owner;
+    }
+
+
+    function registerRequest(uint phone) public {
+        require(phone <= 1e12);
+        require(db[phone] == address(0));
+        require(requests[msg.sender].t == NodeType.NONE);
+
+        requests[msg.sender].t = NodeType.REG;
+        requests[msg.sender].data = phone;
+
+        requests[msg.sender].next = tailAddr;
+        requests[requests[tailAddr].prev].next = msg.sender;
+        requests[msg.sender].prev = requests[tailAddr].prev;
+        requests[tailAddr].prev = msg.sender;
+
+        emit RegistrationRequest(msg.sender);
+    }
+
+    function deleteRequest() public {
+        require(db_rev[msg.sender] != 0);
+        require(requests[msg.sender].t == NodeType.NONE);
+
+        requests[msg.sender].t = NodeType.DEL;
+
+        requests[msg.sender].next = tailAddr;
+        requests[requests[tailAddr].prev].next = msg.sender;
+        requests[msg.sender].prev = requests[tailAddr].prev;
+        requests[tailAddr].prev = msg.sender;
+
+        emit UnregistrationRequest(msg.sender);
+    }
+
+    function confirm(address addr) onlyOwner public {
+        require(requests[addr].t == NodeType.REG || requests[addr].t == NodeType.DEL);
+
+        if (requests[addr].t == NodeType.REG) {
+            db_rev[addr] = requests[addr].data;
+            db[db_rev[addr]] = addr;
+            emit RegistrationConfirmed(addr);
+        }
+        else {
+            delete db[db_rev[addr]];
+            delete db_rev[addr];
+            emit UnregistrationConfirmed(addr);
+        }
+        requests[addr].t = NodeType.NONE;
+        requests[requests[addr].prev].next = requests[addr].next;
+        requests[requests[addr].next].prev = requests[addr].prev;
+    }
+
+    function cancelRequest() public {
+        require(requests[msg.sender].t != NodeType.NONE);
+
+        if (requests[msg.sender].t == NodeType.REG)
+            emit RegistrationCanceled(msg.sender);
+        if (requests[msg.sender].t == NodeType.DEL)
+            emit UnregistrationCanceled(msg.sender);
+
+        requests[msg.sender].t = NodeType.NONE;
+        requests[requests[msg.sender].prev].next = requests[msg.sender].next;
+        requests[requests[msg.sender].next].prev = requests[msg.sender].prev;
+    }
+}
+\end{minted}
+
+\textit{\textbf{./detector\_util.py}}
+\begin{minted}[fontsize=\footnotesize]{python}
+import cv2
+import os
+import dlib
+
+from output_util import print_error
+
+PREDICTOR_PATH = '/opt/shape_predictor_68_face_landmarks.dat' if os.path.exists(
+    '/opt/shape_predictor_68_face_landmarks.dat') else './shape_predictor_68_face_landmarks.dat'
+EYE_THRESHOLD = 0.22
+MOUTH_THRESHOLD = 0.3
+
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor(PREDICTOR_PATH)
+
+
+class FileLike:
+    def __init__(self, image):
+        self.image = image
+
+    def read(self):
+        return self.image
+
+
+def shape_to_list(shape):
+    coords = [None] * 68
+
+    for i in range(0, 68):
+        coords[i] = (shape.part(i).x, shape.part(i).y)
+
+    return coords
+
+
+def right_eye_open(points):
+    eye = points[36:42]
+    return aspect_ratio(eye) > EYE_THRESHOLD
+
+
+def left_eye_open(points):
+    eye = points[42:48]
+    return aspect_ratio(eye) > EYE_THRESHOLD
+
+
+def mouth_open(points):
+    mouth = [points[60], points[61], points[63], points[64], points[65], points[67]]
+    return aspect_ratio(mouth) > MOUTH_THRESHOLD
+
+
+def aspect_ratio(eye):
+    return (dist(eye[1], eye[5]) + dist(eye[2], eye[4])) / (2 * dist(eye[0], eye[3]))
+
+
+def dist(a, b):
+    return ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5
+
+
+def landmarks(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    dets, scores, idx = detector.run(gray, 0, -1)
+
+    if len(dets) == 0:
+        return None
+
+    return shape_to_list(predictor(image, dets[0]))
+
+
+def image_to_jpeg(image):
+    status, encoded_image = cv2.imencode('.jpeg', image)
+    if not status:
+        print_error('Failed to encode frame into jpeg')
+    return encoded_image.tostring()
+
+\end{minted}
+
+\textit{\textbf{./face\_conditions.py}}
+\begin{minted}[fontsize=\footnotesize]{python}
+import cv2
+
+from detector_util import landmarks, left_eye_open, right_eye_open, mouth_open
+
+DEFAULT_ANGLE_DELTA = 3
+
+
+class FaceConditions:
+    def __init__(self, label, yaw=None, roll=None, delta=DEFAULT_ANGLE_DELTA,
+                 left_eye=None, right_eye=None, mouth=None):
+        self.label = label
+        self.completed = False
+
+        self.yaw = yaw
+        self.yaw_delta = delta
+        self.roll = roll
+        self.roll_delta = delta
+        self.left_eye = left_eye
+        self.right_eye = right_eye
+        self.mouth = mouth
+
+    def check_face(self, image, face_api_response=None):
+        if self.completed:
+            return
+
+        if self.yaw is not None and self.roll is not None and face_api_response is not None:
+            yaw_value = face_api_response['faceAttributes']['headPose']['yaw']
+            roll_value = face_api_response['faceAttributes']['headPose']['roll']
+
+            if self.yaw is not None and (yaw_value < self.yaw - self.yaw_delta or yaw_value > self.yaw + self.yaw_delta):
+                return
+            if self.roll is not None and (
+                    roll_value < self.roll - self.roll_delta or roll_value > self.roll + self.roll_delta):
+                return
+
+        points = landmarks(image)
+        if points is None:
+            return False
+
+        if self.left_eye is not None and self.left_eye != left_eye_open(points):
+            return
+        if self.right_eye is not None and self.right_eye != right_eye_open(points):
+            return
+        if self.mouth is not None and self.mouth != mouth_open(points):
+            return
+
+        self.completed = True
+
+        return True
+\end{minted}
+
+\textit{\textbf{./faceid.py}}
+\begin{minted}[fontsize=\footnotesize]{python}
+from argparse import ArgumentParser
+from datetime import datetime
+
+from blockchain import register_request, delete_request, cancel_request, get_balance, \
+    private_key_to_address, send_transaction, create_approval, use_approval, cancel_approvals, pin_code_to_private_key, \
+    normalize_value, check_registrar, check_certificates, get_tx_list, address_to_phone
+from config import get, set, clear
+from output_util import print_error
+from validators import PINPhoneValidate, TransactValidate, ApproveValidate, PINTicketValidate
+from video_detector import simple_identify, identify
+
+parser = ArgumentParser(prog='Faceid service')
+
+parser.add_argument('--find',
+                    nargs=1,
+                    metavar='VIDEO',
+                    help='Identifies person, stores person id in person.json')
+parser.add_argument('--actions',
+                    action='store_true',
+                    help='Generates needed face actions')
+parser.add_argument('--add',
+                    nargs=2,
+                    metavar=('PIN_CODE', 'PHONE_NUMBER'),
+                    action=PINPhoneValidate,
+                    help='Sends register request')
+parser.add_argument('--del',
+                    nargs=1,
+                    metavar='PIN_CODE',
+                    type=pin_code_to_private_key,
+                    dest='delete',
+                    help='Sends delete request')
+parser.add_argument('--cancel',
+                    nargs=1,
+                    metavar='PIN_CODE',
+                    type=pin_code_to_private_key,
+                    help='Cancels register or unregister request')
+parser.add_argument('--balance',
+                    nargs=1,
+                    metavar='PIN_CODE',
+                    type=pin_code_to_private_key,
+                    help='Prints user balance')
+parser.add_argument('--send',
+                    nargs=3,
+                    metavar=('PIN_CODE', 'PHONE_NUMBER', 'VALUE'),
+                    action=TransactValidate,
+                    help='Sends money to another user')
+parser.add_argument('--gift',
+                    nargs=3,
+                    metavar=('PIN_CODE', 'VALUE', 'EXPIRE_DATE'),
+                    action=ApproveValidate,
+                    help='Creates approval ticket')
+parser.add_argument('--receive',
+                    nargs=2,
+                    metavar=('PIN_CODE', 'TICKET'),
+                    action=PINTicketValidate,
+                    help='Receives money via given ticket')
+parser.add_argument('--withdraw',
+                    nargs=1,
+                    metavar='PIN_CODE',
+                    type=pin_code_to_private_key,
+                    help='Withdraw money from unused ticket')
+parser.add_argument('--ops',
+                    nargs=1,
+                    metavar='PIN_CODE',
+                    type=pin_code_to_private_key,
+                    help='Prints all operations')
+parser.add_argument('--opsall',
+                    nargs=1,
+                    metavar='PIN_CODE',
+                    type=pin_code_to_private_key,
+                    help='Prints all operations including certificates')
+
+args = parser.parse_args()
+
+if args.find:
+    clear('person')
+    video = args.find[0]
+
+    actions = get('actions')
+    if actions is None:
+        person_id = simple_identify(video)
+        set('person.id', person_id)
+        print('%s identified' % person_id)
+    else:
+        person_id = identify(video, actions)
+        set('person.id', person_id)
+        print('%s identified' % person_id)
+
+if args.actions:
+    import json, random
+
+    actions = random.choice([
+        {'actions': ["OpenMouth", "YawLeft", "CloseLeftEye"]},
+        {'actions': ["OpenMouth", "YawLeft", "CloseRightEye"]},
+        {'actions': ["OpenMouth", "CloseRightEye", "YawLeft"]},
+        {'actions': ["OpenMouth", "YawRight", "CloseRightEye"]}
+    ])
+    with open('actions.json', 'w') as out:
+        json.dump(actions, out)
+
+if args.add:
+    check_registrar()
+    private_key = args.add[0]
+    phone = args.add[1]
+
+    tx_hash = register_request(private_key, phone)
+
+    print('Registration request sent by %s' % tx_hash)
+
+if args.delete:
+    check_registrar()
+    private_key = args.delete[0]
+
+    tx_hash = delete_request(private_key)
+
+    print('Unregistration request sent by %s' % tx_hash)
+
+if args.cancel:
+    check_registrar()
+    private_key = args.cancel[0]
+
+    type, tx_hash = cancel_request(private_key)
+
+    if type == 3:
+        print('Registration canceled by %s' % tx_hash)
+    else:
+        print('Unregistration canceled by %s' % tx_hash)
+
+if args.balance:
+    private_key = args.balance[0]
+    address = private_key_to_address(private_key)
+
+    print('Your balance is %s' % normalize_value(get_balance(address)))
+
+if args.send:
+    check_registrar()
+    private_key = args.send[0]
+    to = args.send[1]
+    value = args.send[2]
+
+    tx_hash = send_transaction(private_key, to, value)
+
+    print('Transaction Hash: %s' % tx_hash)
+
+if args.gift:
+    check_certificates()
+    private_key = args.gift[0]
+    value = args.gift[1]
+    expire_time = args.gift[2]
+
+    certificate = create_approval(private_key, value, expire_time)
+
+    print(certificate)
+
+if args.receive:
+    check_certificates()
+    private_key = args.receive[0]
+    certificate = args.receive[1]
+
+    ticket = use_approval(private_key, certificate)
+
+    print(ticket)
+
+if args.withdraw:
+    check_certificates()
+    private_key = args.withdraw[0]
+
+    cancel_approvals(private_key)
+
+    print('Cancelled approvals')
+
+if args.ops:
+    check_registrar()
+    check_certificates()
+
+    address = private_key_to_address(args.ops[0]).lower()
+
+    tx_list = get_tx_list(address)
+
+    if len(tx_list) == 0:
+        print_error('No operations found')
+
+    print('Operations:')
+    for tx in tx_list:
+        date = datetime.fromtimestamp(int(tx['timeStamp']))
+
+        if int(tx['blockNumber']) >= get('registrar.registrar.startBlock'):
+            if tx['to'] == address:
+                from_phone = address_to_phone(tx['from'], int(tx['blockNumber']))
+                if from_phone != 'UNKNOWN':
+                    print('%s FROM: %s %s' % (
+                    date.strftime('%H:%M:%S %d.%m.%Y'), from_phone, normalize_value(int(tx['value']), 'ether')))
+            else:
+                to_phone = address_to_phone(tx['to'], int(tx['blockNumber']))
+                if to_phone != 'UNKNOWN':
+                    print('%s   TO: %s %s' % (
+                    date.strftime('%H:%M:%S %d.%m.%Y'), to_phone, normalize_value(int(tx['value']), 'ether')))
+\end{minted}
+
+\textit{\textbf{./face-management.py}}
+\begin{minted}[fontsize=\footnotesize]{python}
+from argparse import ArgumentParser
+from threading import Thread
+from time import sleep
+
+from api import list_people_ids, delete_person, train, create_person, add_face, create_group_if_not_exists
+from output_util import print_error
+from video_detector import detect_all, detect_middle_faces, detect_roll_faces, detect_yaw_faces, \
+    detect_open_mouth_faces, detect_open_eyes_faces
+
+parser = ArgumentParser(prog='Faces management')
+
+parser.add_argument('--simple-add',
+                    nargs=1,
+                    metavar='VIDEO',
+                    help='Adds 5 faces from video')
+parser.add_argument('--add',
+                    nargs='+',
+                    metavar='VIDEO',
+                    help='Adds only needed faces from 1-5 videos')
+parser.add_argument('--list',
+                    action='store_true',
+                    help='Prints all registered person ids')
+parser.add_argument('--del',
+                    nargs=1,
+                    metavar='ID',
+                    dest='delete',
+                    help='Deletes person')
+parser.add_argument('--train',
+                    action='store_true',
+                    help='Starts training')
+
+args = parser.parse_args()
+
+if args.simple_add:
+    video = args.simple_add[0]
+
+    faces = detect_all(video)
+    if faces is None:
+        print_error('Video does not contain any face')
+
+    create_group_if_not_exists()
+
+    print('%d frames extracted' % len(faces))
+
+    person_id = create_person('1')
+
+    print('PersonId: %s' % person_id)
+    print('FaceIds')
+    print('=======')
+
+    for face in faces:
+        print(add_face(face, person_id))
+
+if args.add:
+    person_id = ''
+    faces = []
+
+    done = 0
+    results = [0, 0, 0, 0, 0]
+    if len(args.add) > 0:
+        def target(video):
+            global results, done
+            results[0] = detect_middle_faces(video)
+            done += 1
+
+        video = args.add[0]
+
+        t = Thread(target=target, args=(video,))
+        t.run()
+
+    if len(args.add) > 1:
+        def target(video):
+            global results, done
+            results[1] = detect_roll_faces(video)
+            done += 1
+
+        video = args.add[1]
+
+        t = Thread(target=target, args=(video,))
+        t.run()
+
+    if len(args.add) > 2:
+        def target(video):
+            global results, done
+            results[2] = detect_yaw_faces(video)
+            done += 1
+
+        video = args.add[2]
+
+        t = Thread(target=target, args=(video,))
+        t.run()
+
+    if len(args.add) > 3:
+        def target(video):
+            global results, done
+            results[3] = detect_open_mouth_faces(video)
+            done += 1
+
+        video = args.add[3]
+
+        t = Thread(target=target, args=(video,))
+        t.run()
+
+    if len(args.add) > 4:
+        def target(video):
+            global results, done
+            results[4] = detect_open_eyes_faces(video)
+            done += 1
+
+        video = args.add[4]
+
+        t = Thread(target=target, args=(video,))
+        t.run()
+
+    while len(args.add) > done:
+        sleep(0.5)
+
+    if len(args.add) > 0:
+        if results[0] is None:
+            print_error('Base video does not follow requirements')
+
+        faces += results[0]
+
+    if len(args.add) > 1:
+        if results[1] is None:
+            print_error('Roll video does not follow requirements')
+
+        faces += results[1]
+
+    if len(args.add) > 2:
+        if results[2] is None:
+            print_error('Yaw video does not follow requirements')
+
+        faces += results[2]
+
+    if len(args.add) > 3:
+        if results[3] is None:
+            print_error('Video to detect open mouth does not follow requirements')
+
+        faces += results[3]
+
+    if len(args.add) > 4:
+        if results[4] is None:
+            print_error('Video to detect open eyes does not follow requirements')
+
+        faces += results[4]
+
+    create_group_if_not_exists()
+    person_id = create_person('1')
+
+    print('%d frames extracted' % len(faces))
+    print('PersonId: %s' % person_id)
+    print('FaceIds')
+    print('=======')
+
+    for face in faces:
+        print(add_face(face, person_id))
+
+if args.list:
+    list_ids = list_people_ids()
+
+    if len(list_ids) == 0:
+        print_error('No persons found')
+
+    print('Persons IDs:')
+
+    for id in list_ids:
+        print(id)
+
+if args.delete:
+    id = args.delete[0]
+
+    delete_person(id)
+
+    print('Person deleted')
+
+if args.train:
+    train()
+
+    print('Training successfully started')
+\end{minted}
+
+\textit{\textbf{./kyc.py}}
+\begin{minted}[fontsize=\footnotesize]{python}
+from argparse import ArgumentParser
+
+from blockchain import get_reg_requests, get_del_requests, confirm, phone_to_address, check_address, check_registrar
+from checkers import check_phone_number
+from output_util import print_error
+
+parser = ArgumentParser(prog='KYC')
+
+parser.add_argument('--list',
+                    nargs=1,
+                    metavar='REQUEST_TYPE',
+                    help='Prints out all requests of given type')
+parser.add_argument('--confirm',
+                    nargs=1,
+                    metavar='ADDRESS',
+                    type=check_address,
+                    help='Confirms request related to the given address')
+parser.add_argument('--get',
+                    nargs=1,
+                    type=check_phone_number,
+                    metavar='PHONE',
+                    help='Prints address associated with given phone number')
+
+args = parser.parse_args()
+
+if args.list:
+    check_registrar()
+    request_type = args.list[0]
+
+    lst = []
+    if request_type == 'add':
+        lst = sorted(get_reg_requests())
+        if len(lst) == 0:
+            print_error('No KYC registration requests found')
+    elif request_type == 'del':
+        lst = sorted(get_del_requests())
+        if len(lst) == 0:
+            print_error('No KYC unregistration requests found')
+
+    for phone, address in lst:
+        print('%s: +%s' % (address, str(phone)))
+
+if args.confirm:
+    check_registrar()
+    address = args.confirm[0]
+
+    status, tx_hash = confirm(address)
+
+    if status == 1:
+        print('Confirmed by %s' % tx_hash)
+    else:
+        print('Failed but included in %s' % tx_hash)
+
+if args.get:
+    check_registrar()
+    phone = args.get[0]
+
+    addr = phone_to_address(phone)
+    if addr is None:
+        print_error('Correspondence not found')
+    print('Registered correspondence: %s' % phone_to_address(phone))
+\end{minted}
+
+\textit{\textbf{./output\_util.py}}
+\begin{minted}[fontsize=\footnotesize]{python}
+from json import dumps
+
+def print_error(message):
+    print(message)
+    quit(0)
+
+def print_json(obj):
+    print(dumps(obj, indent=4))
+
+def handle_error(response):
+    if type(response) == dict and response.get('error'):
+        print_error(response['error'])
+    return response
+\end{minted}
+
+\textit{\textbf{./setup.py}}
+\begin{minted}[fontsize=\footnotesize]{python}
+from time import sleep
+
+from argparse import ArgumentParser
+
+from blockchain import deploy_contract, get_owner, change_owner, get_owner_nonce
+from config import set
+
+parser = ArgumentParser(prog='Setup')
+
+parser.add_argument('--deploy',
+                    action='store_true',
+                    help='Deploys registrar and certificates contracts to the blockchain')
+parser.add_argument('--owner',
+                    nargs=1,
+                    metavar='CONTRACT',
+                    help='Prints current owner of the contract')
+parser.add_argument('--chown',
+                    nargs=2,
+                    metavar=('CONTRACT', 'NEW_OWNER'),
+                    help='Changes owner of the specified contract')
+
+
+args = parser.parse_args()
+
+if args.deploy:
+    nonce = get_owner_nonce()
+    registrar = deploy_contract('registrar', nonce)
+    print('KYC Registrar: %s' % registrar['address'])
+    set('registrar.registrar', registrar)
+
+    certificates = deploy_contract('certificates', nonce + 1)
+    print('Payment Handler: %s' % certificates['address'])
+    set('registrar.payments', certificates)
+
+if args.owner:
+    contract = args.owner[0]
+
+    if contract == 'registrar':
+        print('Admin account: %s' % get_owner())
+
+if args.chown:
+    contract = args.chown[0]
+    new_owner = args.chown[1]
+
+    if contract == 'registrar':
+        change_owner(new_owner)
+
+        print('New admin account: %s' % new_owner)
+\end{minted}
+
+\textit{\textbf{./validators.py}}
+\begin{minted}[fontsize=\footnotesize]{python}
+from argparse import Action
+
+from checkers import check_pin_code, check_phone_number, check_date, check_ticket
+
+from blockchain import pin_code_to_private_key, phone_to_address
+
+
+# Substitutes pin with private_key
+class PINPhoneValidate(Action):
+    def __call__(self, parser, args, values, option_string=None):
+        pin_code, phone_number = values
+        res = [pin_code_to_private_key(pin_code), check_phone_number(phone_number)]
+        setattr(args, self.dest, res)
+
+
+# Substitutes pin with private_key
+class PINTicketValidate(Action):
+    def __call__(self, parser, args, values, option_string=None):
+        pin_code, ticket = values
+        res = [pin_code_to_private_key(pin_code), check_ticket(ticket)]
+        setattr(args, self.dest, res)
+
+
+# Substitutes pin with private_key
+# Substitutes phone with address
+class PersonValidate(Action):
+    def __call__(self, parser, args, values, option_string=None):
+        name, phone_number, pin_code = values
+        res = [pin_code_to_private_key(name),
+               phone_to_address(check_phone_number(phone_number)),
+               check_pin_code(pin_code)]
+        setattr(args, self.dest, res)
+
+
+# Substitutes pin with private_key
+class TransactValidate(Action):
+    def __call__(self, parser, args, values, option_string=None):
+        pin_code, phone_number, amount = values
+        res = [pin_code_to_private_key(pin_code),
+               check_phone_number(phone_number),
+               int(amount)]
+        setattr(args, self.dest, res)
+
+
+# Substitutes pin with private_key
+class ApproveValidate(Action):
+    def __call__(self, parser, args, values, option_string=None):
+        pin_code, value, date_to_expire = values
+        res = [pin_code_to_private_key(pin_code), int(value), check_date(date_to_expire)]
+        setattr(args, self.dest, res)
+\end{minted}
+
+\textit{\textbf{./video\_detector.py}}
+\begin{minted}[fontsize=\footnotesize]{python}
+import cv2
+import imutils
+
+from config import get, set, clear
+from api import detect, verify_person, check_same_person, identify_person_id
+from face_conditions import FaceConditions
+from output_util import print_error
+
+WIDTH = 1000
+CONDITIONS_TO_VERIFY = 3
+
+def detect_all(video):
+    faces_images = []
+
+    cap = cv2.VideoCapture(video)
+    success, frame = cap.read()
+    count = 0
+
+    while success:
+        if count % 5 == 0:
+            frame = imutils.resize(frame, width=WIDTH)
+
+            face_api_response = detect(frame)
+
+            if face_api_response is not None:
+                if check_same_person(face_api_response['faceId']):
+                    print_error('The same person already exists')
+
+                faces_images.append(frame)
+
+                if len(faces_images) == 5:
+                    return faces_images
+
+        count += 1
+        success, frame = cap.read()
+
+    return None
+
+
+def detect_by_conditions(video, conditions, face_api=True):
+    cur = 0
+    faces_images = []
+
+    cap = cv2.VideoCapture(video)
+    success, frame = cap.read()
+    count = 0
+
+    while success:
+        if count % 3 == 0:
+            frame = imutils.resize(frame, width=WIDTH)
+
+            face_api_response = detect(frame) if face_api else 0
+            if face_api_response is not None and conditions[cur].check_face(frame, face_api_response):
+                if face_api_response != 0 and check_same_person(face_api_response['faceId']):
+                    print_error('The same person already exists')
+
+                faces_images.append(frame)
+                cur += 1
+
+                if cur == len(conditions):
+                    return faces_images
+
+        count += 1
+        success, frame = cap.read()
+
+    return None
+
+
+def detect_by_conditions_in_any_order(video, conditions, face_api=True):
+    completed = 0
+    faces_images = []
+
+    cap = cv2.VideoCapture(video)
+    success, frame = cap.read()
+
+    while success:
+        frame = imutils.resize(frame, width=WIDTH)
+        face_api_response = detect(frame) if face_api else 0
+        if face_api_response is not None:
+            for condition in conditions:
+                if condition.check_face(frame, face_api_response):
+                    faces_images.append(frame)
+                    completed += 1
+                    break
+
+            if completed == len(conditions):
+                return faces_images
+
+        success, frame = cap.read()
+
+    return None
+
+
+def detect_middle_faces(video):
+    return detect_by_conditions(video, [
+        FaceConditions('middle_face1', yaw=0, roll=0, delta=5),
+        FaceConditions('middle_face2', yaw=0, roll=0, delta=5),
+        FaceConditions('middle_face3', yaw=0, roll=0, delta=5),
+        FaceConditions('middle_face4', yaw=0, roll=0, delta=5),
+        FaceConditions('middle_face5', yaw=0, roll=0, delta=5)
+    ])
+
+
+def detect_roll_faces(video):
+    return detect_by_conditions(video, [
+        FaceConditions('roll_left_30', roll=30),
+        FaceConditions('roll_left_15', roll=15),
+        FaceConditions('roll_middle_0', roll=0),
+        FaceConditions('roll_right_15', roll=-15),
+        FaceConditions('roll_right_30', roll=-30)
+    ])
+
+
+def detect_yaw_faces(video):
+    return detect_by_conditions(video, [
+        FaceConditions('yaw_left_20', yaw=20),
+        FaceConditions('yaw_left_10', yaw=10),
+        FaceConditions('yaw_middle', yaw=0),
+        FaceConditions('yaw_right_10', yaw=-10),
+        FaceConditions('yaw_right_20', yaw=-20)
+    ])
+
+
+def detect_open_mouth_faces(video):
+    return detect_by_conditions(video, [
+        FaceConditions('open_mouth', mouth=True)
+    ], face_api=False)
+
+
+def detect_open_eyes_faces(video):
+    return detect_by_conditions_in_any_order(video, [
+        FaceConditions('closed_left_eye', left_eye=False, right_eye=True),
+        FaceConditions('closed_right_eye', left_eye=True, right_eye=False),
+    ], face_api=False)
+
+
+def simple_identify(video):
+    cap = cv2.VideoCapture(video)
+    success, frame = cap.read()
+    count = 0
+
+    faces_ids = []
+
+    while success:
+        if count % 5 == 0:
+            frame = imutils.resize(frame, width=WIDTH)
+
+            face_api_response = detect(frame)
+
+            if face_api_response is not None:
+                faces_ids += [face_api_response['faceId']]
+
+                if len(faces_ids) == 5:
+                    break
+
+        count += 1
+        success, frame = cap.read()
+
+    if len(faces_ids) < 5:
+        print_error('The video does not follow requirements')
+
+    person_id = identify_person_id(faces_ids)
+
+    if person_id is None:
+        print_error('The person was not found')
+
+    return person_id
+
+
+def action_to_face_condition(action):
+    return action
+
+
+def identify(video, actions):
+    cap = cv2.VideoCapture(video)
+    success, frame = cap.read()
+
+    actions = list(map(action_to_face_condition, actions))
+
+    count = 0
+    cur = 0
+
+    faces_ids = []
+
+    while success:
+        if count % 5 == 0:
+            frame = imutils.resize(frame, width=WIDTH)
+
+            face_api_response = detect(frame)
+
+            if face_api_response is not None and actions[cur].check(frame, face_api_response):
+                faces_ids += [face_api_response['faceId']]
+
+                cur += 1
+                if cur == len(actions):
+                    break
+
+        count += 1
+        success, frame = cap.read()
+
+    if cur < len(actions):
+        print_error('The video does not follow requirements')
+
+    person_id = identify_person_id(faces_ids)
+
+    if person_id is None:
+        print_error('The person was not found')
+
+    return person_id
+\end{minted}
+

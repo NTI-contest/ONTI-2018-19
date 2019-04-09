@@ -1,0 +1,769 @@
+\subsection*{Подотовка сервиса идентификации}
+
+
+Сервис идентификации человека по лицу перед полноценной работой требует предварительной настройки. Первое, что должно быть сделано - в сервис необходимо добавить лица людей, которых в дальнейшем необходимо идентифицировать. Поскольку система автоматического тестирования не может работать с камерой, то изображения человека будут передаваться через видео-файл, передаваемый в сервис через параметры командной строки.
+
+Администратор свервиса должен иметь возможность просматривать список добавленных пользователей, удалять пользователя (и его изображения) из системы. 
+
+Как только необходимое количество лиц зарегистрировано в сервисе, администратор может запустить обучение нейронной сети.
+
+\begin{myverbbox}{\scriptFile}
+face-management.py <command> [options]
+\end{myverbbox}
+\scriptTitle
+
+
+%-----------------------------------------------------
+%US-004
+\newuserstory{Простое добавление пользователя в сервис индентификации}
+
+
+Сервис должен быть устроен так, что добавление изображений человека в систему происходит анонимно, т.е. имя при добавлении не указывается. 
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ face-management.py --simple-add <path to video file>
+\end{myverbbox}
+\scriptExample{
+При использовании команды простого добавления пользователя из видео-потока извлекается 5 кадров с изображением лица человека. При этом подразумевается, что все кадры в видео приндалежат одному и тому же человеку. 
+
+Если в видео-потоке недостаточно кадров с изображением человека, то обработка такого видео должно приводить к ошибке.
+
+}
+
+% AC-004-01
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups/fintech-01
+" -H "Content-Type: application/json" -H "Ocp-Apim-Subscription-Key: 0000
+00000000000000000000000000000" 
+{"error":{"code":"PersonGroupNotFound","message":"Person group is not fou
+nd.\r\nParameter name: personGroupId"}}
+$ face-management.py --simple-add /path/to/video.avi
+5 frames extracted
+PersonId: 419e345a-e6d6-4d9c-953d-667787b8d52e
+FaceIds
+=======
+e27558b9-812d-41c3-b114-8e434b8f4602
+44c350f2-6653-4616-a1b7-e0fe9b481b6b
+f945a3be-4b20-4049-b080-4142a55e4f93
+855ab7c2-9bb3-49ed-8cac-1366c0274b08
+9c4af288-54cd-4375-8eef-f8c29ed56685
+\end{myverbbox}
+\acceptanceCriteria{Требуемый \texttt{personGroupId} не существовал до этого в сервисе \textit{Microsoft Face API}. После добавления \texttt{personGroupId} добавляется новый \texttt{personId}, с которым ассоциируется 5 изображений лица (\texttt{persistedFaceId}).
+}
+
+% AC-004-02
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups" -H "Conte
+nt-Type: application/json" -H "OcApim-Subscription-Key: 00000000000000000
+0000000000000000" 
+[{"personGroupId":"fintech-01","name":"fintech-01","userData":null}]
+$ face-management.py --simple-add /path/to/video1.avi
+5 frames extracted
+PersonId: 37da04e7-f471-49c7-a54c-a08f05950fc5
+FaceIds
+=======
+1d499868-3d01-487c-8bab-626dc562e4e8
+27dadf08-bc60-4a29-82a7-7d21ea7f40af
+b8cf9c2f-a606-4f21-851d-26e0a0dc8a74
+bf4806de-8c4b-4a12-8495-002f43dba797
+ff79486f-15ac-43be-9c6c-b2840f8c8d22
+\end{myverbbox}
+\acceptanceCriteria{Требуемый \texttt{personGroupId} существует в \textit{Microsoft Face API}. В данную группу добавляется новый \texttt{personId}, с которым ассоциируется 5 изображений лица (\texttt{persistedFaceId}).
+}
+
+% AC-004-03
+\begin{myverbbox}[\small]{\output}
+face-management.py --simple-add /path/to/video2.avi
+Video does not contain any face
+\end{myverbbox}
+\acceptanceCriteria{Выдается ошибка при попытке обработать видео, в котором либо нет кадров с лицом пользователя, либо в видео содержится меньше 5 кадров. Группа с \texttt{personGroupId} не создается, новый \texttt{personId} не добавляется.
+}
+
+% AC-004-04
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --simple-add /path/to/video1.avi
+5 frames extracted
+PersonId: 52865cde-3af8-443d-b260-9319c2cb1788
+FaceIds
+=======
+cdb6227e-7453-4057-b4fa-79660914e597
+6976d3c2-dee5-4f24-8950-f38ff10c70ad
+fae15e55-6639-42a4-a954-731c33310e41
+15092567-5765-49ed-ac63-94bc5fa08d17
+a77f1f0a-aa95-4bd1-9826-6b453aec42b2
+$ face-management.py --simple-add /path/to/video31.avi
+5 frames extracted
+PersonId: 9fa0a99b-8e76-474d-8223-dea217c2c19b
+FaceIds
+=======
+b552ef11-a162-4a7d-9047-ccfc84a07043
+90c0815a-ecce-45c6-8107-ced7ef29a249
+fde35dba-505d-4a62-ac5a-c6ae4c89128e
+6c6910b4-0ab5-4eb4-9e53-95b1929f9867
+fdb9d352-65b0-41a2-a1be-03ea5b543160
+$ face-management.py --simple-add /path/to/video41.avi
+5 frames extracted
+PersonId: f290ecb9-bfab-46f7-b623-45140d730628
+FaceIds
+=======
+e5735ecd-ca09-4fd4-bfd3-8ace67702ab0
+9e1bbdee-5981-4f6b-aba5-03be57e5e910
+3120ef58-8d53-4558-8b84-784ba338f621
+8fceb9c7-f029-4326-9703-6749005674fa
+8ea02a3b-7dc0-455a-858c-67251b0ca3b4
+\end{myverbbox}
+\acceptanceCriteria{Несколько добавлений пользователя проходят успешно. Для каждого видео добавляется новый \texttt{personId} добавляется.
+}
+
+%-----------------------------------------------------
+%US-005
+\newuserstory{Улучшенное добавление пользователя в сервис индентификации}
+
+
+Наличие в наборе изображений одного и того же человека, но у которых есть различия в мимике, положении головы и освещенности, влияет на качество обучения нейронной сети сервиса, поэтому при сборе данных для сервиса идентификации важно собирать разные изображения.
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ face-management.py --add <path to video file 1> [ <path to video file 2
+> [ <path to video file 3> [ <path to video file 4> [ <path to video file
+ 5> ] ] ] ]
+\end{myverbbox}
+\scriptExample{
+Команда ожидает 5 видео файлов. Требования к каждому из видео файлов:
+\begin{itemize}
+  \item В первом по списку видеофайле лицо человека должно быть неподвижно (допускаются небольшие повороты)
+  \item Во втором по списку видеофайле должны быть зафиксированы наклоны головы влево и вправо (\textit{roll})
+  \item В третьем по списку видеофайле должны быть зафиксированы повороты головы влево и вправо (\textit{yaw})
+  \item В четвертом видеофайле должен быть зафиксирован открытый рот
+  \item В пятом - должно быть зафиксировано закрытие глаз
+\end{itemize}
+
+}
+
+% AC-005-01
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups/fintech-01
+" -H "Content-Type: application/json" -H "Ocp-Apim-Subscription-Key: 0000
+00000000000000000000000000000" 
+{"error":{"code":"PersonGroupNotFound","message":"Person group is not fou
+nd.\r\nParameter name: personGroupId"}}
+$ face-management.py --add /path/to/video1.avi
+5 frames extracted
+PersonId: ddaa7036-cab0-4d8f-9b36-18f20e294c51
+FaceIds
+=======
+5754a049-0de7-4ee5-99ba-45d0d3398645
+56c0aa34-50c4-4d0b-bcf0-c86e9c9dec52
+f626c3d7-1126-401c-b125-16b6c65e6ed8
+6d617030-941d-4f6c-9d05-b714b4e2b504
+1087c13c-09d7-4053-8bc6-9381c48081e2
+\end{myverbbox}
+\acceptanceCriteria{Требуемый \texttt{personGroupId} не существовал до этого в сервисе \textit{Microsoft Face API}. После добавления \texttt{personGroupId} добавляется новый \texttt{personId}, с которым ассоциируется 5 изображений лица (\texttt{persistedFaceId}). Изображение лица человека не должно значительно отличаться от кадра к кадру (допускаются повороты до 5 градусов).
+}
+
+% AC-005-02
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups" -H "Conte
+nt-Type: application/json" -H "OcApim-Subscription-Key: 00000000000000000
+0000000000000000" 
+[{"personGroupId":"fintech-01","name":"fintech-01","userData":null}]
+$ face-management.py --add /path/to/video1.avi
+5 frames extracted
+PersonId: 6dc70d27-3bad-400a-983f-fec6591cff6b
+FaceIds
+=======
+08609f0a-55ee-46ed-899b-5f7d66f62cce
+2bb6d3a9-1c52-4a70-ac62-44881f2aed29
+4309d3b7-5250-47e3-bc7e-f3d1da8badd1
+76b6a516-c378-4d86-b4cc-03b60b5c2d2c
+85f2af43-ca0e-4dd1-a400-9780d7b7a8f5
+\end{myverbbox}
+\acceptanceCriteria{В требуемую \texttt{personGroupId} добавляется новый \texttt{personId}, с которым ассоциируется 5 изображений лица (\texttt{persistedFaceId}). Изображение лица человека не должно значительно отличаться от кадра к кадру (допускаются повороты до 5 градусов).
+}
+
+% AC-005-03
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video2.avi
+Base video does not follow requirements
+\end{myverbbox}
+\acceptanceCriteria{Изображение лица человека в видео значительно отличаться от кадра к кадру (повороты больше чем на 5 градусов либо есть открый рот, либо есть закрытые глаза). Группа с \texttt{personGroupId} не создается, новый \texttt{personId} не добавляется.
+}
+
+% AC-005-04
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video1.avi /path/to/video2.avi
+10 frames extracted
+PersonId: 8d0b7195-c172-4d1a-8588-063f3e64c0c0
+FaceIds
+=======
+08609f0a-55ee-46ed-899b-5f7d66f62cce
+2bb6d3a9-1c52-4a70-ac62-44881f2aed29
+4309d3b7-5250-47e3-bc7e-f3d1da8badd1
+76b6a516-c378-4d86-b4cc-03b60b5c2d2c
+85f2af43-ca0e-4dd1-a400-9780d7b7a8f5
+300c161f-7154-43c4-80bc-34d1fd9ffb1d
+4f57f616-23ea-4be7-b977-8e9b14a192b4
+52c9b5c4-6cb7-4aae-b9d0-206d6db90510
+8f9a5e7f-c2c4-4d92-908b-6f220b4d3b32
+d45f9324-a845-4db6-abc6-88214726bdcc
+\end{myverbbox}
+\acceptanceCriteria{В требуемую \texttt{personGroupId} добавляется новый \texttt{personId}, с которым ассоциируется 10 изображений лица (\texttt{persistedFaceId}). Помимо 5 изображений лиц из первого видео, добавляется 5 - из второго.
+
+Лицо человека во втором видео должно наклонятся из крайнего положения влево к крайнему положению вправо. Зафиксирован максимальный наклон в каждую из сторон не меньше 30 градусов. Из второго видео выбрано 5 кадров с наклонами головы из следующего списка: 30 градусов влево, 15 градусов влево, 0 градусов, 15 градусов вправо, 30 градусов вправо. Допускается отклонение от перечисленных значений +/- 3 градуса.
+}
+
+% AC-005-05
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video1.avi /path/to/video3.avi
+Roll video does not follow requirements
+\end{myverbbox}
+\acceptanceCriteria{Во втором по счету видео лицо человека не доходит до крайних положений. Т.е. нельзя зафиксировать максимальный наклон в каждую из сторон от 30 градусов и более. Группа с \texttt{personGroupId} не создается, новый \texttt{personId} не добавляется.
+}
+
+% AC-005-06
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video1.avi /path/to/video2.avi /path/
+to/video3.avi
+15 frames extracted
+PersonId: a25ddbf2-aabf-41c7-b9a9-d69f1c055761
+FaceIds
+=======
+0ca5925b-55eb-44fd-9624-39fbaa33a5c5
+31091841-2e3c-43c2-a14c-497fd8137d25
+3f46e69d-33d7-4474-97a1-230046dc9cfa
+f1752749-f602-4151-b3bb-7cec627de3df
+f556db9a-55cd-4542-bf0f-a5848376ba66
+08609f0a-55ee-46ed-899b-5f7d66f62cce
+2bb6d3a9-1c52-4a70-ac62-44881f2aed29
+4309d3b7-5250-47e3-bc7e-f3d1da8badd1
+76b6a516-c378-4d86-b4cc-03b60b5c2d2c
+85f2af43-ca0e-4dd1-a400-9780d7b7a8f5
+300c161f-7154-43c4-80bc-34d1fd9ffb1d
+4f57f616-23ea-4be7-b977-8e9b14a192b4
+52c9b5c4-6cb7-4aae-b9d0-206d6db90510
+8f9a5e7f-c2c4-4d92-908b-6f220b4d3b32
+d45f9324-a845-4db6-abc6-88214726bdcc
+\end{myverbbox}
+\acceptanceCriteria{В требуемую \texttt{personGroupId} добавляется новый \texttt{personId}, с которым ассоциируется 15 изображений лица (\texttt{persistedFaceId}). Помимо 10 изображений лиц из первого и второго видео, добавляется 5 - из третьего.
+
+Лицо человека в третьем видео должно поворачиваться из крайнего положения влево к крайнему положению вправо. Зафиксирован максимальный поворот в каждую из сторон не меньше 20 градусов. Из третьего видео выбрано 5 кадров с наклонами головы из следующего списка: 20 градусов влево, 10 градусов влево, 0 градусов, 10 градусов вправо, 20 градусов вправо. Допускается отклонение от перечисленных значени +/- 3 градуса.
+}
+
+% AC-005-07
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video1.avi /path/to/video2.avi /path/
+to/video4.avi
+Yaw video does not follow requirements
+\end{myverbbox}
+\acceptanceCriteria{Во третьем по счету видео лицо человека не доходит до крайних положений. Т.е. нельзя зафиксировать максимальный поворот в каждую из сторон от 20 градусов и более. Группа с \texttt{personGroupId} не создается, новый \texttt{personId} не добавляется.
+}
+
+% AC-005-08
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video1.avi /path/to/video2.avi /path/
+to/video3.avi /path/to/video4.avi
+16 frames extracted
+PersonId: e3152bc7-431c-4215-a19b-d128f2768438
+FaceIds
+=======
+100d7ff0-0e95-4998-a385-d65a69cbbab4
+1ca71243-1370-4c7f-b457-ac53ade0b59a
+25f51952-880c-435e-9afb-3ca8b2b981d4
+cf17ee9e-140b-444b-a87a-35209a631aa1
+f0ae9fd1-81bd-4fcc-853c-107e228be383
+2307cf52-687b-4d51-9861-728b6297aa7d
+34ac19bb-4018-498b-bb13-02098aaac75c
+7e01b585-78b1-42a0-8e48-4b1ef199dde7
+99943bc7-f92e-49fb-91b4-06b123343982
+ae8b5917-ee88-4499-b262-8bfbfda687ca
+8195743c-ae84-48fe-b381-1eb73c82f5c1
+87ad1c82-0ffd-4b39-8b72-fa6323257802
+9cb6fc25-f32e-49d7-b6de-352bf2d911fc
+bff40657-1ea4-4667-b2aa-d8b480f527be
+d4b57970-6390-4c23-a366-0c51fdc17f9b
+1f41144e-eee5-4210-8a7d-ffa4adc3ba21
+\end{myverbbox}
+\acceptanceCriteria{В требуемую \texttt{personGroupId} добавляется новый \texttt{personId}, с которым ассоциируется 16 изображений лица (\texttt{persistedFaceId}). Помимо 15 изображений лиц из первого-третьего видео, добавляется 1 изображение - из четвертого.
+
+На серии кадров человека в четвертом видео рот человека должен быть открыт. Один из кадров с открытым ртом отправляется в \textit{Microsoft Face API}.
+}
+
+% AC-005-09
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video1.avi /path/to/video2.avi /path/
+to/video3.avi /path/to/video5.avi
+Video to detect open mouth does not follow requirements
+\end{myverbbox}
+\acceptanceCriteria{Во четвертом по счету видео не найдены кадры с открытым ртом. Группа с \texttt{personGroupId} не создается, новый \texttt{personId} не добавляется.
+}
+
+% AC-005-10
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video1.avi /path/to/video2.avi /path/
+to/video3.avi /path/to/video4.avi /path/to/video5.avi
+18 frames extracted
+PersonId: 588e76bc-a0ce-4066-94d2-96620d105401
+FaceIds
+=======
+220dd1ea-3392-466b-ab50-fbb465a513ff
+4977b87d-3c36-45d7-b827-8907aa66b918
+29e7d8fd-f065-41b6-9fd0-b191fb3dde78
+d0e269f1-199a-459e-9fbf-1c24e015fdec
+94d0887a-4e0a-4b86-9e6e-8f6fdd45f1ec
+12938747-8530-4bcc-a811-b890aa852175
+2d486b65-ed15-4313-836c-2cd4ca7e02cb
+9a1ab5a7-9e46-4566-8d85-54bbcd021307
+7a6f7afd-a1f6-4d7a-9e6f-c5e0daf1501a
+105dfcaa-a25d-45ff-ba38-48de04a735e6
+090707ff-91b8-4647-afbd-a80f1976c10d
+65f53802-dfa0-46a0-b9e5-c4780f41d580
+8c485998-ea43-439b-a84e-606433232133
+7b0166db-f7a2-477c-b3f6-bbf3833ea770
+191f33fc-501f-4d1a-8b5f-a4f9917f311a
+44c79f24-5f87-48c6-af1f-f85e0fca521e
+cdd4e100-217d-4163-8f51-4c8f82282f46
+e417cb0c-ad18-47eb-8ffa-d850f3aaa8ec
+\end{myverbbox}
+\acceptanceCriteria{В требуемую \texttt{personGroupId} добавляется новый \texttt{personId}, с которым ассоциируется 18 изображений лица (\texttt{persistedFaceId}). Помимо 16 изображений лиц из первого-четвертого видео, добавляется два изображения - из пятого.
+
+На серии кадров человека в пятом видео был закрыт сначала левый глаз, потом правый. По одному кадру с каждым из закрытых глаз отправляется в \textit{Microsoft Face API}.
+}
+
+% AC-005-11
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video1.avi /path/to/video2.avi /path/
+to/video3.avi /path/to/video4.avi /path/to/video6.avi
+18 frames extracted
+PersonId: 5d5d6e92-f8f0-47cf-8e9b-b4455092603e
+FaceIds
+=======
+0e5edd8e-7756-470e-a26c-f54ab70a5524
+73b4caea-c85c-4594-9153-198351937d94
+2ae3c850-190a-4cd0-afd2-8efa341767ba
+adb7744e-b2fb-4a58-b3a8-f22c3143a8cd
+7e0f87d6-14ad-4ec6-971f-e4c2771cc267
+47c8c307-1f90-473c-b48c-792d5b5a1241
+33e35a22-358a-4847-bcdd-4a5bdfd5eb69
+2c7b951b-126a-4eec-9e22-1d9d65ece9e3
+bcaf7f6a-1c44-476e-a51f-9dde2744ade0
+1c9c0134-ada0-47c2-848c-d4424b232f04
+b79945e1-de47-4011-98f2-e7e8f0d9f3ef
+f972b6ac-078b-4e3d-a779-4cde8ea28f36
+fbeb7aa1-f66e-4412-ad07-b61103e8af0b
+9c762e64-075b-4fa4-8e39-0d83df86428b
+9794e349-e4e4-44ad-951c-610b4890b16e
+2e93da04-8f31-4a27-bd9e-5768335447a5
+b9227512-dfa8-4a17-94e2-be520b8975a9
+b67c1f86-2e3d-45a2-a7fb-57bbbff9cd8c
+\end{myverbbox}
+\acceptanceCriteria{В требуемую \texttt{personGroupId} добавляется новый \texttt{personId}, с которым ассоциируется 18 изображений лица (\texttt{persistedFaceId}). Помимо 16 изображений лиц из первого-четвертого видео, добавляется два изображения - из пятого.
+
+На серии кадров человека в пятом видео был закрыт сначала правый глаз потом левый. По одному кадру с каждым из закрытых глаз отправляется в \textit{Microsoft Face API}.
+}
+
+% AC-005-12
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video1.avi /path/to/video2.avi /path/
+to/video3.avi /path/to/video4.avi /path/to/video7.avi
+Video to detect closed eyes does not follow requirements
+\end{myverbbox}
+\acceptanceCriteria{Во пятом по счету видео не найдены кадры с закрытыми глазами. Причем видео считается не удовлетворяющим требованиям, если только один глаз был закрыт. Группа с \texttt{personGroupId} не создается, новый \texttt{personId} не добавляется.
+}
+
+% AC-005-13
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video11.avi /path/to/video12.avi /pat
+h/to/video13.avi /path/to/video14.avi /path/to/video15.avi
+Roll video does not follow requirements
+\end{myverbbox}
+\acceptanceCriteria{В каком-то видео не найдены кадры, удовлетворяющие требованиям. Группа с \texttt{personGroupId} не создается, новый \texttt{personId} не добавляется.
+}
+
+%-----------------------------------------------------
+%US-006
+\newuserstory{Получение всех пользователей из сервиса идентификации}
+
+
+Администратор сервиса может получить список всех добавленных пользователей. 
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ face-management.py --list
+\end{myverbbox}
+\scriptExample{
+
+
+}
+
+% AC-006-01
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups/fintech-01
+" -H "Content-Type: application/json" -H "Ocp-Apim-Subscription-Key: 0000
+00000000000000000000000000000" 
+{"error":{"code":"PersonGroupNotFound","message":"Person group is not fou
+nd.\r\nParameter name: personGroupId"}}
+$ face-management.py --list
+The group does not exist
+\end{myverbbox}
+\acceptanceCriteria{Требуемый \texttt{personGroupId} не существовует в сервисе \textit{Microsoft Face API} ни до, ни после выполнения команды.
+}
+
+% AC-006-02
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups" -H "Conte
+nt-Type: application/json" -H "OcApim-Subscription-Key: 00000000000000000
+0000000000000000" 
+[{"personGroupId":"fintech-01","name":"fintech-01","userData":null}]
+$ face-management.py --list
+Persons IDs:
+27dadf08-bc60-4a29-82a7-7d21ea7f40af
+b8cf9c2f-a606-4f21-851d-26e0a0dc8a74
+bf4806de-8c4b-4a12-8495-002f43dba797
+ff79486f-15ac-43be-9c6c-b2840f8c8d22
+\end{myverbbox}
+\acceptanceCriteria{Требуемый \texttt{personGroupId} существует в \textit{Microsoft Face API}.
+}
+
+% AC-006-03
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups" -H "Conte
+nt-Type: application/json" -H "OcApim-Subscription-Key: 00000000000000000
+0000000000000000" 
+[{"personGroupId":"fintech-01","name":"fintech-01","userData":null}]
+$ face-management.py --list
+No persons found
+\end{myverbbox}
+\acceptanceCriteria{Требуемый \texttt{personGroupId} существует в \textit{Microsoft Face API}, но в ней нет пользователей.
+}
+
+%-----------------------------------------------------
+%US-007
+\newuserstory{Удаление пользователя из сервиса идентификации}
+
+
+Администратор сервиса может удалить пользователя сервиса по его идентификатору. 
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ face-management.py --del <person id>
+\end{myverbbox}
+\scriptExample{
+
+
+}
+
+% AC-007-01
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups/fintech-01
+" -H "Content-Type: application/json" -H "Ocp-Apim-Subscription-Key: 0000
+00000000000000000000000000000" 
+{"error":{"code":"PersonGroupNotFound","message":"Person group is not fou
+nd.\r\nParameter name: personGroupId"}}
+$ face-management.py --del 27dadf08-bc60-4a29-82a7-7d21ea7f40af
+The group does not exist
+\end{myverbbox}
+\acceptanceCriteria{Требуемый \texttt{personGroupId} не существовует в сервисе \textit{Microsoft Face API} ни до, ни после выполнения команды.
+}
+
+% AC-007-02
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups" -H "Conte
+nt-Type: application/json" -H "OcApim-Subscription-Key: 00000000000000000
+0000000000000000" 
+[{"personGroupId":"fintech-01","name":"fintech-01","userData":null}]
+$ face-management.py --del 27dadf08-bc60-4a29-82a7-7d21ea7f40af
+Person deleted
+\end{myverbbox}
+\acceptanceCriteria{Требуемый \texttt{personGroupId} существует в \textit{Microsoft Face API}. Пользователь с заданным ID удаляется из сервиса.
+}
+
+% AC-007-03
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --del bdaf190a-4805-4e2c-95af-1afa8b2623df
+The person does not exist
+\end{myverbbox}
+\acceptanceCriteria{Пользователь с данным ID не существет в требуемой \texttt{personGroupId}.
+}
+
+%-----------------------------------------------------
+%US-008
+\newuserstory{Запуск обучения сервиса индентификации }
+
+
+Администратор сервиса может запустить обучение нейронной сети сервиса \textit{Microsoft Face API} для возможности дальнейшего распознавания человека по лицу.
+
+Обучение должно запускаться только если до этого происходило добавление или удаление нового человека.
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ face-management.py --train
+\end{myverbbox}
+\scriptExample{
+
+
+}
+
+% AC-008-01
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups/fintech-01
+" -H "Content-Type: application/json" -H "Ocp-Apim-Subscription-Key: 0000
+00000000000000000000000000000" 
+{"error":{"code":"PersonGroupNotFound","message":"Person group is not fou
+nd.\r\nParameter name: personGroupId"}}
+$ face-management.py --train
+There is nothing to train
+\end{myverbbox}
+\acceptanceCriteria{Требуемый \texttt{personGroupId} не существовует в сервисе \textit{Microsoft Face API} ни до, ни после выполнения команды. Тренировка сервиса не запускается.
+}
+
+% AC-008-02
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups" -H "Conte
+nt-Type: application/json" -H "OcApim-Subscription-Key: 00000000000000000
+0000000000000000" 
+[{"personGroupId":"fintech-01","name":"fintech-01","userData":null}]
+$ face-management.py --train
+There is nothing to train
+\end{myverbbox}
+\acceptanceCriteria{Требуемый \texttt{personGroupId} существует в \textit{Microsoft Face API}, но в группе нет ни одного добавленного пользователя. Тренировка сервиса не запускается.
+}
+
+% AC-008-03
+\begin{myverbbox}[\small]{\output}
+$ cat faceapi.json | python -mjson.tool | grep groupId
+    "groupId": "fintech-01",
+$ curl -X GET "https://<datacenter url>/face/v1.0/persongroups" -H "Conte
+nt-Type: application/json" -H "OcApim-Subscription-Key: 00000000000000000
+0000000000000000" 
+[{"personGroupId":"fintech-01","name":"fintech-01","userData":null}]
+$ face-management.py --simple-add /path/to/video1.avi
+5 frames extracted
+PersonId: 37da04e7-f471-49c7-a54c-a08f05950fc5
+FaceIds
+=======
+1d499868-3d01-487c-8bab-626dc562e4e8
+27dadf08-bc60-4a29-82a7-7d21ea7f40af
+b8cf9c2f-a606-4f21-851d-26e0a0dc8a74
+bf4806de-8c4b-4a12-8495-002f43dba797
+ff79486f-15ac-43be-9c6c-b2840f8c8d22
+$ face-management.py --train
+Training successfully started
+\end{myverbbox}
+\acceptanceCriteria{Требуемый \texttt{personGroupId} существует в \textit{Microsoft Face API}. Поскольку запуску команды тренировки сервиса предшествует команда добавления пользователя, то обучение запускается.
+}
+
+% AC-008-04
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video1.avi /path/to/video2.avi /path/
+to/video3.avi /path/to/video4.avi /path/to/video6.avi
+18 frames extracted
+PersonId: 5d5d6e92-f8f0-47cf-8e9b-b4455092603e
+FaceIds
+=======
+0e5edd8e-7756-470e-a26c-f54ab70a5524
+73b4caea-c85c-4594-9153-198351937d94
+2ae3c850-190a-4cd0-afd2-8efa341767ba
+adb7744e-b2fb-4a58-b3a8-f22c3143a8cd
+7e0f87d6-14ad-4ec6-971f-e4c2771cc267
+47c8c307-1f90-473c-b48c-792d5b5a1241
+33e35a22-358a-4847-bcdd-4a5bdfd5eb69
+2c7b951b-126a-4eec-9e22-1d9d65ece9e3
+bcaf7f6a-1c44-476e-a51f-9dde2744ade0
+1c9c0134-ada0-47c2-848c-d4424b232f04
+b79945e1-de47-4011-98f2-e7e8f0d9f3ef
+f972b6ac-078b-4e3d-a779-4cde8ea28f36
+fbeb7aa1-f66e-4412-ad07-b61103e8af0b
+9c762e64-075b-4fa4-8e39-0d83df86428b
+9794e349-e4e4-44ad-951c-610b4890b16e
+2e93da04-8f31-4a27-bd9e-5768335447a5
+b9227512-dfa8-4a17-94e2-be520b8975a9
+b67c1f86-2e3d-45a2-a7fb-57bbbff9cd8c
+$ face-management.py --train
+Training successfully started
+\end{myverbbox}
+\acceptanceCriteria{Поскольку запуску команды тренировки сервиса предшествует команда добавления пользователя, то обучение запускается.
+}
+
+% AC-008-05
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --del 27dadf08-bc60-4a29-82a7-7d21ea7f40af
+Person deleted
+$ face-management.py --train
+Training successfully started
+\end{myverbbox}
+\acceptanceCriteria{Поскольку запуску команды тренировки сервиса предшествует команда удаления пользователя, то обучение запускается.
+}
+
+% AC-008-06
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --train
+Training successfully started
+$ face-management.py --del bdaf190a-4805-4e2c-95af-1afa8b2623df
+The person does not exist
+$ face-management.py --train
+Already trained
+\end{myverbbox}
+\acceptanceCriteria{Поскольку после предыдущего запуска команды тренировки сервиса изменений в списке пользователей не происходило, то обучение не запускается.
+}
+
+%-----------------------------------------------------
+%US-009
+\newuserstory{Обнаружение уже добавленного пользователя }
+
+
+Администратор сервиса не сможет добавить пользователя в сервис \textit{Microsoft Face API}, если изображения лица данного пользователя уже были добавлены в систему, и эти изображения были использованы для обучения сервиса.
+
+
+% AC-009-01
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --simple-add /path/to/video1.avi
+5 frames extracted
+PersonId: 37da04e7-f471-49c7-a54c-a08f05950fc5
+FaceIds
+=======
+1d499868-3d01-487c-8bab-626dc562e4e8
+27dadf08-bc60-4a29-82a7-7d21ea7f40af
+b8cf9c2f-a606-4f21-851d-26e0a0dc8a74
+bf4806de-8c4b-4a12-8495-002f43dba797
+ff79486f-15ac-43be-9c6c-b2840f8c8d22
+$ face-management.py --train
+Training successfully started
+$ face-management.py --simple-add /path/to/video21.avi
+The same person already exists.
+\end{myverbbox}
+\acceptanceCriteria{Первое и второе видео содержат кадры лица одного и того же человека. Идентификация человека на втором видео происходит успешно, поскольку пять разных кадров из видео указывают на одного и того же человека с высокой степенью (не менее 50\%) уверенности определения. Добавление пользователя в систему не происходит.
+}
+
+% AC-009-02
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --add /path/to/video1.avi /path/to/video2.avi /path/
+to/video3.avi /path/to/video4.avi /path/to/video6.avi
+18 frames extracted
+PersonId: 5d5d6e92-f8f0-47cf-8e9b-b4455092603e
+FaceIds
+=======
+0e5edd8e-7756-470e-a26c-f54ab70a5524
+73b4caea-c85c-4594-9153-198351937d94
+2ae3c850-190a-4cd0-afd2-8efa341767ba
+adb7744e-b2fb-4a58-b3a8-f22c3143a8cd
+7e0f87d6-14ad-4ec6-971f-e4c2771cc267
+47c8c307-1f90-473c-b48c-792d5b5a1241
+33e35a22-358a-4847-bcdd-4a5bdfd5eb69
+2c7b951b-126a-4eec-9e22-1d9d65ece9e3
+bcaf7f6a-1c44-476e-a51f-9dde2744ade0
+1c9c0134-ada0-47c2-848c-d4424b232f04
+b79945e1-de47-4011-98f2-e7e8f0d9f3ef
+f972b6ac-078b-4e3d-a779-4cde8ea28f36
+fbeb7aa1-f66e-4412-ad07-b61103e8af0b
+9c762e64-075b-4fa4-8e39-0d83df86428b
+9794e349-e4e4-44ad-951c-610b4890b16e
+2e93da04-8f31-4a27-bd9e-5768335447a5
+b9227512-dfa8-4a17-94e2-be520b8975a9
+b67c1f86-2e3d-45a2-a7fb-57bbbff9cd8c
+$ face-management.py --train
+Training successfully started
+$ face-management.py --add /path/to/video1.avi /path/to/video2.avi /path/
+to/video3.avi /path/to/video4.avi /path/to/video6.avi
+The same person already exists.
+\end{myverbbox}
+\acceptanceCriteria{Поскольку для добавления пользователя использовалось одно и то же видео, то повторное добавление пользователя в систему не происходит.
+}
+
+% AC-009-03
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --simple-add /path/to/video1.avi
+5 frames extracted
+PersonId: 37da04e7-f471-49c7-a54c-a08f05950fc5
+FaceIds
+=======
+1d499868-3d01-487c-8bab-626dc562e4e8
+27dadf08-bc60-4a29-82a7-7d21ea7f40af
+b8cf9c2f-a606-4f21-851d-26e0a0dc8a74
+bf4806de-8c4b-4a12-8495-002f43dba797
+ff79486f-15ac-43be-9c6c-b2840f8c8d22
+$ face-management.py --train
+Training successfully started
+$ face-management.py --simple-add /path/to/video22.avi
+5 frames extracted
+PersonId: 31e1fc90-84ff-498a-833c-1730aa00a310
+FaceIds
+=======
+21a12afe-6aab-4593-ac77-d20d2bea7e8b
+e2f4e1d8-ba2d-4c13-80b7-791f10949143
+8c366814-3e8a-441e-86f2-c9edf967c04e
+8510de4b-9a70-4d62-823d-471107f838da
+c159bd2e-2f71-4c0d-8c85-179d76d96953
+\end{myverbbox}
+\acceptanceCriteria{Первое и второе видео содержат кадры лица разных людей. Человек из второго видео не был добавлен до этого в сервис \textit{Microsoft Face API}. Кадры лица человека из второго видео добавляются в сервис.
+}
+
+% AC-009-04
+\begin{myverbbox}[\small]{\output}
+$ face-management.py --simple-add /path/to/video1.avi
+5 frames extracted
+PersonId: 52865cde-3af8-443d-b260-9319c2cb1788
+FaceIds
+=======
+cdb6227e-7453-4057-b4fa-79660914e597
+6976d3c2-dee5-4f24-8950-f38ff10c70ad
+fae15e55-6639-42a4-a954-731c33310e41
+15092567-5765-49ed-ac63-94bc5fa08d17
+a77f1f0a-aa95-4bd1-9826-6b453aec42b2
+$ face-management.py --simple-add /path/to/video31.avi
+5 frames extracted
+PersonId: 9fa0a99b-8e76-474d-8223-dea217c2c19b
+FaceIds
+=======
+b552ef11-a162-4a7d-9047-ccfc84a07043
+90c0815a-ecce-45c6-8107-ced7ef29a249
+fde35dba-505d-4a62-ac5a-c6ae4c89128e
+6c6910b4-0ab5-4eb4-9e53-95b1929f9867
+fdb9d352-65b0-41a2-a1be-03ea5b543160
+$ face-management.py --simple-add /path/to/video41.avi
+5 frames extracted
+PersonId: f290ecb9-bfab-46f7-b623-45140d730628
+FaceIds
+=======
+e5735ecd-ca09-4fd4-bfd3-8ace67702ab0
+9e1bbdee-5981-4f6b-aba5-03be57e5e910
+3120ef58-8d53-4558-8b84-784ba338f621
+8fceb9c7-f029-4326-9703-6749005674fa
+8ea02a3b-7dc0-455a-858c-67251b0ca3b4
+$ face-management.py --train
+Training successfully started
+$ face-management.py --simple-add /path/to/video22.avi
+5 frames extracted
+PersonId: 31e1fc90-84ff-498a-833c-1730aa00a310
+FaceIds
+=======
+21a12afe-6aab-4593-ac77-d20d2bea7e8b
+e2f4e1d8-ba2d-4c13-80b7-791f10949143
+8c366814-3e8a-441e-86f2-c9edf967c04e
+8510de4b-9a70-4d62-823d-471107f838da
+c159bd2e-2f71-4c0d-8c85-179d76d96953
+\end{myverbbox}
+\acceptanceCriteria{Даже если обучение сервиса не происходило возможно добавлять несколько разных пользователей в сервис.
+}

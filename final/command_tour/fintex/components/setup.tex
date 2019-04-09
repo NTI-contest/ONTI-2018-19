@@ -1,0 +1,186 @@
+\subsection*{Настройка сервиса KYC}
+
+
+Развертывание и настройка в блокечейн сети регистра соответствий аккаунтов и телефонных номеров (Know Your Customer, KYC) выполняется компанией производителем программного обеспечения (тем, кто разрабатывает данный сервис). Тоже самое относится к обработчику сертификатов на получение средств. Предполагается, что в потенциальные пользователи сервиса (пользователи, регистрирующие соответствия, владельцы платежных терминалов) могут ознакомиться с опубликованным в открытом доступе исходным кодом контрактов, принять решение на основе этого, доверять ли этому разработчику и начать пользоваться сервисом.
+
+Фиксация контрактов в блокчейн гарантирует, что приозводитель не сможет изменить логику работы приложения позднее, т.е. условия участия в системе, с которыми ознакомились пользователи, не поменяется.
+
+Функционал сервиса KYC должен быть доступен сразу, минуя фазы настройки, когда контракт зарегистрирован в блокчейн, но еще находится в нерабочем состоянии. Поэтому первичная настройка базовых параметров по максимуму должна выполняться вовремя инициализации контракта во время его регистрации (deploy).
+
+\begin{myverbbox}{\scriptFile}
+setup.py <command> [options]
+\end{myverbbox}
+\scriptTitle
+
+
+%-----------------------------------------------------
+%US-001
+\newuserstory{Регистрация контракта}
+
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ setup.py --deploy
+\end{myverbbox}
+\scriptExample{
+Подключается к узлу Ethereum и регистрирует следующие контракты
+\begin{itemize}
+  \item регистр соответствий аккаунтов и телефонных номеров в сети блокчейн. 
+  \item обработчик сертификатов на получение средств.
+\end{itemize}
+
+На терминал выводятся адреса зарегистрованных контрактов. В текущей рабочей директории создается JSON файл \texttt{registrar.json}, содержащий адреса зарегистрированных контрактов.
+
+}
+
+% AC-001-01
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+cat: registrar.json: No such file or directory
+$ setup.py --deploy
+KYC Registrar: 0x00360d2b7D240Ec0643B6D819ba81A09e40E5bCd
+Payment Handler: 0x95426f2bC716022fCF1dEf006dbC4bB81f5B5164
+$ cat registrar.json
+{"registrar": {"address": "0x00360d2b7D240Ec0643B6D819ba81A09e40E5bCd", "
+startBlock": 123456}, "payments": {"address": "0x95426f2bC716022fCF1dEf00
+6dbC4bB81f5B5164", "startBlock": 123457}}
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляются транзакции для регистрации и первичной настройке контрактов. Транзакции успешно включены в один
+или несколько блоков. Для проведения транзакции выбрана цена из значения \texttt{fast}, возвращенного сервисом \texttt{https://gasprice.poa.network}. Контракты по адресу, выведенным в терминале, созданы одной из отправленных транзакций, и могут быть просмотрены с помощью браузера блоков.
+}
+
+% AC-001-02
+\begin{myverbbox}[\small]{\output}
+$ cat registrar.json
+{"registrar": {"address": "0x00360d2b7D240Ec0643B6D819ba81A09e40E5bCd", "
+startBlock": 123456}, "payments": {"address": "0x95426f2bC716022fCF1dEf00
+6dbC4bB81f5B5164", "startBlock": 123457}}
+$ setup.py --deploy
+KYC Registrar: 0x23B40E5bCd06D819ba81A09e0340Ec06460d2b7D
+Payment Handler: 0xE797A1da01eb0F951E0E400f9343De9d17A06bac
+$ cat registrar.json
+{"registrar": {"address": "0x23B40E5bCd06D819ba81A09e0340Ec06460d2b7D", "
+startBlock": 456123}, "payments": {"address": "0xE797A1da01eb0F951E0E400f
+9343De9d17A06bac", "startBlock": 456125}}
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляются транзакции для регистрации и первичной настройке контрактов. Транзакции успешно включены в один
+или несколько блоков. Для проведения транзакции выбрана цена из значения \texttt{defaultGasPrice} из файла \texttt{network.json}.
+}
+
+%-----------------------------------------------------
+%US-002
+\newuserstory{Вывод владельца контракта регистра соответствий}
+
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ setup.py --owner registrar
+\end{myverbbox}
+\scriptExample{
+Подключается к узлу Ethereum и получает адрес аккаунта, имеющего полномочия выполнять действия по подверждению запросов на регистрацию и удалению соответствий аккаунтов и телефонных номеров в сети блокчейн. 
+
+На терминал выводится адрес аккаунта.
+
+}
+
+% AC-002-01
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep privKey 
+    "privKey": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045
+d85a470",
+$ setup.py --deploy
+KYC Registrar: 0x9FdddF5bf10c65221da0a78ADAFec1D8E9EF0A7D
+Payment Handler: 0xD79A8FDB771Ea12359270aD7020bcCB328C9f5f7
+$ setup.py --owner registrar
+Admin account: 0x9cce34F7aB185c7ABA1b7C8140d620B4BDA941d6
+\end{myverbbox}
+\acceptanceCriteria{Транзакции в блокчейн сеть не отправляются.
+}
+
+% AC-002-02
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep privKey 
+    "privKey": "64e604787cbf194841e7b68d7cd28786f6c9a0a3ab9f8b0a0e87cb438
+7ab0107",
+$ cat registrar.json
+{"registrar": {"address": "0x9FdddF5bf10c65221da0a78ADAFec1D8E9EF0A7D", "
+startBlock": 234156}, "payments": {"address": "0xD79A8FDB771Ea12359270aD7
+020bcCB328C9f5f7", "startBlock": 451247}}
+$ setup.py --owner registrar
+Admin account: 0x9cce34F7aB185c7ABA1b7C8140d620B4BDA941d6
+\end{myverbbox}
+\acceptanceCriteria{Транзакции в блокчейн сеть не отправляются.
+}
+
+%-----------------------------------------------------
+%US-003
+\newuserstory{Изменение владельца контракта регистра соответствий}
+
+
+
+\begin{myverbbox}[\small]{\cmdLine}
+$ setup.py --chown registrar <address>
+\end{myverbbox}
+\scriptExample{
+Подключается к узлу Ethereum и отправляет транзакцию на изменение аккаунта, имеющего полномочия выполнять действия по подверждению запросов на регистрацию и удалению соответствий аккаунтов и телефонных номеров в сети блокчейн. Только аккаунт, в текущее время обладающий полномочиями на выполнение вышеуказанных действий, имеет возможность производить данное изменение.
+
+На терминал выводится адрес нового аккаунта.
+
+}
+
+% AC-003-01
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep privKey 
+    "privKey": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045
+d85a470",
+$ setup.py --owner registrar
+Admin account: 0x9cce34F7aB185c7ABA1b7C8140d620B4BDA941d6
+$ setup.py --chown registrar 0x6455f1445c72ba9460c6f6ab364d3935a0ad4559
+New admin account: 0x6455F1445c72BA9460C6f6AB364d3935a0AD4559
+$ setup.py --owner registrar
+Admin account: 0x6455F1445c72BA9460C6f6AB364d3935a0AD4559
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция для изменения аккаунта. Транзакция успешно верифицирована и включена в блок. Для проведения транзакции выбрана цена из значения \texttt{fast}, возвращенного сервисом \texttt{https://gasprice.poa.network}.
+}
+
+% AC-003-02
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep privKey 
+    "privKey": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045
+d85a470",
+$ setup.py --owner registrar
+Admin account: 0x6455F1445c72BA9460C6f6AB364d3935a0AD4559
+$ setup.py --chown registrar 0x11460ff94ca4212d9d02b5bea1766dd099e0a9df
+Request cannot be executed
+$ setup.py --owner registrar
+Admin account: 0x6455F1445c72BA9460C6f6AB364d3935a0AD4559
+\end{myverbbox}
+\acceptanceCriteria{Транзакции в блокчейн сеть не отправляются.
+}
+
+% AC-003-03
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep gasPriceUrl 
+    "gasPriceUrl": "https://gasprice.poa.network/",
+$ curl https://gasprice.poa.network/
+curl: (6) Could not resolve host: gasprice.poa.network
+$ setup.py --chown registrar 0x11460ff94ca4212d9d02b5bea1766dd099e0a9df
+New admin account: 0x11460ff94cA4212d9D02b5bEA1766Dd099E0A9DF
+\end{myverbbox}
+\acceptanceCriteria{В блокчейн сеть отправляется транзакция для изменения аккаунта. Транзакция успешно верифицирована и включена в блок. Для проведения транзакции выбрана цена из значения \texttt{defaultGasPrice} из файла \texttt{network.json}.
+}
+
+% AC-003-04
+\begin{myverbbox}[\small]{\output}
+$ cat network.json | python -mjson.tool | grep privKey 
+    "privKey": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045
+d85a470",
+$ setup.py --owner registrar
+Admin account: 0x9cce34F7aB185c7ABA1b7C8140d620B4BDA941d6
+$ setup.py --chown registrar 0x6455f1445c72ba9460c6f6ab364d3935a0ad4559
+New admin account: 0x6455F1445c72BA9460C6f6AB364d3935a0AD4559
+$ setup.py --owner registrar
+Admin account: 0x6455F1445c72BA9460C6f6AB364d3935a0AD4559
+\end{myverbbox}
+\acceptanceCriteria{Если из транзакции, которая была отправлена в результате команды \texttt{setup.py --chown}, извлечь поле \texttt{input} и отправить его в новой транзакции снова в поле \texttt{input} на адрес контракта регистра соответствий, то эта транзакция будет включена в блок, но статус ее исполнения будет - ошибка, поскольку новый аккаунт, обладающий полномочиями, был изменен транзакцией, посланной командо \texttt{setup.py --chown}. Следовательно, изменение аккаунта с полномочиями выполнять действия по подверждению запросов на регистрацию и удалению соответствий аккаунтов и телефонных номеров не происходит. Статус можно подтвердить для данной транзакции в браузере блоков.
+}
