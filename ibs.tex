@@ -1,0 +1,73 @@
+\documentclass[a4paper,12pt,oneside]{book}
+
+\usepackage{localfmt}
+\usepackage{localshortcuts}
+
+\def\withsolution{1}
+
+\def\withgrading{1}
+
+\begin{document}
+
+\titlePage{Инженерные биологические системы}
+
+\setcounter{tocdepth}{1}
+
+\tableofcontents
+
+\part{Первый этап}
+\clearpage
+
+\input{1st_tour/chemistry/chemistry_assignements.tex}
+\input{1st_tour/biology/biology_assignements.tex}
+
+\part{Второй этап}
+\clearpage 
+\chapter{Задачи по направлению Геномное редактирование}
+
+\input{2nd_tour/genom/genom_assignements.tex}
+
+\chapter{Задачи по направлению Агробиотехнологии. 9 класс}
+\input{2nd_tour/agrobio_9/agrobio_9_assignements.tex}
+
+\chapter{Задачи по направлению Агробиотехнологии. 10-11 класс}
+\input{2nd_tour/agrobio_10_11/agrobio_10_11_assignements.tex}
+
+\part{Заключительный этап}
+
+\clearpage
+\chapter{Предметный тур}
+
+\section{Геномное редактирование. Химия}
+\input{final/subject_tour/chemistry2003_genom_10/chemistry2003_genom_10_assignements.tex}
+
+\section{Геномное редактирование. Биология}
+\input{final/subject_tour/bio2103_genom_10/bio2103_genom_10_assignements.tex}
+
+\section{Агробиотехнологии. Биология. 9 класс}
+\input{final/subject_tour/bio1403_agrobio_9/bio1403_agrobio_9_assignements.tex}
+
+\section{Агробиотехнологии. Биология. 10-11 класс}
+\input{final/subject_tour/bio1403_agrobio_10/bio1403_agrobio_10_assignements.tex}
+
+\section{Агробиотехнологии. Химия. 9 класс}
+\input{final/subject_tour/chemistry1403_nano_9/chemistry1403_nano_9_assignements.tex}
+
+\section{Агробиотехнологии. Химия. 10-11 класс}
+\input{final/subject_tour/chemistry1403_nano_10/chemistry1403_nano_10_assignements.tex}
+
+
+\chapter{Командный тур}
+\section{Геномное редактирование}
+\input{final/command_tour/genom/assignements.tex}
+
+\section{Агробиотехнологии. 9 класс} 
+
+\input{final/command_tour/agrobio_9/assigniments.tex}
+
+\section{Агробиотехнологии. 10-11 класс}
+
+\input{final/command_tour/agrobio_10/assigniments.tex}
+
+
+\end{document}
