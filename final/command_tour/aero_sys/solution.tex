@@ -1,0 +1,171 @@
+\section{Решение}
+
+1.  Запрограммировать предложенный джойстик для управления роверомв режиме ноды ROS:
+
+Пример кода:
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+#define USE_USBCON
+#define __AVR_ATmega168__ 1
+#include "Arduino.h"
+#include "ros.h" 
+#include <joybro/JoyBro.h>
+
+ros::NodeHandle nh;
+joybro::JoyBro joy_msg;
+ros::Publisher chatter("joybro", &joy_msg);
+
+uint16_t left_zero_x,left_zero_y,right_zero_x,
+    right_zero_y;
+
+
+const byte NUMBER_OF_PINS = 15;
+int inputPins[NUMBER_OF_PINS] = {A0, A1, A2, A3,
+    A4, A5, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+void setup()
+{
+    for(int i=0; i < NUMBER_OF_PINS; i++){
+        pinMode(inputPins[i], INPUT);
+    }
+    nh.getHardware()->setBaud(115200);
+    nh.initNode();
+    nh.advertise(chatter);
+    
+    left_zero_x = analogRead(A4);
+    left_zero_y = analogRead(A3);
+
+    right_zero_x = analogRead(9);
+    right_zero_y = analogRead(10);
+    
+}
+
+void loop()
+{
+    joy_msg.left_x = analogRead(A4) - left_zero_x;
+    joy_msg.left_y = analogRead(A3) - left_zero_y;
+    joy_msg.left_btn = digitalRead(A2);
+    
+    joy_msg.right_x = analogRead(9) - right_zero_x;
+    joy_msg.right_y = analogRead(10) - right_zero_y;
+    joy_msg.right_btn = digitalRead(4);
+
+
+    joy_msg.slider1 = analogRead(A5);
+    joy_msg.slider2 = analogRead(8);
+    
+    joy_msg.btn1 = digitalRead(A0);
+    joy_msg.btn2 = digitalRead(A1);
+    joy_msg.btn3 = digitalRead(12);
+    joy_msg.btn4 = digitalRead(11);
+    
+    joy_msg.sw1 = digitalRead(7);
+    joy_msg.sw2 = digitalRead(6);
+    joy_msg.sw3 = digitalRead(5);
+    
+    chatter.publish( &joy_msg );
+    nh.spinOnce();
+    delay(50);
+}
+\end{minted}
+
+2.  Настроить ROS на ровере в соответствии с инструкцией:
+
+Доступы к устройствам\\
+\textbf{wifi}\\
+TurtleBro или TurtleBro5G\\
+пароль спросить\\
+\textbf{brover}\\
+pi@YOUIP или pi@brover1.local\\
+brobro\\
+\textbf{laptop}\\
+space\\
+123
+
+\textit{Подключение к роверу по сети из ROS}
+
+На лаптопе необходимо указать, по какому адресу находится roscore
+
+\textbf{export ROS\_MASTER\_URI=http://192.168.0.250:11311/}
+
+Удобно прописать ROS\_MASTER\_URI в файле .bashrc, для того чтобы каждый раз не делать export
+
+\textit{Дополнительная настройка}
+
+Для некоторых пакетов (например камера) необходимо дополнительно настроить сетевое взаимодействие.
+
+Необходимо проверить что в файлах /etc/hosts на обоих устройтвах указаны сетевые имена и IP. Для лаптопа указан IP вашего ровера\\
+\textbf{127.0.1.1	roslaptop1}\\
+\textbf{192.168.0.250	brover1}\\
+А для ровера указан IP лаптопа\\
+\textbf{127.0.1.1	brover1}\\
+\textbf{192.168.0.250	roslaptop}\\
+Проверим что мы можем получать информацию о топиках\\
+\textbf{rostopic list}\\
+\textbf{rostopic echo odom}
+
+3.  Проверить что корректно спаяны провода и настроен ровер передав команду на движение через консоль лаптопа:\\
+\textbf{rostopic pub /cmd\_vel geometry\_msgs/Twist "linear:}\\
+\textbf{  x: 0.5}\\
+\textbf{  y: 0.0}\\
+\textbf{  z: 0.0}\\
+\textbf{angular:}\\
+\textbf{  x: 0.0}\\
+\textbf{  y: 0.0}\\
+\textbf{  z: 0.5"}
+
+4. Запрограммировать управление полезной нагрузкой на стороне ровера и залить соответствующую прошивку на ардуино-ровера:
+
+Пример:
+
+\begin{minted}[fontsize=\footnotesize, linenos]{cpp}
+#include <Servo.h>
+#include <ros.h>
+#include <joybro/JoyBro.h>
+class NewHardware : public ArduinoHardware
+{
+    public:
+    NewHardware():ArduinoHardware(&Serial1, 115200){};
+};
+ros::NodeHandle_<NewHardware>  nh;
+Servo servo44;
+Servo servo45;
+Servo servo46;
+//joybro::JoyBro joy_msg;
+void messageCb( const joybro::JoyBro& data){
+    servo44.write(int((data.slider1/6)+3));
+    servo45.write(int((data.slider2/6)+3));
+    servo46.write(int(((data.right_y+512)/6)+3));
+}
+ros::Subscriber<joybro::JoyBro> sub("joybro", &messageCb );
+void setup() {
+    nh.initNode();
+    nh.subscribe(sub);
+    
+    //Serial.begin(9600);
+    // put your setup code here, to run once:
+    servo44.attach(44);servo44.write(90);
+    servo45.attach(45);servo45.write(90);
+    servo46.attach(46);servo46.write(90);
+}
+void loop() {
+    // put your main code here, to run repeatedly:
+    nh.spinOnce();
+    //servo_test.write(180);
+    delay(1);
+}
+\end{minted}
+
+5. Спроектировать полезную нагрузку и подключить ее в соответствии с разработанной программой см.4. 
+
+Примеры полезной нагрузки, могущей решить поставленную в задании задачу:
+
+\putImgWOCaption{7cm}{3}
+
+\putImgWOCaption{7cm}{4}
+
+\putImgWOCaption{7cm}{5}
+
+6. Выполнить задание используя правильно сконфигурированный ровер, правильно запрограммированный джойстик и сконструированную командой участников Полезную нагрузку.
+
+Пример выполнения задания: \url{https://youtu.be/eBceLde2ulc}
