@@ -14,47 +14,30 @@
     // состояния для КРАСНОГО
     int YELLOW_PERIOD, YELLOW_ON_PERIOD; // то же для ЖЕЛТОГО
     int GREEN_PERIOD, GREEN_ON_PERIOD;   // то же для ЗЕЛЕНОГО 
+    
+    int cnt_r=0, cnt_y=0, cnt_g=0; // счетчики для светодиодов
+
     void setup()
     {
-        pinMode(PIN_RED,OUTPUT);
-        pinMode(PIN_YELLOW,OUTPUT);
-        pinMode(PIN_GREEN,OUTPUT);
+        pinMode(PIN_RED, OUTPUT); 
+        pinMode(PIN_YELLOW, OUTPUT); 
+        pinMode(PIN_GREEN, OUTPUT);
     }
-    int i = 0;
+
+    void blink_led(int pin, int &cnt, int on_period, int period)
+    {
+        if( !cnt ) //в начале периода ставим HIGH
+            digitalWrite(pin, HIGH); 
+        else if( cnt >= on_period ) //по истечении времени включения - выключаем
+            digitalWrite(pin, LOW);    
+        cnt = (cnt+1) % period;  // циклически увеличиваем счетчик по модулю period
+    }    
+
     void loop()
     {
-        if (i % RED_PERIOD == 0){
-            digitalWrite(PIN_RED, HIGH);
-        }
-        if (i % RED_PERIOD == RED_ON_PERIOD){
-            digitalWrite(PIN_RED, LOW);   
-        }
-        if (i % YELLOW_PERIOD == 0){
-            digitalWrite(PIN_YELLOW, HIGH);
-        }
-        if (i % YELLOW_PERIOD == YELLOW_ON_PERIOD){
-            digitalWrite(PIN_YELLOW, LOW);   
-        }
-        if (i % GREEN_PERIOD == 0){
-            digitalWrite(PIN_GREEN, HIGH);
-        }
-        int t = 0;
-        if (GREEN_ON_PERIOD == 25){
-            t = 12;
-        }
-        if (GREEN_ON_PERIOD == 15){
-            t = 7;
-        }
-        if (GREEN_ON_PERIOD == 150){
-            t = 300; // и больше
-        }
-        if (GREEN_ON_PERIOD == 30){
-            t = 47; // и больше
-        }
-        if (i % GREEN_PERIOD == t){
-            digitalWrite(PIN_GREEN, LOW);   
-        }
-        i++;
+        blink_led(PIN_RED, cnt_r, RED_ON_PERIOD, RED_PERIOD);
+        blink_led(PIN_YELLOW, cnt_y, YELLOW_ON_PERIOD, YELLOW_PERIOD);
+        blink_led(PIN_GREEN, cnt_g, GREEN_ON_PERIOD, GREEN_PERIOD);
         delay(1);
     }
 \end{minted}
