@@ -18,7 +18,8 @@ def cross_find(coords):
 
 
 def lineToSegments(begin, end, segments = 2):
-    # begin, end - массивы с координатами отрезка (начало, конец). начало, как правило - центр
+    # begin, end - массивы с координатами отрезка (начало, конец). 
+    # начало, как правило - центр
     x0 = round((end[0] - begin[0]) / segments)
     y0 = round((end[1] - begin[1]) / segments)
 
@@ -90,11 +91,14 @@ def blur(pic_in): # div, offset):
                     pic_blur[-1].append([])
                     for jj in range(size):
                         if size == 3:
-                            pic_blur[-1][-1].append(pixels_RGB[channel][ii][jj] * blur3[ii][jj])
+                            pic_blur[-1][-1].append(pixels_RGB[channel][ii][jj] 
+                                * blur3[ii][jj])
                         elif size == 5:
-                            pic_blur[-1][-1].append(pixels_RGB[channel][ii][jj] * blur5[ii][jj])
+                            pic_blur[-1][-1].append(pixels_RGB[channel][ii][jj] 
+                                * blur5[ii][jj])
 
-            pixels_RGB_blur = [int(sum([sum(row) for row in ch_blur])) for ch_blur in pic_blur]
+            pixels_RGB_blur = [int(sum([sum(row) for row in ch_blur])) 
+                for ch_blur in pic_blur]
             pic_out[-1].append(rgb2clr(pixels_RGB_blur))
 
     return pic_out
@@ -119,14 +123,17 @@ def rgb2grey(pic_in, mode):
             if mode == 1:               # "V from HSV", V = max(r, g, b)
                 result = max(RGB)
             elif mode == 2:            # через Y ' from Y'UV(средневзвешенное) вариант 1
-                # result = Math.round((0.299 * RGB[0]) + (0.587 * RGB[1]) + (0.114 * RGB[2]))
+                # result = Math.round((0.299 * RGB[0]) + (0.587 * RGB[1]) 
+                # + (0.114 * RGB[2]))
                 result = round((0.2126 * RGB[0]) + (0.7152 * RGB[1]) + (0.0722 * RGB[2]))
             elif mode == 3:  # через Y ' from Y' UV(средневзвешенное) вариант 2
                 clr = pic_in[i][j]
-                # tmp = ((((clr >> 16) & 0xff) * 76) + (((clr >> 8) & 0xff) * 150) + ((clr & 0xff) * 29)) >> 8
+                # tmp = ((((clr >> 16) & 0xff) * 76) + (((clr >> 8) & 0xff) * 150) 
+                # + ((clr & 0xff) * 29)) >> 8
                 tmp = ((((clr >> 16) & 0xff) * 76) + (((clr >> 8) & 0xff) * 150) + ((clr & 0xff) * 29)) >> 8
                 result = tmp << 16 | tmp << 8 | tmp  # r | g | b
-            elif mode == 4:         # Поиск ближайшей точки нейтральной оси: L = (max(R, G, B) + min(R, G, B)) / 2
+            elif mode == 4:         # Поиск ближайшей точки нейтральной оси: 
+                                    # L = (max(R, G, B) + min(R, G, B)) / 2
                 result = round((max(RGB) + min(RGB)) / 2)
             elif mode == 5:         # Среднее арифметическое компонент R, G, B
                 result = round(sum(RGB) / 3)
@@ -145,7 +152,7 @@ def rgb2bw(pic_in, method = 'niblack'):
 
     delta = 0
     dot_side = 3
-    radius = int(dot_side/2)                    # pixels from center 'big dot' to each side
+    radius = int(dot_side/2)     # pixels from center 'big dot' to each side
 
     if method == 'niblack' or method == 'sauvola':
         '''
@@ -276,7 +283,8 @@ def close_corners(corners):
 
 
 def get_corners(pic_in):
-    corners = [(-1, -1)] * 8       # left_up x 2, right_up x2, right_down x2, left_down x2
+    corners = [(-1, -1)] * 8 
+    # left_up x 2, right_up x2, right_down x2, left_down x2
     #pic_h, pic_w = len(pic_in), len(pic_in[0])
 
     out_l = out_r = False
@@ -328,11 +336,11 @@ def get_corners(pic_in):
                 out_d = True
 
     print(corners)
-    if sum(map(len, corners)) == 0:                             # не найдено ни одного угла
+    if sum(map(len, corners)) == 0:                  # не найдено ни одного угла
         return -1
     elif no_corner(corners[0], corners[1]) or no_corner(corners[2], corners[3]) or \
         no_corner(corners[4], corners[5]) or no_corner(corners[6], corners[7]):
-        return -1                                              # нету одного из углов
+        return -1                                    # нету одного из углов
     else:
         return close_corners(corners)
 
@@ -376,7 +384,7 @@ def find_corners2(pic_in, delta = 0):
                 looked.pop()
                 return (prev_yx)
 
-            #print('yx0:',y0, x0, '   yx:', y, x, '   ', y0 == y, x0 == x, '  dYX:',dY, dX)
+            #print('yx0:',y0, x0, '  yx:', y, x, '  ', y0 == y, x0 == x, ' dYX:',dY, dX)
             looked.append((y, x))
             prev_yx = (y0, x0)
             if y0 == y and x0 == x:
@@ -411,7 +419,9 @@ def find_corners2(pic_in, delta = 0):
                 looked.pop()
                 return prev_yx
 
-            #print('yx0:',y0, x0, '   yx:', y, x, '   ', y0 == y, x0 == x, '  dYX:',dY, dX, '  black[y,x]:',pic_in[y][x],' look:', (y,x) in looked)
+            #print('yx0:',y0, x0, '   yx:', y, x, '   ', y0 == y, x0 == x,
+            # '  dYX:',dY, dX, '  black[y,x]:',pic_in[y][x],' look:', 
+            # (y,x) in looked)
 
             looked.append((y, x))
             prev_yx = (y0, x0)
@@ -536,10 +546,10 @@ def decode_artag(abcd):
 
     # четное "1" - бит Ч в "0",    нечетое "1" - бит Ч в "1"
     if bin_num.count('1') % 2 == 0 and parity == 0 or \
-            bin_num.count('1') % 2 != 0 and parity == 1:                # проверка на бит четности
+            bin_num.count('1') % 2 != 0 and parity == 1: # проверка на бит четности
         return int(bin_num, 2)
     else:
-        return -1                                                       # не прошел контроль четности
+        return -1     # не прошел контроль четности
 
 
 def bfs_edges(pic_in):
@@ -600,7 +610,8 @@ def bfs_edges(pic_in):
                     if not i == j == 1:
                         yy = y - 1 + i
                         xx = x - 1 + j
-                        if check_range(yy, xx) and not visited[yy][xx] and pic_in[yy][xx] == 1:     # black pixel
+                        if check_range(yy, xx) and not visited[yy][xx] 
+                            and pic_in[yy][xx] == 1:     # black pixel
                             queue.append((yy, xx))
 
         if (y, x) == start and len(edges) > 1:
@@ -618,7 +629,8 @@ def bfs_edges(pic_in):
             for y, x in edges:
                 dY = abs(max(y0, y) - min(y0, y))
                 dX = abs(max(x0, x) - min(x0, x))
-                if (dY <= 1 and dX <= 1) and (y, x) not in looked and (y, x) not in queue:
+                if (dY <= 1 and dX <= 1) and (y, x) not in looked and (y, x) 
+                    not in queue:
                     queue.append((y, x))
 
     return perimeter
@@ -644,7 +656,8 @@ pics_dec = []
 for picN in range(shots_n):
     pics_dec.append([])
     for row in range(pic_h):
-        line = list(map(lambda h: int(h, 16), data[row + picN * pic_h].strip().split(' ')))
+        line = list(map(lambda h: int(h, 16), 
+            data[row + picN * pic_h].strip().split(' ')))
         pics_dec[picN].append(line)
 
 print ('get file done')
@@ -701,7 +714,7 @@ for i in range(shots_n):
 
 # vertical output
 '''
-spc = '16711680,' * pic_w						# красный цвет
+spc = '16711680,' * pic_w					# красный цвет
 spc = spc[:-1] + '\n'
 with open(fileOut, mode='w') as f:
 for i in pics_dec[0]:

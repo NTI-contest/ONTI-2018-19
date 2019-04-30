@@ -13,7 +13,7 @@
 
 Из описания структура протокола UDP (для IPv4) нам известно, что IP-адреса отправителя и получателя находятся в начале пакета и занимают по 4 байта каждый (таблица \ref{fig:01_Found_intersects_01}).
 
-\begin{table}[h!]
+\begin{table}[H]
 	\begin{center}
 		\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
 			\hline
@@ -32,7 +32,7 @@
 
 Время снятия показаний $t$, координаты $X$ и $Y$ находятся в конце пакета UDP (таблица \ref{table:01_Found_intersects_02}).
 
-\begin{table}[h!]
+\begin{table}[H]
 	\begin{center}
 		\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
 			\hline
@@ -53,7 +53,7 @@
 
 Если же пути пересекались, то выводим пару IP-адресов роботов в десятичном формате в порядке возрастания. В случае, если пересекались несколько пар роботов, то эти пары выводим в порядке первых пересечений траекторий роботов.\\
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\linewidth]{2nd_tour_progr/05_Communication/01_Found_intersects/solution/01_Found_intersects_01.pdf}
 	\caption{Пример не пересекающихся траекторий роботов}
@@ -63,7 +63,7 @@
 В случае с траекториями движения роботов, как на рис. \ref{fig:01_Found_intersects_01} ответ: $-1$
 
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\linewidth]{2nd_tour_progr/05_Communication/01_Found_intersects/solution/01_Found_intersects_02.pdf}
 	\caption{Пример пересекающихся траекторий роботов}

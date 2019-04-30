@@ -9,14 +9,14 @@
 	\item Разрешение снимка камеры по ширине, $width = 15$ пикселей
 \end{itemize}
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/03_Camera/02_find_velocity/solution/02_find_velocity_01.pdf}
 	\caption{Схема установки камеры с исходными данными}
 	\label{fig:02_find_velocity_01}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/03_Camera/02_find_velocity/solution/02_find_velocity_02.pdf}
 	\caption{Пример снимков (1 цв.квадрат = 1 пиксель) с камеры размером 15х15 пикселей}
@@ -25,7 +25,7 @@
 
 Для решения задачи сначала вычисляем перемещения робота через смещения пикселей на снимках (рис. \ref{fig:02_find_velocity_03}). Сравниваем по два смежных снимка: $снимок_{i-1} и снимок_i$. После обработки всех снимков получаем конечное смещение в пикселях.
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/03_Camera/02_find_velocity/solution/02_find_velocity_03.pdf}
 	\caption{Вычисление перемещения робота}
@@ -36,7 +36,7 @@
 
 Для пересчета смещения из пикселей в мм рассмотрим схему на рис. \ref{fig:02_find_velocity_04} и переведем полученные относительные координаты $(x; y)$ в мм.
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\center
 	\includegraphics[width=0.4\linewidth]{2nd_tour/irs/03_Camera/02_find_velocity/solution/02_find_velocity_04.pdf}
 	\caption{}

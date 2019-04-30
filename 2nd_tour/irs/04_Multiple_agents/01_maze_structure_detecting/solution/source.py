@@ -30,13 +30,13 @@ def edit_matrix(m):
             cells[2] = coord2cell(x, y - 1)
 
         robot_obstacle = [False] * 3
-        for b in range(N):                                  # проверяем каждого робота
-            for ss in range(3):                             # на пересечение с каждым дальномером
+        for b in range(N):                         # проверяем каждого робота
+            for ss in range(3):                    # на пересечение с каждым дальномером
                 if coord2cell(robots_moves[b][0], robots_moves[b][1]) == cells[ss]:
                     robot_obstacle[ss] = True
 
         cell = coord2cell(x, y)
-        for s in range(3):                                  # 3 sensors
+        for s in range(3):                          # 3 sensors
             if cells[s] >= K * M or cells[s] < 0:
                 continue
 
@@ -115,9 +115,9 @@ for move in range(N):
         for i in range(3):
             measures[-1][-1].append(int(line[i + 1]))
 
-matrix = [[-1 for j in range(K*M)] for i in range(K*M)]     # пустая матрица смежности
-move_cells = [1 for i in range(N)]                          # подсчет посещенных клеток роботами
-LMooved = [False for i in range(K * M)]			            # просмотренные или посещенные клетки
+matrix = [[-1 for j in range(K*M)] for i in range(K*M)] # пустая матрица смежности
+move_cells = [1 for i in range(N)] # подсчет посещенных клеток роботами
+LMooved = [False for i in range(K * M)]	# просмотренные или посещенные клетки
 
 robots_moves = []
 for i in range(N):

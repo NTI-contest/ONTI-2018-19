@@ -12,7 +12,8 @@ def check(mat1, mat2):  #функция для нахождения смещен
             max_this = 0
             for y in range(pic_h):
                 for x in range(pic_w):
-                    if (y + i) >= 0 and (x + j) >= 0 and (y + i) < pic_h and (x + j) < pic_w:
+                    if (y + i) >= 0 and (x + j) >= 0 and (y + i) < pic_h and 
+                       (x + j) < pic_w:
                         if mat1[y][x] == mat2[y + i][x + j]:
                             max_this += 1
             if max_this > maximum:
@@ -35,11 +36,14 @@ data.pop(0)
 shots = []
 
 for i in range(shots_n):
-    shots.append([])	               			    # очередной кадр
-    shot_raw = data[i].strip().split(' ')		    # кадр в виде одномерного массива пикселей в hex
-    shot_dec = list(map(lambda hx: int(hx,16), shot_raw))   # кадр в виде одномерного массива пикселей в dec
+    shots.append([]) # очередной кадр
+    shot_raw = data[i].strip().split(' ') 
+    # кадр в виде одномерного массива пикселей в hex
+    shot_dec = list(map(lambda hx: int(hx,16), shot_raw)) 
+    # кадр в виде одномерного массива пикселей в dec
     for r in range(0, pic_h * pic_w, pic_w):
-        shots[-1].append(shot_dec[r:r + pic_w])		    # очередная строка пикселей в кадре i
+        shots[-1].append(shot_dec[r:r + pic_w]) 
+        # очередная строка пикселей в кадре i
 
 x, y = 0, 0
 for i in range(1, shots_n):

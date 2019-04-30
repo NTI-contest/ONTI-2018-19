@@ -26,7 +26,7 @@ N, dT = map(int, data[0].strip().split(' '))
 N  - кол-во замеров
 dT - пауза между замерами, мс
 """
-diameter = 20                                           # robots and cylinders, in cm
+diameter = 20                                      # robots and cylinders, in cm
 cylinder_colors = []
 cylinder_dist_by_colors = {}
 
@@ -34,8 +34,8 @@ robot_xy = [[0, 0]]
 alpha, robot_distance = 0, 0
 
 for i in range(N):
-    measures = data[i+1].strip().split(' ')            # v, w, dist_to_cylinder, color
-    measures[:3] = list(map(float, measures[:3]))      # v, w, dist_to_cylinder -> float()
+    measures = data[i+1].strip().split(' ')       # v, w, dist_to_cylinder, color
+    measures[:3] = list(map(float, measures[:3])) # v, w, dist_to_cylinder -> float()
     measures[3] = measures[3].rjust(6, '0')
     v, w, dist_to_cyl, color = measures
 

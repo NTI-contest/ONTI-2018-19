@@ -115,13 +115,15 @@ public:
 			if (motor2w == 0)
 			{
 				double speed = motor1w * radius;
-				Vector sVec(speed * pow(cos(PI / 6), 2), -speed * sin(PI / 6) * cos(PI / 6));
+				Vector sVec(speed * pow(cos(PI / 6), 2), -speed 
+					* sin(PI / 6) * cos(PI / 6));
 				return sVec;
 			}
 			if (motor3w == 0)
 			{
 				double speed = motor1w * radius;
-				Vector sVec(speed * pow(cos(PI / 6), 2), speed * sin(PI / 6) * cos(PI / 6));
+				Vector sVec(speed * pow(cos(PI / 6), 2), speed 
+					* sin(PI / 6) * cos(PI / 6));
 				return sVec;
 			}
 		case 2:

@@ -2,7 +2,7 @@
 
 Рассмотрим движение робота между моментами изменения скоростей. В этот момент линейная и угловая скорости постоянны и мы можем рассматривать движение робота, как показано на рис. \ref{fig:02_beacons_02_01}.
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\includegraphics{2nd_tour/irs/02_Beacons/02_colour_cylinders/solution/02_beacons_02_01.pdf}
 	\caption{Движение между измерениями скоростей}
@@ -33,7 +33,7 @@ y_i = y_0 + l \cdot sin(\alpha)
 \end{eqnarray}
 
 После обработки всех данных получаем путь перемещения робота (рис. \ref{fig:02_beacons_02_02}).
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.5\linewidth]{2nd_tour/irs/02_Beacons/02_colour_cylinders/solution/02_beacons_02_02.pdf}
 	\caption{Рассчитанный путь перемещения робота}
@@ -43,7 +43,7 @@ y_i = y_0 + l \cdot sin(\alpha)
 
 Зная координаты робота и получаемое расстояние от дальномера $(d)$ мы можем рассчитать координаты точек на окружностях цилиндров (с учетом того, что дальномер направлен прямо по ходу движения робота, см. рис. \ref{fig:02_beacons_02_03}) по формулам (\ref{eq:02_beacon_02_05}) и (\ref{eq:02_beacon_02_06}):
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\includegraphics{2nd_tour/irs/02_Beacons/02_colour_cylinders/solution/02_beacons_02_03.pdf}
 	\caption{}
@@ -61,7 +61,7 @@ y'_c = y_{robot} + sin(\alpha) \cdot d
 
 Координаты точек относятся к цилиндрам определенного цвета. Результат показан на рис. \ref{fig:02_beacons_02_04}.
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/02_Beacons/02_colour_cylinders/solution/02_beacons_02_04.pdf}
 	\caption{Наборы точек, распределенные по цветам цилиндров}
@@ -143,7 +143,7 @@ y &= k_{P_1} \cdot x + b_{P_1}
 \end{eqnarray}
 
 Результат расчета центров цилиндров показан на рис. (\ref{fig:02_beacons_02_07}):
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/02_Beacons/02_colour_cylinders/solution/02_beacons_02_07.pdf}
 	\caption{Центры цилиндров}
@@ -152,7 +152,7 @@ y &= k_{P_1} \cdot x + b_{P_1}
 
 Далее проверяем попарно все цилиндры (каждый с каждым) на возможность проезда между ними робота. Для этого мы должны узнать расстояние между краями цилиндров по формуле (\ref{eq:02_beacon_02_19}). Для примера возьмем цилиндры с цветами $800080$ и $0000FF$.
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/02_Beacons/02_colour_cylinders/solution/02_beacons_02_08.pdf}
 	\caption{}

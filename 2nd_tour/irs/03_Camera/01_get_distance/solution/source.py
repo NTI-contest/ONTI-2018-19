@@ -39,7 +39,8 @@ def find_obj2(pic):
                     colors.pop(key)
                 else:
                     # добавляем площадь цвета от общего размера картинки
-                    colors[key].insert(0, len(colors[key]) / (pic_h * pic_w) * 100)
+                    colors[key].insert(0, len(colors[key]) / (pic_h * pic_w) 
+                        * 100)
 
     # выбираем цвет, у которого минимальная дельта к площади из условий (sq)
     # for clr in colors:
@@ -68,7 +69,8 @@ virtual = True
 results = []
 data = sys.stdin.readlines()
 
-cam_h, cam_alpha, cam_beta, pic_h, pic_w, sq = list(map(int, data[0].strip().split(' ')))
+cam_h, cam_alpha, cam_beta, pic_h, pic_w, sq = list(map(int, 
+    data[0].strip().split(' ')))
 data.pop(0)
 
 """
@@ -87,7 +89,7 @@ for row in range(pic_h):
     lineRaw = list(data[row].strip().split(' '))
     picRaw[row] = lineRaw
 
-object_bottom = find_obj2(picRaw)        	# pixels from picture_bottom to object_bottom
+object_bottom = find_obj2(picRaw) # pixels from picture_bottom to object_bottom
 angle = 90 - cam_alpha - cam_beta/2 + (pic_h - object_bottom)/pic_h * cam_beta
 
 result = cam_h * math.tan(math.radians(angle))
