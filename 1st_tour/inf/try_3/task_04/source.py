@@ -12,8 +12,7 @@ def get_next(n, s):
                    ((i), j + 1), \
                    ((i + 1), j - 1), \
                    ((i + 1), j), \
-                   ((i + 1), j + 1)] 
-            
+                   ((i + 1), j + 1)]             
             idx = [x * n + y for (x, y) in idx if x >= 0 and x < n and 
                 y >= 0 and y < n]
             alive = sum([1 for x in idx if s[x] == '*'])
@@ -22,8 +21,7 @@ def get_next(n, s):
             elif s[i * n + j] == '*' and (alive == 2 or alive == 3):
                 new_s += '*'
             else:
-                new_s += 'x'
-                
+                new_s += 'x'               
     return new_s    
 
 dataset = sys.stdin.read()

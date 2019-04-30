@@ -7,6 +7,5 @@ if b > c:
     for x in range(b):
         if (a * x) % b == c:
             d = x
-            break
-        
+            break 
 print(d)
