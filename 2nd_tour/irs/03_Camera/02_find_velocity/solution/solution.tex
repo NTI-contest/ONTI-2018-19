@@ -1,0 +1,77 @@
+\solutionSection
+
+Для примера рассмотрим схему установки камеры (рис. \ref{fig:02_find_velocity_01}), снимки с камеры (рис. \ref{fig:02_find_velocity_02}) и набор данных:
+\begin{itemize}
+	\item Количество замеров камерой, $N = 3$
+	\item Высота установки камеры, $h = 100$ мм
+	\item Угол обзора камеры, $\alpha = 30^\circ$
+	\item Разрешение снимка камеры по высоте, $height = 15$ пикселей
+	\item Разрешение снимка камеры по ширине, $width = 15$ пикселей
+\end{itemize}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/03_Camera/02_find_velocity/solution/02_find_velocity_01.pdf}
+	\caption{Схема установки камеры с исходными данными}
+	\label{fig:02_find_velocity_01}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/03_Camera/02_find_velocity/solution/02_find_velocity_02.pdf}
+	\caption{Пример снимков (1 цв.квадрат = 1 пиксель) с камеры размером 15х15 пикселей}
+	\label{fig:02_find_velocity_02}
+\end{figure}
+
+Для решения задачи сначала вычисляем перемещения робота через смещения пикселей на снимках (рис. \ref{fig:02_find_velocity_03}). Сравниваем по два смежных снимка: $снимок_{i-1} и снимок_i$. После обработки всех снимков получаем конечное смещение в пикселях.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\linewidth]{2nd_tour/irs/03_Camera/02_find_velocity/solution/02_find_velocity_03.pdf}
+	\caption{Вычисление перемещения робота}
+	\label{fig:02_find_velocity_03}
+\end{figure}
+
+\newpage
+
+Для пересчета смещения из пикселей в мм рассмотрим схему на рис. \ref{fig:02_find_velocity_04} и переведем полученные относительные координаты $(x; y)$ в мм.
+
+\begin{figure}[h!]
+	\center
+	\includegraphics[width=0.4\linewidth]{2nd_tour/irs/03_Camera/02_find_velocity/solution/02_find_velocity_04.pdf}
+	\caption{}
+	\label{fig:02_find_velocity_04}
+\end{figure}
+
+
+Вычислим размерность 1 пикселя для ширины и высоты снимка (формулы \ref{eq:02_find_velocity_01} и \ref{eq:02_find_velocity_02}). \\
+
+\begin{equation}
+pixel\_width\_mm = \frac{h \cdot tg(\beta) \cdot 2}{width} \Rightarrow
+\frac{100 \cdot tg(0.2618) \cdot 2}{15} = 3.57 \text{ мм}
+\label{eq:02_find_velocity_01}
+\end{equation}
+
+\begin{equation}
+pixel\_height\_mm = \frac{h \cdot tg(\beta) \cdot 2}{height} \Rightarrow
+\frac{100 \cdot tg(0.2618) \cdot 2}{15} = 3.57 \text{ мм}
+\label{eq:02_find_velocity_02}
+\end{equation}
+
+
+Переводим пиксели в мм:
+\begin{equation*}
+\begin{aligned}
+& x = x \cdot 3.57 = -1 \cdot 3.57 = -3.6 \text{(мм)}\\
+& y = y \cdot 3.57 = -2 \cdot 3.57 = -7.1 \text{(мм)}
+\end{aligned}
+\end{equation*}
+
+\textbf{Ответ: } -3.6 -7.1
+
+
+
+\codeExample
+
+\inputPythonSource
+%\inputCPPSource
