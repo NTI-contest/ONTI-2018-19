@@ -14,8 +14,9 @@ inline ll my_abs(ll x) {
 }
 
 inline ll cost(int i, int j) {
-    return 3 * (r[i] - r[j]) * (r[i] - r[j]) + 2 * my_abs(2 * k[i] - 2 * k[j]) * 
-           my_abs(2 * k[i] + 2 * k[j]) + 5 * my_abs(y[i] - y[j]);
+    return 3 * (r[i] - r[j]) * (r[i] - r[j]) + 
+           2 * my_abs(2 * k[i] - 2 * k[j]) * my_abs(2 * k[i] + 2 * k[j]) +
+           5 * my_abs(y[i] - y[j]);
 }
 
 ll mn[MAXN];

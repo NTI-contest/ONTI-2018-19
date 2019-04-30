@@ -1,4 +1,17 @@
+\solutionSection
+
+Задача сводится к тому, что нужно найти такое минимальное число $k$, что $k \cdot m$ делится на $n$ без остатка.
+
+Получается, что $k \cdot m = lcm(m, n)$ , где lcm -- это наименьшее общее кратное.
+
+Так как $lcm(a, b) \cdot gcd(a, b) = a \cdot b$ , где lcm -- это наименьшее общее кратное, а gcd -- это наибольший общий делитель, получаем:
+
+$lcm(m, n) \cdot gcd(m, n) = m \cdot n \Rightarrow k \cdot m = lcm(m, n) = \frac{m \cdot n}{gcd(m, n)} \Rightarrow k = \frac{n}{gcd(m, n)}$
+
+Таким образом, ответом будет $\frac{n}{gcd(m, n)}$ .
+
 \codeExample
 
 \inputPythonSource
-%\inputminted[fontsize=\footnotesize, linenos]{python}{1st_tour/inf/try_1/task_03/source.py}
+%\inputJavaSource
+%\inputCPPSource
