@@ -20,6 +20,5 @@ for ant in points:
     if 4 * R2_ant <= R * R:
         s += u
     elif R2_ant <= R * R:
-        s += v
-        
+        s += v     
 print(int(s))
