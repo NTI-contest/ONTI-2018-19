@@ -35,8 +35,10 @@ int main()
 
     int time2 = hours * 100 + minutes;
 
-    std::vector<int> before{ time / 1000, (time % 1000) / 100, (time % 100) / 10 , (time % 10) };
-    std::vector<int> after{ time2 / 1000, (time2 % 1000) / 100, (time2 % 100) / 10 , (time2 % 10) };
+    std::vector<int> before{ time / 1000, (time % 1000) / 100, 
+        (time % 100) / 10 , (time % 10) };
+    std::vector<int> after{ time2 / 1000, (time2 % 1000) / 100, 
+        (time2 % 100) / 10 , (time2 % 10) };
 
     int sum = 0;
     for (int i = 0; i < 4; i++)

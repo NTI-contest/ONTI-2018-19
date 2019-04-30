@@ -20,7 +20,8 @@ int main()
         if (command == "END")
             break;
         else if (command == "REP")
-            repeats_count.push_back(atoi(line.substr(4, line.size() - 4).c_str()) * repeats_count.back());
+            repeats_count.push_back(atoi(line.substr(4, line.size() - 4).c_str()) 
+            * repeats_count.back());
         else if (command == "BLB")
         {
             current_block++;
