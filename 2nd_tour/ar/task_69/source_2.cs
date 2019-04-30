@@ -67,7 +67,8 @@ public class GridTransform : MonoBehaviour {
 			 pos_z -= scale_z/2 - (0.5f*tz);
 
 			// Vector3 pos = bottom_left.transform.position;
-			 grid.transform.localPosition = new Vector3(pos_x, pos_y, pos_z);
+			 grid.transform.localPosition = new Vector3(pos_x,
+			  pos_y, pos_z);
 			
 
 		/*
@@ -75,7 +76,8 @@ public class GridTransform : MonoBehaviour {
 		
 		
 
-		grid.transform.localScale = new Vector3(scale_x, scale_y, scale_z);
+		grid.transform.localScale = new Vector3(scale_x, scale_y, 
+		scale_z);
 		//Vector3 rot = top_left.transform.rotation;*/
 	}
 }

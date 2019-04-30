@@ -14,7 +14,8 @@ def color_coords(img):
     gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
     ret,thresh = cv2.threshold(gray,127,255,0)
     #получение контуров
-    im2, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    im2, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,
+    cv2.CHAIN_APPROX_SIMPLE)
     
     centers = []
     clr = ["r","y","g"]

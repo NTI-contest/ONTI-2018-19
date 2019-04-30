@@ -62,18 +62,19 @@ public class GridMaker : MonoBehaviour {
 
 		for (int j = 0; j < height; j++)
 		{
-			genx = 0;
-			for (int i = 0; i < width; i++)
-			{
-					Vector3 pos = new Vector3(genx, genz, geny);
-					GameObject new_cell = Instantiate (cell, pos, cell.transform.rotation);
-					new_cell.name = "cell" + i.ToString() + j.ToString();
-					new_cell.SetActive(true);
-					new_cell.transform.parent = GameObject.Find("Grid").transform;
-					new_cell.transform.localPosition = pos;
-					genx += x_step;
-			}
-			geny += y_step;
+		 genx = 0;
+		 for (int i = 0; i < width; i++)
+		 {
+		  Vector3 pos = new Vector3(genx, genz, geny);
+		  GameObject new_cell = Instantiate (cell, pos,
+			 cell.transform.rotation);
+		  new_cell.name = "cell" + i.ToString() + j.ToString();
+		  new_cell.SetActive(true);
+		  new_cell.transform.parent = GameObject.Find("Grid").transform;
+		  new_cell.transform.localPosition = pos;
+		  genx += x_step;
+		 }
+		 geny += y_step;
 
 		}
 		GridTransform.x_count = width;

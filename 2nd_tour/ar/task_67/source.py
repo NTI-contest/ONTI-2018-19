@@ -14,7 +14,8 @@ def haversine(coord1, coord2):
     lon1, lat1, lon2, lat2 = map(math.radians, [lon1, lat1, lon2, lat2])
     dlon = lon2 - lon1
     dlat = lat2 - lat1
-    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) 
+    * math.cos(lat2) * math.sin(dlon / 2) ** 2
     c = 2 * math.asin(math.sqrt(a))
     dec_m = EARTH_RADIUS * c
     return dec_m
@@ -162,7 +163,8 @@ print(max_points_in_radius)
 # start_points = []
 # start_angle = 0.0
 # while start_angle < 360:
-#     start_points.append(destination_point((104.2805530000, 52.2779920000), 2000, start_angle))
+#     start_points.append(
+#    destination_point((104.2805530000, 52.2779920000), 2000, start_angle))
 #     start_angle += 10
 #
 # print('\n'.join(map(str, map(lambda p: ','.join(map(str, p[::-1])), start_points))))
