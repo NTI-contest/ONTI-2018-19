@@ -54,7 +54,8 @@ public class MazeSpawner : MonoBehaviour
 
       var mazeDescriptionCells = new List<MazeDescriptionCell>();
       var cellsWithCoinIndexes = new List<int>();
-      var mMazeGenerator = new TreeMazeGenerator(MazeDescription.Rows, MazeDescription.Cols);
+      var mMazeGenerator = new TreeMazeGenerator(MazeDescription.Rows,
+      MazeDescription.Cols);
       mMazeGenerator.GenerateMaze();
       for (var row = 0; row < MazeDescription.Rows; ++row) {
          for (var column = 0; column < MazeDescription.Cols; ++column) {
