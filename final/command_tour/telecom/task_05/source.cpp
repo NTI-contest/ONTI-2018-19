@@ -124,7 +124,8 @@ Circle* FindParamCircle(param_find* param){
 
 	Y0 = (-D*B + D1*A)/(B*B - A*A1)/2.0;
 	X0 = (-D*A1 + D1*B)/(A*A1 - B*B)/2.0;
-	R  = sqrt((X2-2.0*X0*X+X0*X0*(double)(N)+Y2-2.0*Y0*Y+Y0*Y0*(double)(N))/(double)(N));
+	R = sqrt((X2-2.0*X0*X+X0*X0*(double)(N)+Y2-2.0*Y0*Y+
+		Y0*Y0*(double)(N))/(double)(N));
 
 	CKO = 0.0;
 	for(int i = 0; i<N; i++){
@@ -165,7 +166,9 @@ int CountOne(int i, int j, param_find *param){
 		param->XY2 += x*y*y;
 		param->pntX.push_back(j);
 		param->pntY.push_back(i);
-		return 1 + CountOne(i,j-1,param) + CountOne(i-1,j-1,param) + CountOne(i-1,j,param) + CountOne(i-1,j+1,param)
-				 + CountOne(i,j+1,param) + CountOne(i+1,j+1,param) + CountOne(i+1,j,param) + CountOne(i+1,j-1,param); 
+		return 1 + CountOne(i,j-1,param) + CountOne(i-1,j-1,param) 
+			+ CountOne(i-1,j,param) + CountOne(i-1,j+1,param) 
+			+ CountOne(i,j+1,param) + CountOne(i+1,j+1,param) 
+			+ CountOne(i+1,j,param) + CountOne(i+1,j-1,param); 
 	}
 }

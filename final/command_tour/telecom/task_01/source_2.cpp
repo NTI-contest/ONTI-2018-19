@@ -6,8 +6,7 @@
 //Инициализация массивов
 void GearsSignal::InitArray()
 {
-    TP =
-        (double *)calloc(ngear, sizeof(double));     //Период сигнала для каждой шестерни
+    TP =(double *)calloc(ngear, sizeof(double));    //Период сигнала для каждой шестерни
     direction = (char *)calloc(ngear, sizeof(char)); //Направление вращения
     DT = (double *)calloc(ngear, sizeof(double));    //Сдвиг повремени
     Amp = (double *)calloc(ngear, sizeof(double));   //Амплитуда кор-функции
