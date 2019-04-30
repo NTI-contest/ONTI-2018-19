@@ -1,5 +1,6 @@
 function sign(num) { return num >= 0 ? 1 : -1}
-function motors(mL, mR){ mR = mR || mL; brick.motor('M4').setPower(mL); brick.motor('M3').setPower(mR) }
+function motors(mL, mR){ mR = mR || mL; brick.motor('M4').setPower(mL); 
+	brick.motor('M3').setPower(mR) }
 
 function move(cm, turn){
 	var L = (cm / (Math.PI * robot.D)) * robot.cpr
@@ -84,9 +85,12 @@ while (true){
 		break
 }
 motors(0)
-
-// test
-a = 1
+
+
+// test
+
+a = 1
+
 
 out = '(' + robot.x + ',' + robot.y + ')'
 brick.display().addLabel(out, 1, 1)

@@ -47,7 +47,8 @@ def is_group_up_to_date():
 
 def check_same_person(face_id):
     try:
-        response = cf.face.identify([face_id], person_group_id=GROUP_ID, threshold=CONFIDENCE_THRESHOLD)
+        response = cf.face.identify([face_id], person_group_id=GROUP_ID, 
+            threshold=CONFIDENCE_THRESHOLD)
         candidates = response[0]['candidates']
 
         return len(candidates) != 0
@@ -59,7 +60,8 @@ def identify_person_id(faces_ids):
     if not is_group_up_to_date():
         print_error('The service is not ready')
 
-    responses = cf.face.identify(faces_ids, person_group_id=GROUP_ID, threshold=CONFIDENCE_THRESHOLD)
+    responses = cf.face.identify(faces_ids, person_group_id=GROUP_ID, 
+        threshold=CONFIDENCE_THRESHOLD)
     person_id = ''
     for response in responses:
         candidates = response['candidates']
@@ -74,7 +76,8 @@ def identify_person_id_old(image):
     if len(response) != 1:
         print_error('There should be exactly 1 person on image')
     face_id = response[0]['faceId']
-    response = cf.face.identify([face_id], person_group_id=GROUP_ID, threshold=CONFIDENCE_THRESHOLD)
+    response = cf.face.identify([face_id], person_group_id=GROUP_ID, 
+        threshold=CONFIDENCE_THRESHOLD)
     candidates = response[0]['candidates']
 
     print(candidates)
@@ -120,7 +123,8 @@ def delete_person(person_id):
 
 
 def add_face(image, person_id):
-    return cf.person.add_face(FileLike(image_to_jpeg(image)), GROUP_ID, person_id)['persistedFaceId']
+    return cf.person.add_face(FileLike(image_to_jpeg(image)), 
+        GROUP_ID, person_id)['persistedFaceId']
 
 
 def update_person_data(person_id, name, address):
@@ -187,13 +191,16 @@ except requests.exceptions.RequestException:
 REGISTRAR_ADDRESS = get('registrar.registrar.address')
 CERTIFICATES_ADDRESS = get('registrar.payments.address')
 
-compiled_registrar = check_output(["solc", "--optimize", "--bin", "--abi", "./Registrar.sol"]).decode()
+compiled_registrar = check_output(["solc", "--optimize", "--bin", "--abi", 
+    "./Registrar.sol"]).decode()
 compiled_registrar_abi = re.findall("ABI \\n(.*?)\\n", compiled_registrar)[0]
 compiled_registrar_bytecode = re.findall("Binary: \\n(.*?)\\n", compiled_registrar)[0]
 
-compiled_certificates = check_output(["solc", "--optimize", "--bin", "--abi", "Certificates.sol"]).decode()
+compiled_certificates = check_output(["solc", "--optimize", "--bin", "--abi", 
+    "Certificates.sol"]).decode()
 compiled_certificates_abi = re.findall("ABI \\n(.*?)\\n", compiled_certificates)[0]
-compiled_certificates_bytecode = re.findall("Binary: \\n(.*?)\\n", compiled_certificates)[0]
+compiled_certificates_bytecode = re.findall("Binary: \\n(.*?)\\n", 
+    compiled_certificates)[0]
 
 registrar = web3.eth.contract(address=REGISTRAR_ADDRESS,
                               abi=compiled_registrar_abi)
@@ -225,7 +232,8 @@ def private_key_to_address(private_key):
     return web3.toChecksumAddress(privtoaddr(private_key).hex())
 
 
-def build_and_send_tx(private_key, to='', data='', value=0, nonce=None, gas_estimation=True, message=None):
+def build_and_send_tx(private_key, to='', data='', value=0, nonce=None, 
+    gas_estimation=True, message=None):
     address = private_key_to_address(private_key)
     if nonce is None:
         nonce = web3.eth.getTransactionCount(address)
@@ -279,7 +287,8 @@ def deploy_contract(contract_name, nonce):
 
     tx_receipt = build_and_send_tx(PRIVATE_KEY, data=bytecode, nonce=nonce)
 
-    return {"address": tx_receipt['contractAddress'], "startBlock": tx_receipt['blockNumber']}
+    return {"address": tx_receipt['contractAddress'], 
+        "startBlock": tx_receipt['blockNumber']}
 
 
 def get_owner():
@@ -313,7 +322,8 @@ def change_owner(new_owner):
         print_error('Request cannot be executed')
 
     build_and_send_tx(PRIVATE_KEY, REGISTRAR_ADDRESS,
-                      web3.keccak(text='transferOwnership(address)')[:4] + encode_int(new_owner[2:], 16))
+        web3.keccak(text='transferOwnership(address)')[:4] 
+        + encode_int(new_owner[2:], 16))
 
 
 def get_request_type(address):
@@ -323,7 +333,7 @@ def get_request_type(address):
 def register_request(user_private_key, phone_number):
     try:
         tx_receipt = build_and_send_tx(user_private_key, REGISTRAR_ADDRESS,
-                                       web3.keccak(text='registerRequest(uint256)')[:4] + encode_int(phone_number))
+            web3.keccak(text='registerRequest(uint256)')[:4] + encode_int(phone_number))
 
         return tx_receipt['transactionHash'].hex()
     except ValueError as err:
@@ -340,7 +350,8 @@ def register_request(user_private_key, phone_number):
 def delete_request(user_private_key):
     request_type = get_request_type(private_key_to_address(user_private_key))
     try:
-        tx_receipt = build_and_send_tx(user_private_key, REGISTRAR_ADDRESS, web3.keccak(text='deleteRequest()')[:4])
+        tx_receipt = build_and_send_tx(user_private_key, REGISTRAR_ADDRESS,     
+        web3.keccak(text='deleteRequest()')[:4])
 
         return tx_receipt['transactionHash'].hex()
     except ValueError as err:
@@ -356,7 +367,8 @@ def delete_request(user_private_key):
 def cancel_request(user_private_key):
     request_type = get_request_type(private_key_to_address(user_private_key))
     try:
-        tx_receipt = build_and_send_tx(user_private_key, REGISTRAR_ADDRESS, web3.keccak(text='cancelRequest()')[:4])
+        tx_receipt = build_and_send_tx(user_private_key, REGISTRAR_ADDRESS, 
+            web3.keccak(text='cancelRequest()')[:4])
 
         return request_type, tx_receipt['transactionHash'].hex()
     except ValueError as err:
@@ -374,9 +386,8 @@ def confirm(address):
     try:
 
         tx_receipt = build_and_send_tx(PRIVATE_KEY,
-                                       REGISTRAR_ADDRESS,
-                                       web3.keccak(text='confirm(address)')[:4] + encode_int(address[2:], 16),
-                                       gas_estimation=False)
+            REGISTRAR_ADDRESS, web3.keccak(text='confirm(address)')[:4] 
+            + encode_int(address[2:], 16), gas_estimation=False)
 
         return tx_receipt['status'], tx_receipt['transactionHash'].hex()
     except ValueError as err:
@@ -387,8 +398,8 @@ def confirm(address):
 def create_approval(user_private_key, value, time_to_expire):
     try:
         tx_receipt = build_and_send_tx(user_private_key, CERTIFICATES_ADDRESS,
-                                       web3.keccak(text='approve(uint256)')[:4] + encode_int(time_to_expire),
-                                       value)
+                                       web3.keccak(text='approve(uint256)')[:4] 
+                                       + encode_int(time_to_expire), value)
 
         id_hex = tx_receipt['logs'][0]['topics'][1]
 
@@ -427,7 +438,7 @@ def send_transaction(user_private_key, to, value):
         if addr is None:
             print_error('No account with the phone number +%s' % to)
         tx_receipt = build_and_send_tx(user_private_key, to=addr, value=value,
-                                       message='Payment of %s to +%s scheduled' % (normalize_value(value), to))
+            message='Payment of %s to +%s scheduled' % (normalize_value(value), to))
         return tx_receipt['transactionHash'].hex()
     except ValueError as err:
         if err.args[0]['code'] == -32010:
@@ -473,7 +484,8 @@ def phone_to_address(phone):
 
 
 def address_to_phone(address, block='latest'):
-    phone = registrar.functions.db_rev(web3.toChecksumAddress(address)).call(block_identifier=block)
+    phone = 
+        registrar.functions.db_rev(web3.toChecksumAddress(address)).call(block_identifier=block)
 
     if phone == 0:
         return 'UNKNOWN'
@@ -492,7 +504,8 @@ def check_address(address):
 
 def get_tx_list(address):
     return requests.get(
-        'https://blockscout.com/poa/sokol/api?module=account&action=txlist&address=%s&startblock=%s' % (
+        'https://blockscout.com/poa/sokol/api?module=account&action=txlist&address=%s\
+        &startblock=%s' % (
             address, get('registrar.registrar.startBlock'))
     ).json()['result']
 \end{minted}
@@ -516,7 +529,8 @@ def check_name(name):
 
 
 def check_phone_number(phone_number):
-    if len(phone_number) != 12 or not phone_number[1:].isdecimal() or phone_number[0] != '+':
+    if len(phone_number) != 12 or not phone_number[1:].isdecimal() 
+        or phone_number[0] != '+':
         print_error('Incorrect phone number')
     return phone_number[1:]
 
@@ -811,8 +825,9 @@ import dlib
 
 from output_util import print_error
 
-PREDICTOR_PATH = '/opt/shape_predictor_68_face_landmarks.dat' if os.path.exists(
-    '/opt/shape_predictor_68_face_landmarks.dat') else './shape_predictor_68_face_landmarks.dat'
+PREDICTOR_PATH = '/opt/shape_predictor_68_face_landmarks.dat' 
+    if os.path.exists('/opt/shape_predictor_68_face_landmarks.dat') 
+    else './shape_predictor_68_face_landmarks.dat'
 EYE_THRESHOLD = 0.22
 MOUTH_THRESHOLD = 0.3
 
@@ -937,12 +952,16 @@ class FaceConditions:
 from argparse import ArgumentParser
 from datetime import datetime
 
-from blockchain import register_request, delete_request, cancel_request, get_balance, \
-    private_key_to_address, send_transaction, create_approval, use_approval, cancel_approvals, pin_code_to_private_key, \
-    normalize_value, check_registrar, check_certificates, get_tx_list, address_to_phone
+from blockchain import register_request, delete_request, \ 
+    cancel_request, get_balance, private_key_to_address, \
+    send_transaction, create_approval, use_approval, \
+    cancel_approvals, pin_code_to_private_key, \
+    normalize_value, check_registrar, check_certificates, \
+    get_tx_list, address_to_phone
 from config import get, set, clear
 from output_util import print_error
-from validators import PINPhoneValidate, TransactValidate, ApproveValidate, PINTicketValidate
+from validators import PINPhoneValidate, TransactValidate, ApproveValidate, \ 
+    PINTicketValidate
 from video_detector import simple_identify, identify
 
 parser = ArgumentParser(prog='Faceid service')
@@ -1125,12 +1144,14 @@ if args.ops:
                 from_phone = address_to_phone(tx['from'], int(tx['blockNumber']))
                 if from_phone != 'UNKNOWN':
                     print('%s FROM: %s %s' % (
-                    date.strftime('%H:%M:%S %d.%m.%Y'), from_phone, normalize_value(int(tx['value']), 'ether')))
+                    date.strftime('%H:%M:%S %d.%m.%Y'), from_phone, 
+                        normalize_value(int(tx['value']), 'ether')))
             else:
                 to_phone = address_to_phone(tx['to'], int(tx['blockNumber']))
                 if to_phone != 'UNKNOWN':
                     print('%s   TO: %s %s' % (
-                    date.strftime('%H:%M:%S %d.%m.%Y'), to_phone, normalize_value(int(tx['value']), 'ether')))
+                    date.strftime('%H:%M:%S %d.%m.%Y'), to_phone, 
+                        normalize_value(int(tx['value']), 'ether')))
 \end{minted}
 
 \textit{\textbf{./face-management.py}}
@@ -1139,9 +1160,11 @@ from argparse import ArgumentParser
 from threading import Thread
 from time import sleep
 
-from api import list_people_ids, delete_person, train, create_person, add_face, create_group_if_not_exists
+from api import list_people_ids, delete_person, train, create_person, \ 
+    add_face, create_group_if_not_exists
 from output_util import print_error
-from video_detector import detect_all, detect_middle_faces, detect_roll_faces, detect_yaw_faces, \
+from video_detector import detect_all, detect_middle_faces, \
+    detect_roll_faces, detect_yaw_faces, \
     detect_open_mouth_faces, detect_open_eyes_faces
 
 parser = ArgumentParser(prog='Faces management')
@@ -1321,7 +1344,8 @@ if args.train:
 \begin{minted}[fontsize=\footnotesize]{python}
 from argparse import ArgumentParser
 
-from blockchain import get_reg_requests, get_del_requests, confirm, phone_to_address, check_address, check_registrar
+from blockchain import get_reg_requests, get_del_requests, \
+     confirm, phone_to_address, check_address, check_registrar
 from checkers import check_phone_number
 from output_util import print_error
 
@@ -1411,8 +1435,8 @@ from config import set
 parser = ArgumentParser(prog='Setup')
 
 parser.add_argument('--deploy',
-                    action='store_true',
-                    help='Deploys registrar and certificates contracts to the blockchain')
+                action='store_true',
+                help='Deploys registrar and certificates contracts to the blockchain')
 parser.add_argument('--owner',
                     nargs=1,
                     metavar='CONTRACT',
@@ -1501,7 +1525,8 @@ class TransactValidate(Action):
 class ApproveValidate(Action):
     def __call__(self, parser, args, values, option_string=None):
         pin_code, value, date_to_expire = values
-        res = [pin_code_to_private_key(pin_code), int(value), check_date(date_to_expire)]
+        res = [pin_code_to_private_key(pin_code), int(value), 
+            check_date(date_to_expire)]
         setattr(args, self.dest, res)
 \end{minted}
 
@@ -1559,8 +1584,10 @@ def detect_by_conditions(video, conditions, face_api=True):
             frame = imutils.resize(frame, width=WIDTH)
 
             face_api_response = detect(frame) if face_api else 0
-            if face_api_response is not None and conditions[cur].check_face(frame, face_api_response):
-                if face_api_response != 0 and check_same_person(face_api_response['faceId']):
+            if face_api_response is not None 
+                and conditions[cur].check_face(frame, face_api_response):
+                if face_api_response != 0 and 
+                    check_same_person(face_api_response['faceId']):
                     print_error('The same person already exists')
 
                 faces_images.append(frame)
@@ -1697,7 +1724,8 @@ def identify(video, actions):
 
             face_api_response = detect(frame)
 
-            if face_api_response is not None and actions[cur].check(frame, face_api_response):
+            if face_api_response is not None 
+                and actions[cur].check(frame, face_api_response):
                 faces_ids += [face_api_response['faceId']]
 
                 cur += 1

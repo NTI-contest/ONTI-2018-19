@@ -78,8 +78,10 @@ for i in range(w8):
     for j in range(h8):
         ans = (0, 0)
         for q in range(nbins):
-            ans = (ans[0] + blocks2[i][j][q] * math.cos(angle_per_bin * q + angle_shift),
-                   ans[1] + blocks2[i][j][q] * math.sin(angle_per_bin * q + angle_shift))
+            ans = (ans[0] + blocks2[i][j][q] * math.cos(angle_per_bin * q 
+            + angle_shift),
+                   ans[1] + blocks2[i][j][q] * math.sin(angle_per_bin * q 
+                   + angle_shift))
 
         if math.fabs(ans[0]) - math.fabs(ans[1]) > 0:
             ver += 1

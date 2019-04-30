@@ -4,10 +4,12 @@ psm = ips.init()
 def average_weather(type, turn):
     if type == 'sun':
         q = psm.sun[turn].forecast
-        return (0.25 * (q.lower0 * 0.5 + q.lower50 + q.median + q.upper50 + q.upper0 * 0.5))
+        return (0.25 * (q.lower0 * 0.5 + q.lower50 + q.median + q.upper50 
+            + q.upper0 * 0.5))
     else:
         q = psm.wind[turn].forecast
-        return (0.25 * (q.lower0 * 0.5 + q.lower50 + q.median + q.upper50 + q.upper0 * 0.5))
+        return (0.25 * (q.lower0 * 0.5 + q.lower50 + q.median + q.upper50 
+            + q.upper0 * 0.5))
 
 main_station = list(psm.stations.keys())
 buffer = ips.buffer()

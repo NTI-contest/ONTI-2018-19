@@ -79,7 +79,8 @@ function angle() {
 var mtimer = script.timer(50);
 mtimer.timeout.connect(angle);
 
-//поворот на угол по гироскопу _angle - относительный угол на который необходимо повернуться
+//поворот на угол по гироскопу _angle - относительный угол на который 
+//необходимо повернуться
 function turnDirection(_angle, _v) {
   _angle = azimut + _angle;
   azimut = _angle;
@@ -88,7 +89,7 @@ function turnDirection(_angle, _v) {
   eLeft.reset();
   eRight.reset();
 
-  var _vel = _v == undefined & 40: _v; // скорость по умолчанию
+  var _vel = _v == undefined ? 40: _v; // скорость по умолчанию
   var angleOfRotate = _angle - direction;
   var sgn = angleOfRotate == 0 ? 0 : angleOfRotate / Math.abs(angleOfRotate);
   mLeft(-_vel * sgn);
@@ -98,7 +99,7 @@ function turnDirection(_angle, _v) {
   target = 211;
 
   while (Math.abs(eRight.read() - eLeft.read()) / 2 < target) {
-    if ((eLeft.read() - eLeftOld) == 0) && (eRight.read() - eRightOld == 0) {
+    if ((eLeft.read() - eLeftOld) == 0 && (eRight.read() - eRightOld == 0)) {
       _vel += 5;
       mLeft(-_vel * sgn);
       mRight(_vel * sgn);
