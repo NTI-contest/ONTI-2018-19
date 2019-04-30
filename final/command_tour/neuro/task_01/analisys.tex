@@ -202,8 +202,9 @@
     # соответствующие состоянию со сниженным уровнем внимания отметим
     # красным. Как видно, в таки моменты мы наблюдаем наиболее низкую ЧСС.
 
-    hr = pd.DataFrame({'hr': [getHR(ecg[i*15*hz:(i+1)*15*hz]) for i in range(len(ecg)//(15*hz))],
-                    'target': [tar for tar in traindf.target.values[::15*hz]]})
+    hr = pd.DataFrame({'hr': [getHR(ecg[i*15*hz:(i+1)*15*hz]) 
+        for i in range(len(ecg)//(15*hz))],
+            'target': [tar for tar in traindf.target.values[::15*hz]]})
     plt.figure(figsize=(15,10))
     plt.plot(hr.hr[hr.target==1])
     plt.plot(hr.hr[hr.target==0], 'r')
