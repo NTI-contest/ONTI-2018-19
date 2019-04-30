@@ -175,9 +175,12 @@ void loop() {
       ky = 19.614/(muyp - muym); by = (muyp + muym)/2.0;
       kz = 19.614/(muzp - muzm); bz = (muzp + muzm)/2.0;
 
-      Serial.print("acc bias X = " + String(bx,6) + "\t" + "acc scale X = "+ String(kx,6) + "\n");
-      Serial.print("acc bias Y = " + String(by,6) + "\t" + "acc scale Y = "+ String(ky,6) + "\n");
-      Serial.print("acc bias Z = " + String(bz,6) + "\t" + "acc scale Z = "+ String(kz,6) + "\n");
+      Serial.print("acc bias X = " + String(bx,6) + "\t" 
+        + "acc scale X = "+ String(kx,6) + "\n");
+      Serial.print("acc bias Y = " + String(by,6) + "\t" 
+        + "acc scale Y = "+ String(ky,6) + "\n");
+      Serial.print("acc bias Z = " + String(bz,6) + "\t" 
+        + "acc scale Z = "+ String(kz,6) + "\n");
       
       IMU.setAccelCalX(bx, kx);
       IMU.setAccelCalY(by, ky);
