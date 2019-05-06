@@ -1,0 +1,93 @@
+\documentclass[a4paper,12pt,oneside]{book}
+
+\usepackage{localfmt}
+\usepackage{localshortcuts}
+
+\def\withsolution{1}
+
+\def\withgrading{1}
+
+\begin{document}
+
+\begin{titlepage}
+    \vspace*{\stretch{1.0}}
+    \begin{center}
+        \huge{МАТЕРИАЛЫ ЗАДАНИЙ} \\
+        \Large{командной инженерной олимпиады школьников} \\
+        \Large{<<Олимпиада Национальной технологической инициативы>>} \\
+        \large{2018/2019 учебный год} \\
+        \large{Том 1} \\
+        \vspace{14cm}
+        \Large{2019 год}  
+    \end{center}
+    \vspace*{\stretch{2.0}}
+  \end{titlepage}
+\setcounter{tocdepth}{1}
+
+\tableofcontents
+
+\part{Аэрокосмические системы}
+\clearpage
+\chapter{Задачи второго этапа}
+\input{2nd_tour/aero_sys/aero_sys_assignements.tex}
+\input{2nd_tour/course_3D/3D_assignements.tex}
+\input{2nd_tour/course_electro/electro_assignements.tex}
+\clearpage
+\chapter{Командная задача заключительного этапа}
+\input{final/command_tour/aero_sys/assignements.tex}
+
+\part{Автономные транспортные системы}
+\clearpage
+\chapter{Задачи второго этапа}
+\input{2nd_tour/ats/ats_assignements.tex}
+\clearpage
+\chapter{Командная задача заключительного этапа}
+\input{final/command_tour/ats/assignements.tex}
+
+\part{Беспилотные авиационные системы}
+\clearpage 
+\chapter{Задачи второго этапа}
+\section{Задачи}
+\input{2nd_tour/bas/bas_assignements.tex}
+\clearpage
+\chapter{Командная задача заключительного этапа}
+\section{Задачи}
+\input{final/command_tour/bas/assignements.tex}
+
+\part{Интеллектуальные робототехнические системы}
+\clearpage
+\chapter{Задачи второго этапа}
+\section{Задачи}
+\input{2nd_tour/irs/content.tex}
+\clearpage
+\chapter{Командная задача заключительного этапа}
+\subimport{final/command_tour/irs/}{content.tex}
+
+\part{Передовые производственные технологии}
+\clearpage
+\chapter{Задачи второго этапа}
+\input{2nd_tour/ppt/ppt_assignements.tex}
+\clearpage
+\chapter{Командная задача заключительного этапа}
+\input{final/command_tour/ppt/assignements.tex}
+
+\part{Умный город}
+\clearpage
+\chapter{Задачи второго этапа}
+\input{2nd_tour/smart_city/smart_city_assignements.tex}
+\clearpage
+\chapter{Командная задача заключительного этапа}
+\section{Задачи}
+\input{final/command_tour/smart_city/assignements.tex}
+
+\part{Водные робототехнические системы}
+\clearpage
+\chapter{Задачи второго этапа}
+\section{Задачи}
+\input{2nd_tour/vrs/vrs_assignements.tex}
+\clearpage
+\chapter{Командная задача заключительного этапа}
+\section{Задачи}
+\input{final/command_tour/vrs/assignements.tex}
+
+\end{document}
