@@ -1,0 +1,486 @@
+
+@import url("https://fonts.googleapis.com/css?family=Roboto+Condensed:700");
+@import url("https://fonts.googleapis.com/css?family=Roboto:400,450,500");
+@import url('https://fonts.googleapis.com/css?family=Arsenal:400,700|Open+Sans:400,600');
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  line-height: 1.667;
+  font-family: 'Arsenal', 'sans-serif';
+}
+
+a {
+  color: rgb(38, 8, 12);
+  -webkit-transition: all .35s;
+  transition: all .35s;
+}
+
+a:hover,
+a:focus {
+  color: rgb(231, 150, 102);
+}
+
+h2 {
+  font-family: 'Arsenal', 'sans-serif';
+  font-size: 5.5vh;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: rgb(36, 8, 12);
+}
+
+h3 {
+  font-family: 'Arsenal', 'sans-serif';
+  font-size: 3.5vh;
+  font-weight: 600;
+  color: rgb(36, 8, 12);
+}
+
+h4 {
+  font-family: 'Arsenal', 'sans-serif';
+  font-size: 3vh;
+  font-weight: 600;
+  color: rgb(36, 8, 12);
+}
+
+h5,
+h6 {
+  font-family: 'Catamaran', 'Helvetica', 'Arial', 'sans-serif';
+  font-weight: 200;
+  letter-spacing: 1px;
+}
+
+p {
+  font-family: 'Arsenal', 'sans-serif';
+  line-height: 1.5;
+  margin-bottom: 20px;
+  color: #674C47;
+  font-size: 2.5vh;
+}
+
+iframe {
+  overflow: hidden;
+  position: relative;
+}
+
+i {
+  color: rgb(36, 8, 12);
+}
+
+section {
+  padding: 5.7rem 0;
+}
+
+section p {
+  text-align: justify;
+}
+
+section .section-heading h1 {
+  text-align: center;
+  font-size: 10vh;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 575.98px) {
+  section .section-heading h1 {
+    font-size: 3.5vh;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  section .section-heading h1 {
+    font-size: 5.5vh;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  section .section-heading h1 {
+    font-size: 7vh;
+  }
+}
+
+@media (max-width: 575.98px) {
+
+  section p {
+    font-size: 1.8vh;
+  }
+
+  section.download img{
+    padding-top: 60px;
+  }
+
+  section h2{
+    font-size: 3vh;
+  }
+  section.registration {
+    margin:0!important;
+  }
+}
+
+section.registration {
+  padding: 10rem 0;
+  background-image: url('../img/bg12.svg') !important;
+  background-size: cover;
+}
+
+section.registration li {
+  color: rgb(32, 8, 12);
+  font-weight: 450;
+  font-size: 18px;
+}
+
+section.registration label {
+  font-size: 2.5vh;
+  text-transform: uppercase;
+  font-family: "Arsenal", 'sans-serif';
+  font-weight: 600;
+  color: rgb(32, 8, 12);
+}
+
+section.registration input {
+  border-radius: 300px;
+  font-family: "Open Sans", 'sans-serif';
+  color: #674C47!important;
+}
+
+section .download {
+  background-image: url('../img/bg23.svg') !important;
+  background-size: cover;
+}
+
+section .contact {
+  background-image: url('../img/bg23.svg') !important;
+  background-size: cover;
+}
+
+form {
+  padding-right: 30px;
+  padding-left: 30px;
+}
+
+footer {
+  padding: 25px 0;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(203, 185, 169, .1);
+}
+
+footer p {
+  font-size: 14px;
+  margin: 0;
+}
+
+
+
+section .infrastructure {
+  background-image: url('../img/bg5.svg') !important;
+  background-size: cover;
+}
+
+
+
+
+.headline {
+  font-weight: 700;
+  font-size: 20px !important;
+  color: #26080c !important;
+}
+
+
+
+.service-icon {
+  background-color: #fff;
+  height: 7rem;
+  width: 7rem;
+  display: block;
+  line-height: 7.5rem;
+  font-size: 2rem;
+}
+
+
+.testimonial__item {
+  background-color: rgba(203, 185, 169, .1);
+  border-radius: 30px;
+  padding: 30px;
+}
+
+.testimonial .owl-dots .owl-dot span {
+  width: 20px;
+  height: 4px;
+  background: #cdcad5;
+  border-radius: 5px;
+  margin: 5px 8px;
+}
+
+.testimonial .owl-dots .owl-dot.active span {
+  height: 6px;
+  background: rgb(36, 8, 12);
+}
+
+#mainNav {
+  background-color: white;
+  -webkit-transition: all .35s;
+  transition: all .35s;
+  font-family: "Arsenal", 'sans-serif';
+  font-weight: 600;
+  padding-bottom: 25px;
+}
+
+#mainNav .navbar-brand {
+  color: rgb(32, 8, 12);
+  font-family: "Arsenal", 'sans-serif';
+  font-weight: 600;
+}
+
+#mainNav i {
+  color: rgb(36,8,12)!important; 
+  font-weight: 600;
+  font-size: 20px!important;
+}
+
+#mainNav .navbar-brand:hover,
+#mainNav .navbar-brand:focus {
+  color: #fcbd20;
+}
+
+#mainNav .navbar-toggler {
+  font-size: 12px;
+  padding: 8px 10px;
+  color: #222222;
+}
+
+#mainNav .navbar-nav>li>a {
+  font-size: 16px;
+  font-family: "Arsenal", 'sans-serif';
+  color: rgb(36, 8, 12) !important;
+}
+
+#mainNav .navbar-nav>li>a.active {
+  color: rgb(231, 150, 102) !important;
+  background-color: transparent;
+}
+
+#mainNav .navbar-nav>li>a.active:hover {
+  background-color: transparent;
+}
+#mainNav .navbar-nav>li>a>btn{
+ font-size: 16px;font-weight: 700;
+}
+#mainNav .navbar-nav>li>a,
+#mainNav .navbar-nav>li>a:focus {
+  color: #222222;
+}
+
+#mainNav .navbar-nav>li>a:hover,
+#mainNav .navbar-nav>li>a:focus:hover {
+  color: #fdcc52;
+}
+
+@media (min-width: 992px) {
+  #mainNav {
+    border-color: transparent;
+    background-color: transparent;
+  }
+  #mainNav .navbar-brand {
+    color: fade(white, 70%);
+  }
+  #mainNav .navbar-brand:hover,
+  #mainNav .navbar-brand:focus {
+    color: #fdcc52;
+  }
+  #mainNav .navbar-nav>li>a,
+  #mainNav .navbar-nav>li>a:focus {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  #mainNav .navbar-nav>li>a:hover,
+  #mainNav .navbar-nav>li>a:focus:hover {
+    color: white;
+  }
+  #mainNav.navbar-shrink {
+    border-color: rgba(34, 34, 34, 0.1);
+    background-color: white;
+  }
+  #mainNav.navbar-shrink .navbar-brand {
+    color: #222222;
+  }
+  #mainNav.navbar-shrink .navbar-brand:hover,
+  #mainNav.navbar-shrink .navbar-brand:focus {
+    color: #fdcc52;
+  }
+  #mainNav.navbar-shrink .navbar-nav>li>a,
+  #mainNav.navbar-shrink .navbar-nav>li>a:focus {
+    color: #222222;
+  }
+  #mainNav.navbar-shrink .navbar-nav>li>a:hover,
+  #mainNav.navbar-shrink .navbar-nav>li>a:focus:hover {
+    color: #fdcc52;
+  }
+}
+
+header.masthead {
+  font-family: 'Arsenal', 'sans-serif';
+  background-image: url('../img/bgrnd.svg');
+  background-size: cover;
+  width: 100%;
+  padding-top: 130px;
+  padding-bottom: 100px;
+}
+
+header.masthead .btn {
+  font-size: 2vh!important;
+  color: rgb(36, 8, 12);
+  font-weight: 700;
+}
+
+header.masthead .header-content h1 {
+  font-family: 'Arsenal', 'sans-serif';
+  font-size: 5.5vh;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: rgb(36, 8, 12);
+}
+
+header.masthead .header-content p {
+  font-size: 2vh;
+  font-weight: 350;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 575.98px) {
+  header.masthead {
+    padding-top: 60px;
+  }
+  header.masthead .header-content h1 {
+    font-size: 4.9vh;
+    text-align: center!important;
+  }
+  header.masthead .header-content {
+    text-align: center!important;
+  }
+  header.masthead .header-content p {
+    margin-right: 10px;
+    margin-left: 10px;
+  }
+  header.masthead .btn {
+    text-align: center;
+    margin-bottom: 25px;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+  }
+  header.masthead img {
+    width: 80%!important;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  header.masthead img {
+    width: 80%!important;
+    margin-left: 100px;
+  }
+   section h2{
+    font-size: 3.5vh;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 990.98px) {
+  header.masthead img {
+    width: 100%!important;
+  }
+   section h2{
+    font-size: 4vh;
+  }
+}
+
+.bg-primary {
+  background: #fdcc52;
+  background: -webkit-gradient(linear, left top, left bottom, from(#fdcc52), to(#fdc539));
+  background: linear-gradient(#fdcc52, #fdc539);
+}
+
+.btn-outline {
+  background-color: #fdcc52;
+  border-color: #fdcc52;
+  color: white;
+  border: 1px solid;
+  border-color: white;
+  font-weight: 500;
+}
+
+.btn-outline:hover,
+.btn-outline:focus,
+.btn-outline:active,
+.btn-outline.active {
+  background-color: rgb(231, 150, 102);
+  border-color: rgb(231, 150, 102);
+}
+
+.btn {
+  border-radius: 300px;
+  font-family: 'Arsenal', 'sans-serif';
+  /*font-family: 'Lato', 'Helvetica', 'Arial', 'sans-serif';*/
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.btn-xl {
+  font-size: 11px;
+  padding: 10px 35px;
+}
+
+.palace-card {
+  position: relative;
+  margin-bottom: 30px;
+  background-color: rgba(203, 185, 169, .1);
+}
+
+.palace-card .palace-card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  padding: 40px;
+  opacity: 0;
+  z-index: -1;
+}
+
+.palace-card .palace-card-overlay h4 {
+  font-family: 'Arsenal', 'sans-serif';
+  text-transform: uppercase;
+  font-weight: 600;
+  color: rgb(36, 8, 12);
+}
+
+.palace-card .palace-card-overlay p {
+  font-size: 2vh;
+}
+
+.palace-card:hover .palace-card-overlay {
+  width: 100%;
+  opacity: 1;
+  z-index: 1;
+}
+
+.palace-card:hover {
+  background-color: rgba(203, 185, 169, .0);
+}
+
+@media (min-width: 1200px) {
+  .palace-card:hover .palace-card-overlay {
+    width: 74%;
+  }
+}
+
+.palace-content {
+  padding: 8px 20px 25px 15px;
+}
+
+.palace-content h2 {
+  margin-bottom: 15px;
+}
+
+img .logo{
+  width: 110%; height: 110%;
+}

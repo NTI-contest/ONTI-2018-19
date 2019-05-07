@@ -1,6 +1,6 @@
 {
-	"width":12, 
-	"height":12,
+	"width": 12,
+	"height": 12,
 	"all_points": {
 		"Sherbinina": {
 			"x": 2,
@@ -9,6 +9,79 @@
 				"latitude": 52.287527,
 				"longitude": 104.291251
 			}
+		},
+		"merchant house": {
+			"x": 1,
+			"y": 7,
+			"coords": {
+				"latitude": 52.284283,
+				"longitude": 104.287344
+			}
+		},
+		"clinics": {
+			"x": 4,
+			"y": 6,
+			"coords": {
+				"latitude": 52.283765,
+				"longitude": 104.279034
+			}
+		},
+		"museum": {
+			"x": 1,
+			"y": 8,
+			"coords": {
+				"latitude": 52.275748,
+				"longitude": 104.278163
+			}
+		},
+		"manor": {
+			"x": 3,
+			"y": 3,
+			"coords": {
+				"latitude": 52.284905,
+				"longitude": 104.296066
+			}
+		},
+		"philharmonic": {
+			"x": 4,
+			"y": 8,
+			"coords": {
+				"latitude": 52.277985,
+				"longitude": 104.285367
+			}
+		},
+		"Feinberg house": {
+			"x": 1,
+			"y": 3,
+			"coords": {
+				"latitude": 52.289020,
+				"longitude": 104.286580
+			},
+			"delay_time": 10
+		},
+		"Gogol school": {
+			"x": 5,
+			"y": 8,
+			"coords": {
+				"latitude": 52.286112,
+				"longitude": 104.284532
+			}
+		},
+		"palace of Children": {
+			"x": 2,
+			"y": 6,
+			"coords": {
+				"latitude": 52.287770,
+				"longitude": 104.284846
+			}
+		},
+		"drama school": {
+			"x": 1,
+			"y": 7,
+			"coords": {
+				"latitude": 52.280564,
+				"longitude": 104.295456
+			}
 		}
-    }
+	}
 }
