@@ -13,8 +13,10 @@ try {
 }
 
 function insert_row_groups($pdo, $name, $phone, $group_number){
-    $sth = $pdo->prepare("INSERT INTO `groups` (`id`, `name`, `phone`, `group_id`, `timestamp`)
-                                       VALUES (NULL, :name, :phone, :group_number, CURRENT_TIMESTAMP)");
+    $sth = $pdo->prepare("INSERT INTO `groups` 
+        (`id`, `name`, `phone`, `group_id`, `timestamp`)
+        VALUES (NULL, :name, :phone, :group_number, 
+        CURRENT_TIMESTAMP)");
 
 
     $sth->bindParam(':name', $name, PDO::PARAM_STR, 255);
