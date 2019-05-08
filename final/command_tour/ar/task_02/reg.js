@@ -24,7 +24,9 @@ Query(document).ready(function($) {
                   }
                   else{
                   form.fadeOut(500, function() {
-                      $("#number").html('<h3>Поздравляем! <br>Вы успешно зарегистрированы на экскурсию!</h3> <h3 class="mt-4">Код вашей команды: ' + result +'</h3> ');
+                      $("#number").html('<h3>Поздравляем! <br>Вы успешно \
+                      зарегистрированы на экскурсию!</h3> <h3 class="mt-4">\
+                      Код вашей команды: ' + result +'</h3> ');
                       form.find('.form-control').val(' ');
   
                   });
