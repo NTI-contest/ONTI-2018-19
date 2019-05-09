@@ -99,7 +99,8 @@ public class TreeMazeGenerator
       }
 
       //check move backward
-      if (ctv.Row > 0 && ctv.Row - 1 >= 0 && !GetMazeCell(ctv.Row - 1, ctv.Column).IsVisited && 
+      if (ctv.Row > 0 && ctv.Row - 1 >= 0 && 
+        !GetMazeCell(ctv.Row - 1, ctv.Column).IsVisited && 
         !IsCellInList(ctv.Row - 1, ctv.Column)) {
         movesAvailable[movesAvailableCount] = Direction.Back;
         ++movesAvailableCount;
