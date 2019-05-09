@@ -1,0 +1,225 @@
+\subsection*{Вариант решения задач командного тура}
+
+Подробное решение представлено в репозитории: \url{https://github.com/dvfu/NTI-2019---Project}
+
+Для обзора файлов и поиска конкретных модулей может быть использована следующая таблица:
+
+\begin{longtable}{|p{8cm}|p{6cm}|}
+    \hline
+    Файл&Назначение \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials}&каталог с материалами \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials.meta}&метаданные материалов \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs}&каталог с шаблонами объектов \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs.meta}&метаданные шаблонов объектов \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts}&каталог со скриптами \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts.meta}&метаданные скриптов \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\arrow_assembly_machine.png}&изображение сборочного узла \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\arrow_assembly_machine.png.meta}&метаданные изображения сборочного узла \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\arrow_conveyor.png}&изображение конвейера \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\arrow_conveyor.png.meta}&метаданные изображения конвейера \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\Black.mat}&чёрный материал \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\Black.mat.meta}&метаданные чёрного материала \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\BlueMaterial.mat}&синий материал \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\BlueMaterial.mat.meta}&метаданные синего материала \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\FloorMaterial.mat}&материал пола \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\FloorMaterial.mat.meta}&метаданные материала пола \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\GreenMaterial.mat}&зелёный материал \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\GreenMaterial.mat.meta}&метаданные зелёного материала \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\Materials}&вторичный каталог с материалами \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\Materials.meta}&метаданные вторичного каталога \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\Purple.mat}&пурпурный материал \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\Purple.mat.meta}&метаданные пурпурного материала \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\RedMaterial.mat}&красный материал \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\RedMaterial.mat.meta}&метаданные красного материала \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\YellowMaterial.mat}&жёлтый материал \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\YellowMaterial.mat.meta}&метаданные жёлтого материала \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\Materials\arrow.mat}&материал конвейера \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\Materials\arrow.mat.meta}&метаданные материала конвейера \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\Materials\arrow_assembly_machine.mat}&материал сборочного узла \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\Materials\arrow_assembly_machine.mat.meta}&метаданные материала сборочного узла \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\Materials\arrow_conveyor.mat}&материал конвейера \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Materials\Materials\arrow_conveyor.mat.meta}&метаданные материала конвейера \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\AssemblyMachine.prefab}&шаблон сборочного узла \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\AssemblyMachine.prefab.meta}&метаданные шаблона сборочного узла \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Conveyor.prefab}&шаблон конфейера \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Conveyor.prefab.meta}&метаданные шаблона конвейера \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources}&каталог ресурсов \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources.meta}&метаданные каталога ресурсов \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\SnapDropZone.prefab}&шаблон зоны привязки \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\SnapDropZone.prefab.meta}&метаданные шаблона зоны привязки \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Sources}&каталог исходного кода \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Sources.meta}&метаданные каталога исходного кода \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Stock.prefab}&каталог склада \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Stock.prefab.meta}&метаданные каталога склада \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource1.prefab}&шаблон ресурса типа 1 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource1.prefab.meta}&метаданные ресурса типа 1 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource10.prefab}&шаблон ресурса типа 10 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource10.prefab.meta}&метаданные ресурса типа 10 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource11.prefab}&шаблон ресурса типа 11 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource11.prefab.meta}&метаданные ресурса типа 11 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource12.prefab}&шаблон ресурса типа 12 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource12.prefab.meta}&метаданные ресурса типа 12 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource13.prefab}&шаблон ресурса типа 13 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource13.prefab.meta}&метаданные ресурса типа 13 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource14.prefab}&шаблон ресурса типа 14 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource14.prefab.meta}&метаданные ресурса типа 14 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource2.prefab}&шаблон ресурса типа 2 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource2.prefab.meta}&метаданные ресурса типа 2 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource3.prefab}&шаблон ресурса типа 3 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource3.prefab.meta}&метаданные ресурса типа 3 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource4.prefab}&шаблон ресурса типа 4 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource4.prefab.meta}&метаданные ресурса типа 4 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource5.prefab}&шаблон ресурса типа 5 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource5.prefab.meta}&метаданные ресурса типа 5 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource6.prefab}&шаблон ресурса типа 6 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource6.prefab.meta}&метаданные ресурса типа 6 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource7.prefab}&шаблон ресурса типа 7 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource7.prefab.meta}&метаданные ресурса типа 7 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource8.prefab}&шаблон ресурса типа 8 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource8.prefab.meta}&метаданные ресурса типа 8 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource9.prefab}&шаблон ресурса типа 9 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Resources\Resource9.prefab.meta}&метаданные ресурса типа 9 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Sources\ResourceSource1.prefab}&шаблон источника ресурса типа 1 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Sources\ResourceSource1.prefab.meta}&метаданные шаблона источника ресурса типа 1 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Sources\ResourceSource2.prefab}&шаблон источника ресурса типа 2 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Sources\ResourceSource2.prefab.meta}&метаданные шаблона источника ресурса типа 2 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Sources\ResourceSource3.prefab}&шаблон источника ресурса типа 3 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Sources\ResourceSource3.prefab.meta}&метаданные шаблона источника ресурса типа 3 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Sources\ResourceSource4.prefab}&шаблон источника ресурса типа 4 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Prefabs\Sources\ResourceSource4.prefab.meta}&метаданные шаблона источника ресурса типа 4 \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\AbstractConveyorController.cs}&код абстрактного контроллера конвейера \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\AbstractConveyorController.cs.meta}&метаданные кода абстрактного контроллера конвейера \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\AssemblyMachineController.cs}&код абстрактного контроллера сборочного узла \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\AssemblyMachineController.cs.meta}&метаданные кода абстрактного контроллера сборочного узла \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\ConveyorController.cs}&код контроллера конвейера \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\ConveyorController.cs.meta}&метаданные кода контроллера конвейера \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\FileHandler.cs}&код обработки файлов \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\FileHandler.cs.meta}&метаданные кода обработки файлов \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\GameState.cs}&код состояния игры \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\GameState.cs.meta}&метаданные кода состояния игры \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\MenuController.cs}&код контроллера меню \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\MenuController.cs.meta}&метаданные кода контроллера меню \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\PinController.cs}&код контроллера привязки \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\PinController.cs.meta}&метаданные кода контроллера привязки \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\ResourceController.cs}&код контроллера ресурсов \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\ResourceController.cs.meta}&метаданные кода контроллера ресурсов \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\ResourceSourceController.cs}&код контроллера источников \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\ResourceSourceController.cs.meta}&метаданные кода контроллера источников \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\ResourceSourcePositionController.cs}&код контролера позиции источников \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\ResourceSourcePositionController.cs.meta}&метаданные кода контролера позиции источников  \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\StockController.cs}&код контроллера складов \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\StockController.cs.meta}&метаданные кода контроллера складов \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\Utils.cs}&вспомогательный код \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\Utils.cs.meta}&метаданные вспомогательного кода \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\WorldController.cs}&код контроллера мира \\
+    \hline
+    \url{NTI-2019---Project\Assets\Resources\Scripts\WorldController.cs.meta}&метаданные кода контроллера мира \\
+    \hline
+
+
+\end{longtable}
