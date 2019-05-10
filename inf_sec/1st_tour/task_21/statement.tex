@@ -1,0 +1,72 @@
+\assignementTitle{Cobra}{1000}{}
+
+В диких условиях продолжительность жизни кобр составляет в среднем 20 лет. Но у тебя есть всего 5 дней, чтобы решить эту задачу.
+
+Файл из задания доступен по ссылке: \url{https://cyberchallenge.rt.ru/files/8a4e2531ce3c70165d58ec763b9be177/cobra.py}
+
+\solutionSection
+
+Исходный файл – скрипт на языке Python. Все, что он делает, это загружает и исполняет некий объект из base64-строки. Таким образом, чтобы понять, как получить флаг, нужно заглянут внутрь этого объекта.
+
+Сначала нужно понять, где в этом объекте код. Сделать это можно немного модифицировав исходный скрипт:
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+s = '<строка из исходного файла>'
+code = marshal.loads(base64.b64decode(s))
+for item in code.co_consts: 
+    print('%s: %r' % (type(item), item))
+\end{minted}
+
+Результат работы скрипта следующий:\\
+<type 'int'>: -1\\
+<type 'tuple'>: ('AES',)\\
+<type 'NoneType'>: None\\
+<type 'code'>: <code object check at 0000000005B0E830, file "<string>", line 6>\\
+<type 'code'>: <code object generate\_flag at 0000000005B71330, file "<string>", line 13>\\
+<type 'str'>: 'enter serial: '
+
+Видим, что в объекте есть 2 объекта с кодом – функции check и generate\_flag. Чтобы посмотреть их код, удобно воспользоваться библиотекой uncompyle6. Дополним наш модифицированный скрипт следующими строками:
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+uncompyle6.main.decompile(2.7, code.co_consts[3], sys.stdout)
+uncompyle6.main.decompile(2.7, code.co_consts[4], sys.stdout)
+\end{minted}
+
+Результат:
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+# uncompyle6 version 3.3.1
+# Python bytecode 2.7
+# Decompiled from: Python 2.7.16 (v2.7.16:413a49145e, Mar  4 2019, 01:37:19) [MSC v.1500 64 bit (AMD64)]
+# Embedded file name: <string>
+expressions = [
+ '1790 + 1543', '1234 * 3', '9999 - 1337', '2048 // 2', '3 ** 8']
+for index, value in enumerate(serial.split('-')):
+    if eval(expressions[index]) != int(value):
+        return False
+
+return True
+
+# uncompyle6 version 3.3.1
+# Python bytecode 2.7
+# Decompiled from: Python 2.7.16 (v2.7.16:413a49145e, Mar  4 2019, 01:37:19) [MSC v.1500 64 bit (AMD64)]
+# Embedded file name: <string>
+cipher = AES.new(serial, AES.MODE_ECB)
+decoded = cipher.decrypt(base64.b64decode('0P8pV0G6WlqUxuuKNk+y4N5PTfamGAln9gDhXDxi5rM='))
+return decoded.strip()
+\end{minted}
+
+Проанализировав эти 2 функции, несложно понять, что флаг можно получить, расшифровав base64-строку из функции generate\_flag. В качестве ключа для AES выступает строка, содержащая числа, полученные в результате вычисления арифметических выражений из списка expressions, объединенные через символ «-». Скрипт, расшифровывающий флаг, выглядит так:
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+from Crypto.Cipher import AES
+import base64
+
+expressions = ['1790 + 1543', '1234 * 3', '9999 - 1337', '2048 // 2', '3 ** 8']
+serial = '-'.join([str(eval(x)) for x in expressions])
+
+cipher = AES.new(serial, AES.MODE_ECB)
+decoded = cipher.decrypt(base64.b64decode('0P8pV0G6WlqUxuuKNk+y4N5PTfamGAln9gDhXDxi5rM='))
+print(decoded.strip())
+\end{minted}
+
+\answerMath{CC\{1\_60774\_5uch\_4\_l0n6\_5n4k3\}.}

@@ -1,0 +1,55 @@
+\assignementTitle{Crackme}{1000}{}
+
+Говорят, что, если решить этот crackme, использовав в качестве имени cyberchallenge, ваш интеллект вырастет на 20 единиц.
+
+Формат флага: СС\{serial\_number\}.
+
+Файл из задания доступен по ссылке: \url{
+https://cyberchallenge.rt.ru/files/ef852562955917ad9c459135a717e391/crackme-mac.app.zip}
+
+\solutionSection
+
+Исходный файл – ZIP-архив, содержащий приложение для операционной системы macOS. После запуска приложения появляется диалоговое окно с предложением ввести имя пользователя и серийный номер. Имя пользователя указано в описании. Остается понять, как формируется серийный номер.
+
+Проверка серийного номера осуществляется в функции +[Utils checkName:serial:]. Алгоритм довольно прост и может легко быть переписан на Python:
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+import binascii
+
+def xor(val, key):
+    tmp = list(val)
+    for i in range(len(val)):
+        tmp[i] = ord(tmp[i]) ^ (key & 0xFF)
+    return bytearray(tmp)
+
+username = "cyberchallenge"
+randval = ??????
+
+round_key = randval & 0xFF
+part1 = binascii.crc32(xor(username, round_key))
+
+round_key = (randval >> 8) & 0xFF
+part2 = binascii.crc32(xor(username, round_key))
+
+round_key = (randval >> 16) & 0xFF
+part3 = binascii.crc32(xor(username, round_key))
+
+round_key = (randval >> 24) & 0xFF
+part4 = binascii.crc32(xor(username, round_key))
+
+print("The flag is: CC{%X-%X-%X-%X}" % (part1, part2, part3, part4))
+\end{minted}
+
+Проблема кроется в ключе для шифра xor (randval), т. к. это значение, которое возвращает системная функция rand, и оно, на первый взгляд, должно быть случайным числом.
+
+\putImgWOCaption{8cm}{1st_tour/task_25/1}
+
+После запуска приложения, система автоматически вызовет в том числе 2 его функции: -[AppDelegate awakeFromNib] и -[AppDelegate applicationDidFinishLaunching:]. В нашем случае, в awakeFromNib с помощью однобайтового xor’а расшифровывается строчка «\_rand», а адрес этой функции сохраняется в глобальной переменной. В applicationDidFinishLaunching, используя технику mach\_override (\url{https://github.com/rentzsch/mach_override}), системная функция rand подменяется на реализованную в программе функцию ud\_set\_reg.
+
+\putImgWOCaption{10cm}{1st_tour/task_25/2}
+
+Основная задача этой небольшой функции – вернуть верное значение ключа для шифра xor только, если процесс не находится под отладкой. Делается это при помощи проверки флага P\_TRACED в структуре текущего процесса, полученного через вызов функции sysctl.
+
+Таким образом, верным ключом для шифрования xor будет значение 0x8821018D. Подставив его в уже написанный скрипт, получим флаг.
+
+\answerMath{CC\{E5E9BB3-93B88C75-7890F648-6C651E87\}.}

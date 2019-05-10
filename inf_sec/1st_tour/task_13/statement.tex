@@ -1,0 +1,23 @@
+\assignementTitle{Octocat}{1000}{}
+
+Ссылка на сервис: \url{http://octocat.2018.cyberchallenge.ru}.
+
+\solutionSection
+
+Из названия сервиса можно догадаться, что речь идет о системе контроля версий git. Проверить, доступна ли она для скачивания, можно попробовав скачать конфигурационный файл. Воспользуемся для этого утилитой httpie (\url{https://httpie.org}).
+
+\putImgWOCaption{14cm}{1st_tour/task_13/1}
+
+Видно, что конфигурационные файлы действительно присутствуют. Скачать и восстановить всю директорию можно с помочью утилиты \url{https://github.com/internetwache/GitTools}.
+
+\putImgWOCaption{14cm}{1st_tour/task_13/2}
+
+В директории octocat нет никаких файлов, но можно посмотреть историю обновлений:
+
+\putImgWOCaption{14cm}{1st_tour/task_13/3}
+
+В последнем изменении были удалены какие-то важные данные. Чтобы их посмотреть, нужно воспользоваться командой git show.
+
+\putImgWOCaption{14cm}{1st_tour/task_13/4}
+
+\answerMath{CC\{CseK6Eo762c\_octocat\_is\_fuuuuuuuun\}.}

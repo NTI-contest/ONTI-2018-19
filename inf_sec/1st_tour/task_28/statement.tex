@@ -1,0 +1,19 @@
+\assignementTitle{Some Tricky File}{1000}{}
+
+На конверте, в котором нам прислали флешку с этим файлом, было написано: «...яйцо в утке, утка в зайце...»
+
+Файл из задания доступен по ссылке: \url{https://cyberchallenge.rt.ru/files/982aba0e4ba8f0fcefdadfd311178f1d/some_file}.
+
+\solutionSection
+
+Чтобы определить тип файла, можно воспользоваться утилитой file. Вот её вывод по этому файлу:
+\mint{console}|some_file: Squashfs filesystem, little endian, version 4.0, 17845373 bytes, 57475 inodes, blocksize: 131072 bytes, created: Mon Aug 20 20:05:58 2018|
+
+Таким образом, исходный файл – это образ файловой системы SquashFS. Для распаковки образа удобно использовать утилиту unsquashfs из пакета squashfs-tools.
+
+В получившемся множестве файлов нужно поискать файл, содержащий в своем имени строку «flag». Сделать это можно следующей командой:
+\mint{console}|find . -type f -name flag*|
+
+Один из найденных файлов –  ./linux-headers-4.13.0-21/fs/squashfs/flag.zip. Распаковав из него flag.txt и открыв в любом текстовом редакторе получим флаг.
+
+\answerMath{CC\{l00k\_1n51d3\_7h3\_5qu45h\}.}

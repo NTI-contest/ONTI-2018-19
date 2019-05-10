@@ -1,0 +1,38 @@
+\assignementTitle{Dump}{1000}{}
+
+Я нашел загадочный дамп. Уверен, что в нем есть что-то очень важное. 
+
+Файл из задания доступен по ссылке: \url{https://cyberchallenge.rt.ru/files/8541568f732b64fedc1440bffcdb3f70/dump.txt}
+
+\solutionSection
+
+Данный файл представляет из себя hexdump некоего исполняемого PE-файла. Придется написать программу, которая переведет этот файл в бинарный вид. Важно заметить, что, если строка повторяет предыдущую, то в дампе она заменяется символом «*».
+
+Скрипт, переводящий дамп в бинарный файл:
+
+\begin{minted}[fontsize=\footnotesize, linenos]{python}
+dump = open('dump.txt').readlines()[:-2]
+result = bytes()
+
+for i, line in enumerate(dump):
+    line = line.strip()
+    if line:
+        if line.startswith('*'):
+            offset_prev = dump[i - 1][:7]
+            offset_next = dump[i + 1][:7]
+            lines_to_add = int(offset_next, 16) - int(offset_prev, 16) - 1
+
+            for j in range(lines_to_add):
+                result += result[-16:]
+            
+        else:
+            offset, bytes1, bytes2, text = line.split('  ', maxsplit=3)
+            result += bytes.fromhex((bytes1 + bytes2).replace(' ', ''))
+
+with open('dump.exe', 'wb') as f:
+    f.write(result + b'\x00')
+\end{minted}
+
+Остается только запустить полученный PE-файл, он выведет флаг на экран.
+
+\answerMath{CC\{1\_w4n7\_70\_dump\_7h3\_w0rld\}.}
