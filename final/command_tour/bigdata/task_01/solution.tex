@@ -20,12 +20,12 @@
 
 \end{minted}
 
-Сcылка на Среду с Базовым рещением (докер файл): \url{http://185.127.227.39:788/nti.tar.xz}
+Сcылка на Среду с Базовым решением (докер файл): \url{http://185.127.227.39:788/nti.tar.xz}
 
 \subsubsection*{Настройка докера под Linux}
 
 \begin{enumerate}
-    \item Опционально поставить анаконду на основную систему отвечаем там yes на все кроме visual studio
+    \item Опционально поставить Anaconda на основную систему, отвечаем там yes на все кроме Visual Studio Code.
     
     wget \url{https://repo.anaconda.com/archive/Anaconda3-2018.12-Linux-x86_64.sh}
     
@@ -41,7 +41,7 @@
 
     cd nti
 
-    Все примеры через sudo, но можете завести пользователя и дать ему права соответствующие
+    Все примеры через sudo, но можете завести пользователя и дать ему соответствующие права.
 
     \item Собрать докер образ
     
@@ -254,8 +254,7 @@
 
 \end{minted}
 
-Основа базового решение (pposgd\_simple)
-код с обучением политикам модели
+\textbf{Основа базового решения (pposgd\_simple), код с обучением политикам модели}
 
 \begin{minted}[fontsize=\footnotesize, linenos]{python}
     from baselines.common import Dataset, explained_variance, fmt_row, zipsame
