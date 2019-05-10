@@ -161,27 +161,3 @@ public class GridGenerator : MonoBehaviour
    }
 }
 
-using UnityEngine;
-
-[CreateAssetMenu(fileName = "GridChild", menuName = "scriptable/GridChild", order = 0)]
-public class GridChildScriptable : ScriptableObject
-{
-   public GameObject prefab;
-   public Vector2 scale;
-}
-
-using UnityEngine;
-
-[System.Serializable]
-public class GridObject
-{
-   public GridChildScriptable scriptable;
-   public Vector2Int gridPos;
-   public GameObject obj;
-
-   public GridObject(GridChildScriptable scriptable, Vector2Int gridPos)
-   {
-       this.scriptable = scriptable;
-       this.gridPos = gridPos;
-   }
-}

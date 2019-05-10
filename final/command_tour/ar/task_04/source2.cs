@@ -23,7 +23,8 @@ public class PlaceGroupsScript : MonoBehaviour
        {
            foreach (var location in group.coords)
            {
-               var localLocation = GeoUtils.GetPosition(location.latitude, location.longitude);
+               var localLocation = GeoUtils.GetPosition(location.latitude, 
+                                                        location.longitude);
                var local3Location = new Vector3(localLocation.x, localLocation.y, 0.5f);
                var go = Instantiate(
                    groupItem,
