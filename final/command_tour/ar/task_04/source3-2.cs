@@ -60,7 +60,8 @@ public class GyroCamera : MonoBehaviour
        _rawGyroRotation.Rotate(90f, 180f, 0f,
            Space.World); // Rotate to make sense as a camera pointing out 
                          // the back of your device.
-       _appliedGyroYAngle = _rawGyroRotation.eulerAngles.y; // Save the angle around y axis 
+       _appliedGyroYAngle = _rawGyroRotation.eulerAngles.y; // Save the angle 
+                                                            // around y axis 
                                                             // for use in calibration.
    }
 
