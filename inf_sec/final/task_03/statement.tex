@@ -8,26 +8,26 @@
 
 Сайт представляет из себя блог с одной единственной записью. Обратив внимание на параметры URL (\url{http://blogger.2018.cyberchallenge.ru/post?id=helloworld.html}), можно заметить, что файл, который нужно прочитать, передается в открытом виде. Попробуем прочитать любой другой файл на файловой системе.
 
-\putImgWOCaption{14cm}{final/task_03/1}
+\putImgWOCaption{16cm}{final/task_03/1}
 
 Прочитав исходные коды сервиса, понимаем, что файл спрятан не в нем, а, скорее всего, на файловой системе сервиса. Если запросить несуществующий файл, приложение переходит в режим отладки:
 
-\putImgWOCaption{14cm}{final/task_03/2}
+\putImgWOCaption{16cm}{final/task_03/2}
 
 Из сообщения можно понять, что сервис использует сервер werkzeug (\url{https://github.com/pallets/werkzeug}), отладочный режим которого может позволить исполнять код на сервере.
 
 При попытке получит такой доступ, пользователь увидит сообщение с запрашиваемым пин-кодом 
 
-\putImgWOCaption{14cm}{final/task_03/3}
+\putImgWOCaption{16cm}{final/task_03/3}
 
 Поиск в интернете позволяет найти инструкцию по получению этого пин кода \url{https://www.kingkk.com/2018/08/Flask-debug-pin%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98/}.
 
 С помощью инструкции и возможности чтения файлов, которую дает нам предыдущая уязвимость, генерируем пин код:
 
-\putImgWOCaption{14cm}{final/task_03/4}
+\putImgWOCaption{16cm}{final/task_03/4}
 
-\putImgWOCaption{8cm}{final/task_03/5}
+\putImgWOCaption{12cm}{final/task_03/5}
 
-\putImgWOCaption{14cm}{final/task_03/6}
+\putImgWOCaption{16cm}{final/task_03/6}
 
 \answerMath{CC\{daaaaaamn\_everything\_is\_vulnerable\_even\_my\_static\_site\}.}

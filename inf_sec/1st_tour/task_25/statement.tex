@@ -1,6 +1,6 @@
 \assignementTitle{Crackme}{1000}{}
 
-Говорят, что, если решить этот crackme, использовав в качестве имени cyberchallenge, ваш интеллект вырастет на 20 единиц.
+Говорят, что, если решить этот crackme, использовав в качестве имени cybercha-\linebreak llenge, ваш интеллект вырастет на 20 единиц.
 
 Формат флага: СС\{serial\_number\}.
 
@@ -42,11 +42,11 @@ print("The flag is: CC{%X-%X-%X-%X}" % (part1, part2, part3, part4))
 
 Проблема кроется в ключе для шифра xor (randval), т. к. это значение, которое возвращает системная функция rand, и оно, на первый взгляд, должно быть случайным числом.
 
-\putImgWOCaption{8cm}{1st_tour/task_25/1}
+\putImgWOCaption{10cm}{1st_tour/task_25/1}
 
 После запуска приложения, система автоматически вызовет в том числе 2 его функции: -[AppDelegate awakeFromNib] и -[AppDelegate applicationDidFinishLaunching:]. В нашем случае, в awakeFromNib с помощью однобайтового xor’а расшифровывается строчка «\_rand», а адрес этой функции сохраняется в глобальной переменной. В applicationDidFinishLaunching, используя технику mach\_override (\url{https://github.com/rentzsch/mach_override}), системная функция rand подменяется на реализованную в программе функцию ud\_set\_reg.
 
-\putImgWOCaption{10cm}{1st_tour/task_25/2}
+\putImgWOCaption{14cm}{1st_tour/task_25/2}
 
 Основная задача этой небольшой функции – вернуть верное значение ключа для шифра xor только, если процесс не находится под отладкой. Делается это при помощи проверки флага P\_TRACED в структуре текущего процесса, полученного через вызов функции sysctl.
 

@@ -5,9 +5,9 @@
 Обратите внимание, что исполняемый файл decrypt\_flag предназначен для запуска под операционной системой семейства GNU/Linux.
 
 Файлы из задания доступны по ссылкам:\\
-\url{https://cyberchallenge.rt.ru/files/e2641b5075eb2e30af4b875a41997ecf/decrypt_flag}\\
-\url{https://cyberchallenge.rt.ru/files/5d58c4dbe40eae9e0146e91370329059/libdecrypt.so}\\
-\url{https://cyberchallenge.rt.ru/files/9b95abdf2074d08a59a8c1b860eafb9b/libdecrypt_good.so}
+\url{https://cyberchallenge.rt.ru/files/e2641b5075eb2e30af4b875a41997ecf/decryp}\linebreak \url{t_flag}\\
+\url{https://cyberchallenge.rt.ru/files/5d58c4dbe40eae9e0146e91370329059/libdec} \\ \url{rypt.so}\\
+\url{https://cyberchallenge.rt.ru/files/9b95abdf2074d08a59a8c1b860eafb9b/libdecr}\\\url{ypt_good.so}
 
 \solutionSection
 
@@ -18,28 +18,28 @@ readelf -d decrypt\_flag\\
 readelf -s decrypt\_flag
 
 В результате станет понятно, что decrypt\_flag импортирует из libdecrypt.so 2 функции: decrypt\_flag и decrypt\_flag2. Проверим, нет ли тех же самых функций среди экспортируемых библиотекой libdecrypt\_good.so:\\
-\begin{minted}[fontsize=\footnotesize, linenos]{console}
+\begin{minted}[fontsize=\footnotesize]{console}
 $ readelf -s libdecrypt_good.so
 Symbol table '.dynsym' contains 13 entries:
-   Num:    Value          Size Type    Bind   Vis      Ndx Name
-     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND
-     1: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
-     2: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _Jv_RegisterClasses
-     3: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND __cxa_finalize@GLIBC_2.2.5 (2)
-     4: 0000000000202038     0 NOTYPE  GLOBAL DEFAULT   23 _edata
-     5: 00000000000006d2   171 FUNC    GLOBAL DEFAULT   12 Crypto_Encrypt
-     6: 0000000000202048     0 NOTYPE  GLOBAL DEFAULT   24 _end
-     7: 0000000000000a16   284 FUNC    GLOBAL DEFAULT   12 decrypt_flag
-     8: 000000000000077d   170 FUNC    GLOBAL DEFAULT   12 Crypto_Decrypt
-     9: 0000000000202038     0 NOTYPE  GLOBAL DEFAULT   24 __bss_start
-    10: 00000000000004f8     0 FUNC    GLOBAL DEFAULT    9 _init
-    11: 0000000000000b78     0 FUNC    GLOBAL DEFAULT   13 _fini
-    12: 0000000000000827   495 FUNC    GLOBAL DEFAULT   12 Crypto_Init
+  Num:    Value          Size Type    Bind   Vis      Ndx Name
+    0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND
+    1: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+    2: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _Jv_RegisterClasses
+    3: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND __cxa_finalize@GLIBC_2.2.5 (2)
+    4: 0000000000202038     0 NOTYPE  GLOBAL DEFAULT   23 _edata
+    5: 00000000000006d2   171 FUNC    GLOBAL DEFAULT   12 Crypto_Encrypt
+    6: 0000000000202048     0 NOTYPE  GLOBAL DEFAULT   24 _end
+    7: 0000000000000a16   284 FUNC    GLOBAL DEFAULT   12 decrypt_flag
+    8: 000000000000077d   170 FUNC    GLOBAL DEFAULT   12 Crypto_Decrypt
+    9: 0000000000202038     0 NOTYPE  GLOBAL DEFAULT   24 __bss_start
+   10: 00000000000004f8     0 FUNC    GLOBAL DEFAULT    9 _init
+   11: 0000000000000b78     0 FUNC    GLOBAL DEFAULT   13 _fini
+   12: 0000000000000827   495 FUNC    GLOBAL DEFAULT   12 Crypto_Init
 \end{minted}
 
-Т. к. libdecrypt\_good.so экспортирует только 1 из 2 двух требуемых функций, просто подменить библиотеку не получиться. Тут на помощь приходит переменная окружения LD\_PRELOAD. Она позволяет, задав имя библиотеки, загрузить её в память запускаемого процесса. При этом, фукнции из предзагруженной библиотеки имеют при вызове более высокий приоритет. Т. е., если в процессе, порожденным запуском файла decrypt\_flag, будут обе библиотеки libdecrypt.so и libdecrypt\_good.so, причем libdecrypt\_good.so будет загружена через LD\_PRELOAD, функция decrypt\_flag будет вызвана именно из последней.
+Т. к. libdecrypt\_good.so экспортирует только 1 из 2 двух требуемых функций, просто подменить библиотеку не получиться. Тут на помощь приходит переменная окружения LD\_PRELOAD. Она позволяет, задав имя библиотеки, загрузить её в память запускаемого процесса. При этом, фукнции из предзагруженной библиотеки имеют при вызове более высокий приоритет. Т. е., если в процессе, порожденным запуском файла decrypt\_flag, будут обе библиотеки libdecrypt.so и libdecrypt\_good.so, причем libdecrypt\_good.so будет загружена через LD\_PRELOAD, функция \linebreak decrypt\_flag будет вызвана именно из последней.
 
-Таким образом, чтобы получить флаг достаточно положить все файлы из задания в одну папку и выполнить следующую команду:\\
-LD\_LIBRARY\_PATH=. LD\_PRELOAD=libdecrypt\_good.so ./decrypt\_flag
+Таким образом, чтобы получить флаг достаточно положить все файлы из задания в одну папку и выполнить следующую команду:
+\mint{console}|LD_LIBRARY_PATH=. LD_PRELOAD=libdecrypt_good.so ./decrypt_flag|
 
 \answerMath{CC\{m4k3\_d3cryp710n\_6r347\_4641n!\}.}

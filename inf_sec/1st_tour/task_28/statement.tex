@@ -7,7 +7,10 @@
 \solutionSection
 
 Чтобы определить тип файла, можно воспользоваться утилитой file. Вот её вывод по этому файлу:
-\mint{console}|some_file: Squashfs filesystem, little endian, version 4.0, 17845373 bytes, 57475 inodes, blocksize: 131072 bytes, created: Mon Aug 20 20:05:58 2018|
+\begin{minted}[fontsize=\footnotesize]{console}
+some_file: Squashfs filesystem, little endian, version 4.0, 17845373 bytes, 
+    57475 inodes, blocksize: 131072 bytes, created: Mon Aug 20 20:05:58 2018
+\end{minted}
 
 Таким образом, исходный файл – это образ файловой системы SquashFS. Для распаковки образа удобно использовать утилиту unsquashfs из пакета squashfs-tools.
 
