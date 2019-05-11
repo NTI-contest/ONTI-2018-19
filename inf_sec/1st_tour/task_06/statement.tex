@@ -16,7 +16,7 @@
 
 Нажав клавишу “Купить”, можно увидеть HTTP-запрос с методом POST на страницу. \url{http://silmarilstore.2018.cyberchallenge.ru/buy}.
 
-\putImgWOCaption{10cm}{1st_tour/task_06/1}
+\putImgWOCaption{16cm}{1st_tour/task_06/1}
 
 С параметрами id и price.
 
@@ -26,22 +26,22 @@
 
 Перехваченный запрос на покупку может выглядеть так:
 
-\putImgWOCaption{10cm}{1st_tour/task_06/3}
+\putImgWOCaption{16cm}{1st_tour/task_06/3}
 
 Для перебора значений параметра id воспользуемся утилитой Intruder, которая входит в состав BurpSuite. Для этого нужно нажать правой клавишей мыши и выбрать пункт меню “Send to Intruder”. Далее нужно выбрать вкладку “Positions” и оставить специальные символы только вокруг параметра id. Цену на всякий случай желательно установить равную 0.
 
-\putImgWOCaption{10cm}{1st_tour/task_06/4}
+\putImgWOCaption{16cm}{1st_tour/task_06/4}
 
 Значения параметра для перебора можно задать на вкладке “Payloads”.  Тип параметра “Numbers”, а значения от 1 до 20 с шагом 1.
 
-\putImgWOCaption{10cm}{1st_tour/task_06/5}
+\putImgWOCaption{16cm}{1st_tour/task_06/5}
 
 Запустить перебор можно клавишей Start Attack. Видно, что из всех значений параметра id, явно выделяются значения 1, 2 и 7. 
 
-\putImgWOCaption{10cm}{1st_tour/task_06/6}
+\putImgWOCaption{16cm}{1st_tour/task_06/6}
 
 Если посмотреть результат покупки предмета со значением 7, там окажется флаг.
 
-\putImgWOCaption{10cm}{1st_tour/task_06/7}
+\putImgWOCaption{16cm}{1st_tour/task_06/7}
 
 \answerMath{CC\{when\_in\_doubt\_follow\_your\_nose\}.}

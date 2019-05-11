@@ -1,0 +1,18 @@
+\assignementTitle{One Time}{1000}{}
+
+Я нашел код своего друга. Похоже на криптографию, но чего-то точно не хватает. Он очень скромный, и все, что я о нем знаю — это то, что он помешан на песне «Rick Astley — Never gonna give you up». Но ты ведь мне поможешь?
+
+Файл из задания доступен по ссылке: \url{https://cyberchallenge.rt.ru/files/71f77e469bff75250a4ccb30c8ffedcf/uroboros_strikes_back.py}
+
+\solutionSection
+
+Как несложно догадаться из названия задания, в данном скрипте используется схема шифрования одноразовый блокнот. И еще в скрипте видно, что с одним и тем же ключом зашифрованы 2 разных сообщения, шифротексты которых мы и имеем. Это дает возможность применить для расшифровки атаку, называемую crib dragging. Для этого удобно воспользоваться утилитой cribdrag или соответствующим онлайн-сервисом.
+
+Прочитав описание, можно догадаться, что ключом или сообщением будут строки из текста песни Never gonna give you up. Таким образом, применяя атаку crib dragging и угадывая слова в одном сообщении, мы можем расшифровать второе и наоборот.
+
+В результате, рано или поздно, получаем расшифрованное сообщение:\\
+the flag for this task is cc curly bracket zero n three underscore seven one m three underscore p four d underscore one five underscore five three cur three underscore zero nly underscore zero nc three curly bracket
+
+Заменив слова соответствующими символами, получим флаг.
+
+\answerMath{CC\{0n3\_71m3\_p4d\_15\_53cur3\_0nly\_0nc3\}.}

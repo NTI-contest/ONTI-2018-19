@@ -1,0 +1,47 @@
+\assignementTitle{Pick Wisely}{1000}{}
+
+Вместо описания: \url{https://ru.wikipedia.org/wiki/%D0%9F%D0%B0%D1%80%D0%B0%D0%B4%D0%BE%D0%BA%D1%81_%D0%9C%D0%BE%D0%BD%D1%82%D0%B8_%D0%A5%D0%BE%D0%BB%D0%BB%D0%B0}
+
+Задание доступно по ссылке: \url{http://pickwisely.2018.cyberchallenge.ru/}
+
+\solutionSection
+
+Простое взаимодействие с сервисом ничего не дает, но попробовав перехватить запрос с помощью утилиты BurpSuite (\url{https://portswigger.net/burp}, инструкции по установке можно найти на сайте), видим, что cookie файлы заданы в каком-то необычном формате
+
+\putImgWOCaption{16cm}{final/task_02/1}
+
+По виду этого параметра, можно догадаться, что файл закодирован в формате base64, декодировать его можно внутри утилиты BurpSuite в разделе Decoder:
+
+\putImgWOCaption{16cm}{final/task_02/2}
+
+С помощью поиска в интернете и логических рассуждений, можно понять, что внутри параметра state хранится данные, сериализованные с помощью библиотеки Pickle (\url{https://docs.python.org/3/library/pickle.html}). Эта библиотека известна тем, что при десериализации объекта, полученного из ненадежного источника, может произойти удаленное исполнение кода.
+
+Попробуем создать такое состояние, десериализация которого приведет к исполнению кода. Чтобы узнать результат выполнения кода, воспользуемся сервисом PostBin (\url{https://postb.in/}).
+
+\putImgWOCaption{16cm}{final/task_02/3}
+
+Выполнив следующий код, получаем новое значение cookie параметра state.
+
+gANjcG9zaXgKc3lzdGVtCnEAWDQAAAB3Z2V0IGh0dHBzOi8vcG9zdGIuaW4vS1RvZEV1Njg/cmVzdWx0PSQobHMgfCBiYXNlNjQpcQGFcQJScQMu
+
+Подставим это значение с помощью утилиты Repeater, входящей в состав BurpSuite. Для этого нужно нажать правой кнопкой мыши на любой запрос и выбрать пункт меню ‘Send to Repeater’.
+
+\putImgWOCaption{16cm}{final/task_02/4}
+
+Подставим полученное значение в параметр state, отправим запрос и получим результат в PostBin:
+
+\putImgWOCaption{16cm}{final/task_02/5}
+
+Декодировав полученное значение в разделе Decoder программы BurpSuite, получаем результат
+
+\putImgWOCaption{16cm}{final/task_02/6}
+
+Осталось прочитать файл flag.txt
+
+\putImgWOCaption{16cm}{final/task_02/7}
+
+Проделав предыдущие шаги еще раз, получаем ответ
+
+\putImgWOCaption{16cm}{final/task_02/8}
+
+\answerMath{CC\{math\_is\_my\_friend\_i\_like\_it\_but\_i\_like\_coding\_too\}.}
