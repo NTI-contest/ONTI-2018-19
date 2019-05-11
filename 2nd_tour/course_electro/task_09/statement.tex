@@ -21,39 +21,53 @@ STEP -  каждый короткий импульс, подаваемый на 
 
 \putImgWOCaption{7cm}{2}
 
-a) При использовании этой платой сигнал ENABLE: 
-
 \begin{enumerate}
-    \item Отдельный для каждого мотора
-    \item Общий для всех моторов
-    \item Всегда включен
-    \item Общий для каналов X и Y
+    \item[a)] При использовании этой платой сигнал ENABLE: 
+    \begin{enumerate}
+        \item Отдельный для каждого мотора
+        \item Общий для всех моторов
+        \item Всегда включен
+        \item Общий для каналов X и Y
+    \end{enumerate}
+    \item[б)] Сигнал STEP для канала X подключен к пину Arduino: 
+    \begin{enumerate}
+        \item D1
+        \item D2
+        \item D3
+        \item D4
+        \item D5
+        \item D6
+        \item D7
+        \item D8
+    \end{enumerate}
+    \item[в)] Сигнал DIR для канала Z подключен к пину Arduino: 
+    \begin{enumerate}
+        \item D1
+        \item D2
+        \item D3
+        \item D4
+        \item D5
+        \item D6
+        \item D7
+        \item D8
+        \item D9
+        \item D10
+    \end{enumerate}
 \end{enumerate}
 
-б) Сигнал STEP для канала X подключен к пину Arduino: 
+\solutionSection
 
-\begin{enumerate}
-    \item D1
-    \item D2
-    \item D3
-    \item D4
-    \item D5
-    \item D6
-    \item D7
-    \item D8
-\end{enumerate}
+Решение этой задачи очевидно из условия. Ищем "CNC shield pinout"{}, и находим вот такую схему:
 
-в) Сигнал DIR для канала Z подключен к пину Arduino: 
+\putImgWOCaption{16cm}{3}
 
-\begin{enumerate}
-    \item D1
-    \item D2
-    \item D3
-    \item D4
-    \item D5
-    \item D6
-    \item D7
-    \item D8
-    \item D9
-    \item D10
-\end{enumerate}
+Посмотрев подробнее на подключение драйверов, мы видим, что:
+\begin{itemize}
+    \item Сигнал EN (а точнее - NOT ENABLE, т.к. драйверы включаются при подаче 0 на EN) разведен с пина 8 на все драйвера,
+    \item Сигнал шаг X\_STEP подключен к пину 2, Y\_STEP к пину 3,  Z\_STEP к пину 4
+    \item Сигнал направления X\_DIR подключен к пину 5 и т.д.
+\end{itemize}
+
+\putImgWOCaption{8cm}{4}
+
+Этого достаточно, чтобы правильно ответить на вопрос задания.  На практике, следует иметь в виду, что разводка конкретной "китайской"\ платы может отличаться от найденной вами в интернете, поэтому крайне желательно проверять ее по дорожкам на плате и/или мультиметром.
