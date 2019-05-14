@@ -20,27 +20,20 @@
 
 Допускается отклонение вычисленных значений на 1 в любую сторону.
 
-\begin{myverbbox}[\small]{\vinput}
-    12 33
-\end{myverbbox}
-\begin{myverbbox}[\small]{\voutput}
-    13
-    0 223 272 478 558 610 613 623 750 785 846 877 1023
-\end{myverbbox}
-\inputoutputTable
-
 \solutionSection
 
 Чтобы понять эту задачу, следует помнить, что любой пин Arduino может находится в 4-х разных состояниях:
 
-\begin{tabular}{|p{3.5cm}|p{1.5cm}|p{6cm}|}
+\begin{tabular}{|p{6.5cm}|p{1.5cm}|p{6cm}|}
     \hline
     Состояние&Обозн.&Что происходит \\
     \hline
     pinMode(pin, OUTPUT);
+
     digitalWrite(pin,  HIGH);& 1& На пин подано напряжение питания\\
     \hline
     pinMode(pin, OUTPUT);
+
     digitalWrite(pin,  LOW); & 0 & На пин подается 0 (подключен GND) \\
     \hline
     pinMode(pin, INPUT); &I &Пин отключен от каких-либо напряжений \\
