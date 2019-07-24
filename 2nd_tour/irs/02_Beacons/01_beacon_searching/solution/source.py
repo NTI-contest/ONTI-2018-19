@@ -84,14 +84,13 @@ for i in range(N):
     xy = circles(b_info)
     xy_robot.append(xy)
 
-    if (measures[i][0] < 1000) and len(xy_robot) > 1: # замеры с дальномера
+    if (measures[i][0] < 1000) and len(xy_robot) > 1:              # замеры с дальномера
         dY = xy_robot[-1][1] - xy_robot[-2][1]
         dX = xy_robot[-1][0] - xy_robot[-2][0]
         alpha = (math.atan2(dY, dX))
 
         betta = alpha + math.radians(90)
-        xy = [xy_robot[-1][0] + measures[i][0] * math.cos(betta), 
-            xy_robot[-1][1] + measures[i][0] * math.sin(betta)]
+        xy = [xy_robot[-1][0] + measures[i][0] * math.cos(betta), xy_robot[-1][1] + measures[i][0] * math.sin(betta)]
 
         xy_obstacle.append(xy)
 

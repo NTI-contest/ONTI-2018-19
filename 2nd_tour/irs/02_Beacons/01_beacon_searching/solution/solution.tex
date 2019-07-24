@@ -9,9 +9,9 @@
 	\item $r_2$ - радиус второй окружности (расстояние от маяка $K$ до центра робота)
 \end{itemize}
 
-\begin{figure}[H]
+\begin{figure}[h!]
 	\centering
-	\includegraphics{2nd_tour/irs/02_Beacons/01_beacon_searching/solution/02_beacons_01_01.pdf}
+	\includegraphics{2nd_tour_progr/02_Beacons/01_beacon_searching/solution/02_beacons_01_01.pdf}
 	\caption{}
 	\label{fig:02_beacons_01_01}
 \end{figure}
@@ -72,10 +72,10 @@
 Теперь найдем катет $d_2$ в треугольнике $K_1M_2S$ по формуле (\ref{eq:02_beacons_01_02}).
 
 Зная расстояния $d$ и $d_2$, находим $d_1$ по формуле (\ref{eq:02_beacons_01_03}):
-\begin{equation*}
+\begin{equation}
 	d_1 = d - d_2
 	\label{eq:02_beacons_01_03}
-\end{equation*}
+\end{equation}
 
 Зная катет $d_1$ и гипотенузу $r_1$ найдем катет $h$ в $\triangle M_1K_1S$ по формуле (\ref{eq:02_beacons_01_04}):
 
@@ -106,7 +106,7 @@ x_2 = -\frac{h}{d} \cdot (b_1 - b_2)+x_s
 \label{eq:02_beacons_01_09}
 \end{equation}
 \begin{equation}
-y_2 = -\frac{h}{d} \cdot (a_1 - a_2)+y_s
+y_2 = -\frac{h}{d} \cdot (a_2 - a_1)+y_s
 \label{eq:02_beacons_01_10}
 \end{equation}
 
@@ -140,9 +140,9 @@ y_2 = -\frac{h}{d} \cdot (a_1 - a_2)+y_s
 
 Результаты вычислений показаны на рис. \ref{fig:02_beacons_01_02}
 
-\begin{figure}[H]
+\begin{figure}[h!]
 	\centering
-	\includegraphics{2nd_tour/irs/02_Beacons/01_beacon_searching/solution/02_beacons_01_02.pdf}
+	\includegraphics{2nd_tour_progr/02_Beacons/01_beacon_searching/solution/02_beacons_01_02.pdf}
 	\caption{Траектория движения робота и границы препятствия}
 	\label{fig:02_beacons_01_02}
 \end{figure}

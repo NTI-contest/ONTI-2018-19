@@ -51,8 +51,7 @@ public:
 		multiply(num);
 		return *this;
 	}
-	bool operator==(Point p) { return abs(_x - p._x) < 1E-2 && 
-		abs(_y - p._y) < 1E-2; }
+	bool operator==(Point p) { return abs(_x - p._x) < 1E-2 && abs(_y - p._y) < 1E-2; }
 private:
 	double _x, _y;
 };
@@ -169,10 +168,8 @@ public:
 		_orientation = 0;
 		_origin = Point(0, 0);
 		_motor1 = Point(originDistance, 0);
-		_motor2 = Point(originDistance * cos(PI / 6), -originDistance 
-			* sin(PI / 6));
-		_motor3 = Point(-originDistance * cos(PI / 6), -originDistance 
-		* sin(PI / 6));
+		_motor2 = Point(originDistance * cos(PI / 6), -originDistance * sin(PI / 6));
+		_motor3 = Point(-originDistance * cos(PI / 6), -originDistance * sin(PI / 6));
 	}
 	void startMotion(Motion motion)
 	{
@@ -182,10 +179,8 @@ public:
 			if (motion.motor1w == -motion.motor2w)
 			{
 				rotate(2. / 3 * PI - tOrientation);
-				Vector projX(Point(0, 0), Point(motion.motor3w 
-					* motion.radius, 0));
-				Vector projY(Point(0, 0), Point(0, -motion.motor1w
-					* motion.radius*sin(PI / 3)));
+				Vector projX(Point(0, 0), Point(motion.motor3w*motion.radius, 0));
+				Vector projY(Point(0, 0), Point(0, -motion.motor1w*motion.radius*sin(PI / 3)));
 				Vector res = (projX + projY)*motion.time;
 				_motor1 += (Point)res;
 				_motor2 += (Point)res;
@@ -197,10 +192,8 @@ public:
 			if (motion.motor1w == -motion.motor3w)
 			{
 				rotate(-2. / 3 * PI - tOrientation);
-				Vector projX(Point(0, 0), Point(motion.motor2w 
-					* motion.radius, 0));
-				Vector projY(Point(0, 0), Point(0, motion.motor1w
-					* motion.radius * sin(PI / 3)));
+				Vector projX(Point(0, 0), Point(motion.motor2w*motion.radius, 0));
+				Vector projY(Point(0, 0), Point(0, motion.motor1w*motion.radius*sin(PI / 3)));
 				Vector res = (projX + projY)*motion.time;
 				_motor1 += (Point)res;
 				_motor2 += (Point)res;
@@ -211,10 +204,8 @@ public:
 			}
 			if (motion.motor2w == -motion.motor3w)
 			{
-				Vector projX(Point(0, 0), Point(motion.motor1w 
-					* motion.radius, 0));
-				Vector projY(Point(0, 0), Point(0, -motion.motor2w 
-					* motion.radius*sin(PI / 3)));
+				Vector projX(Point(0, 0), Point(motion.motor1w*motion.radius, 0));
+				Vector projY(Point(0, 0), Point(0, -motion.motor2w*motion.radius*sin(PI / 3)));
 				Vector res = (projX + projY)*motion.time;
 				_motor1 += (Point)res;
 				_motor2 += (Point)res;
@@ -225,13 +216,8 @@ public:
 			if (motion.motor1w == motion.motor2w)
 			{
 				rotate(-2. / 3 * PI - tOrientation);
-				Vector proj(Point(0, 0), Point(motion.motor2w
-					* motion.radius - motion.motor1w*motion.radius
-					* cos(PI / 3), motion.motor1w*motion.radius
-					* sin(PI / 3)));
-				if ((proj - Vector(Point(0, 0), Point(-motion.motor3w
-					* motion.radius*cos(PI / 6), -motion.motor3w 
-					* motion.radius*sin(PI / 6))) == 0))
+				Vector proj(Point(0, 0), Point(motion.motor2w*motion.radius - motion.motor1w*motion.radius*cos(PI / 3), motion.motor1w*motion.radius*sin(PI / 3)));
+				if ((proj - Vector(Point(0, 0), Point(-motion.motor3w*motion.radius*cos(PI / 6), -motion.motor3w*motion.radius*sin(PI / 6))) == 0))
 				{
 					_motor1 += (Point)proj;
 					_motor2 += (Point)proj;
@@ -240,18 +226,14 @@ public:
 					rotate(2. / 3 * PI + tOrientation);
 					return;
 				}
-				Vector speed1(Point(0, 0), Point(-motion.motor3w 
-					* motion.radius*cos(PI / 6), -motion.motor3w 
-					* motion.radius*sin(PI / 6)));
+				Vector speed1(Point(0, 0), Point(-motion.motor3w*motion.radius*cos(PI / 6), -motion.motor3w*motion.radius*sin(PI / 6)));
 				double proj1 = proj.lenght();
 				if (motion.motor2w < 0) proj1 *= -1;
 				double proj2 = speed1.lenght();
 				if (motion.motor3w < 0) proj2 *= -1;
-				double d = (proj2*_originDistance - proj1 
-					* _originDistance) / (proj1 + proj2);
+				double d = (proj2*_originDistance - proj1 * _originDistance) / (proj1 + proj2);
 				Point center = _motor3 * -(d / _originDistance);
-				double angle = proj1 * motion.time 
-					/ (_originDistance - d);
+				double angle = proj1 * motion.time / (_originDistance - d);
 				_motor1 -= center;
 				_motor2 -= center;
 				_motor3 -= center;
@@ -267,13 +249,8 @@ public:
 			if (motion.motor2w == motion.motor3w)
 			{
 				rotate(2. / 3 * PI - tOrientation);
-				Vector proj(Point(0, 0), Point(motion.motor3w 
-					* motion.radius - motion.motor2w*motion.radius
-					* cos(PI / 3), motion.motor2w*motion.radius
-					* sin(PI/3)));
-				if ((proj - Vector(Point(0, 0), Point(-motion.motor1w
-					* motion.radius*cos(PI/6), -motion.motor1w
-					* motion.radius*sin(PI/6))) == 0))
+				Vector proj(Point(0, 0), Point(motion.motor3w*motion.radius - motion.motor2w*motion.radius*cos(PI / 3), motion.motor2w*motion.radius*sin(PI/3)));
+				if ((proj - Vector(Point(0, 0), Point(-motion.motor1w*motion.radius*cos(PI/6), -motion.motor1w*motion.radius*sin(PI/6))) == 0))
 				{
 					_motor1 += (Point)proj;
 					_motor2 += (Point)proj;
@@ -282,18 +259,14 @@ public:
 					rotate(-2. / 3 * PI + tOrientation);
 					return;
 				}
-				Vector speed1(Point(0, 0), Point(-motion.motor1w 
-					* motion.radius*cos(PI / 6), -motion.motor1w
-					* motion.radius*sin(PI / 6)));
+				Vector speed1(Point(0, 0), Point(-motion.motor1w*motion.radius*cos(PI / 6), -motion.motor1w*motion.radius*sin(PI / 6)));
 				double proj1 = proj.lenght();
 				if (motion.motor2w < 0) proj1 *= -1;
 				double proj2 = speed1.lenght();
 				if (motion.motor1w < 0) proj2 *= -1;
-				double d = (proj2*_originDistance - proj1 
-					* _originDistance) / (proj1 + proj2);
+				double d = (proj2*_originDistance - proj1 * _originDistance) / (proj1 + proj2);
 				Point center = _motor1* -(d / _originDistance);
-				double angle = proj1 * motion.time 
-					/ (_originDistance - d);
+				double angle = proj1 * motion.time / (_originDistance - d);
 				_motor1 -= center;
 				_motor2 -= center;
 				_motor3 -= center;
@@ -308,13 +281,8 @@ public:
 			}
 			if (motion.motor3w == motion.motor1w)
 			{
-				Vector proj(Point(0, 0), Point(motion.motor1w
-					* motion.radius - motion.motor3w*motion.radius
-					* cos(PI / 3), motion.motor3w*motion.radius
-					* sin(PI / 3)));
-				if ((proj - Vector(Point(0, 0), Point(-motion.motor2w
-					* motion.radius*cos(PI / 6), -motion.motor2w
-					* motion.radius*sin(PI / 6))) == 0))
+				Vector proj(Point(0, 0), Point(motion.motor1w*motion.radius - motion.motor3w*motion.radius*cos(PI / 3), motion.motor3w*motion.radius*sin(PI / 3)));
+				if ((proj - Vector(Point(0, 0), Point(-motion.motor2w*motion.radius*cos(PI / 6), -motion.motor2w*motion.radius*sin(PI / 6))) == 0))
 				{
 					_motor1 += (Point)proj;
 					_motor2 += (Point)proj;
@@ -322,18 +290,14 @@ public:
 					_origin += (Point)proj;
 					return;
 				}
-				Vector speed1(Point(0, 0), Point(-motion.motor2w
-					* motion.radius*cos(PI / 6), -motion.motor2w
-					* motion.radius*sin(PI / 6)));
+				Vector speed1(Point(0, 0), Point(-motion.motor2w*motion.radius*cos(PI / 6), -motion.motor2w*motion.radius*sin(PI / 6)));
 				double proj1 = proj.lenght();
 				if (motion.motor3w < 0) proj1 *= -1;
 				double proj2 = speed1.lenght();
 				if (motion.motor2w < 0) proj2 *= -1;
-				double d = (proj2*_originDistance - proj1 
-					* _originDistance) / (proj1 + proj2);
+				double d = (proj2*_originDistance - proj1 * _originDistance) / (proj1 + proj2);
 				Point center = _motor2 * -(d / _originDistance);
-				double angle = proj1 * motion.time 
-					/ (_originDistance - d);
+				double angle = proj1 * motion.time / (_originDistance - d);
 				_motor1 -= center;
 				_motor2 -= center;
 				_motor3 -= center;
@@ -363,14 +327,10 @@ public:
 			cosa = cos(angle),
 			sina = sin(angle);
 
-		_motor1 = Point(_motor1.getX()*cosa + _motor1.getY()*sina, 
-			-_motor1.getX()*sina + _motor1.getY()*cosa);
-		_motor2 = Point(_motor2.getX()*cosa + _motor2.getY()*sina, 
-			-_motor2.getX()*sina + _motor2.getY()*cosa);
-		_motor3 = Point(_motor3.getX()*cosa + _motor3.getY()*sina, 
-			-_motor3.getX()*sina + _motor3.getY()*cosa);
-		_origin = Point(_origin.getX()*cosa + _origin.getY()*sina, 
-			-_origin.getX()*sina + _origin.getY()*cosa);
+		_motor1 = Point(_motor1.getX()*cosa + _motor1.getY()*sina, -_motor1.getX()*sina + _motor1.getY()*cosa);
+		_motor2 = Point(_motor2.getX()*cosa + _motor2.getY()*sina, -_motor2.getX()*sina + _motor2.getY()*cosa);
+		_motor3 = Point(_motor3.getX()*cosa + _motor3.getY()*sina, -_motor3.getX()*sina + _motor3.getY()*cosa);
+		_origin = Point(_origin.getX()*cosa + _origin.getY()*sina, -_origin.getX()*sina + _origin.getY()*cosa);
 
 		_orientation += angle;
 	}
@@ -413,6 +373,5 @@ int main()
 		robot.startMotion(m);
 	}
 
-	cout << fixed << setprecision(3) << robot.getOrigin().getX() << ' ' 
-		 << robot.getOrigin().getY() << endl;
+	cout << fixed << setprecision(3) << robot.getOrigin().getX() << ' ' << robot.getOrigin().getY() << endl;
 }
